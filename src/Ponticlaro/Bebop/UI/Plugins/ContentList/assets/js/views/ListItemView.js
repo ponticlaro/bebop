@@ -8,16 +8,58 @@
 
 		tagName: 'li',
 
+		className: 'bebop-list--item',
+
 		events: {
 			'click [bebop-list--action]': 'doAction'
 		},
 
 		initialize: function(options) {
 
-			this.$el.attr('bebop-list--el', 'item').addClass('bebop-list--item').html(options.template);
+			// Insert template html into item element
+			this.$el.html(options.template);
+
+			// Collect data container and pass data into it
 			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]');
 			this.$dataContainer.attr('name', options.fieldName +'[]').val(JSON.stringify(this.model.attributes));
 
+			// Collect views
+			this.views = {
+				browse: {
+					$el: this.$el.find('[bebop-list--view="browse"]'),
+					fields: {}
+				},
+				edit: {
+					$el: this.$el.find('[bebop-list--view="edit"]'),
+					fields: {}
+				},
+				reorder: {
+					$el: this.$el.find('[bebop-list--view="edit"]'),
+					fields: {}
+				}
+			}
+
+			// Collect fields from each view
+			_.each(this.views, function(view, key) {
+
+				_.each(view.$el.find('[bebop-list--field]'), function(field){
+
+					var $field     = $(field),
+						fullValue  = $field.attr('bebop-list--field'),
+						details    = fullValue.split(':'),
+						name       = details[0],
+						targetAttr = details.length > 1 ? details[1] : null;
+
+					this.views[key].fields[name] = {
+						$el: $field,
+						targetAttr: targetAttr
+					}
+
+				}, this);
+
+			}, this);
+
+			// Add event listeners for model events
 			this.listenTo(this.model, 'change:view', this.render);
 			this.listenTo(this.model, 'destroy', this.destroy);
 		},
@@ -43,87 +85,81 @@
 		},
 
 		remove: function(event) {
+
  			this.model.destroy();
+		},
+
+		destroy: function() {
+
+			this.$el.slideUp(250, function() {
+
+				$(this).remove();
+			})
 		},
 
 		updateData: function(event) {
 
-			var self    = this,
-				view    = this.model.previous('view'),
-				$fields = this.$el.find('[bebop-list--view="'+ view +'"] [bebop-list--field]'),
-				data    = {};
+			var view = this.model.previous('view');
 
-			_.each($fields, function(field, index) {
-
-				var $field       = $(field),
-					fieldString  = $field.attr('bebop-list--field'),
-					fieldDetails = fieldString.split(':'),
-					fieldName    = fieldDetails[0],
-					fieldTarget  = fieldDetails.length > 1 ? fieldDetails[1] : null,
-					value        = ""
+			_.each(this.views[view].fields, function(field, name) {
 
 				if (view == 'edit') {
 
-					 value = $field.val();
+					 value = field.$el.val();
 
 				} else {
 
-					if (fieldTarget) {
+					if (field.targetAttr) {
 
-						value = $field.attr(fieldTarget);
+						value = field.$el.attr(field.targetAttr);
 
 					} else {
 
-						value = $field.text();
+						value = field.$el.text();
 					}
 				}
 
-				data[fieldName] = value;
-				self.model.set(fieldName, value);
-			});
+				this.model.set(name, value);
 
-			this.$dataContainer.val(JSON.stringify(data));
+			}, this);
+
+			this.$dataContainer.val(JSON.stringify(this.model.attributes));
 		},
 
 		render: function() {
 
-			var self           = this,
-				currentViewId  = this.model.get('view'),
-				previousViewId = this.model.previous('view') ? this.model.previous('view') : currentViewId,
-				$currentView   = this.$el.find('[bebop-list--view="'+ currentViewId +'"]');
+			// Get current view
+			var view = this.model.get('view');
 
-			if (this.model.hasChanged('view')) this.updateData();
+			// Update data if view has changed
+			if(this.model.hasChanged('view')) this.updateData();
 
-			var $fields = this.$el.find('[bebop-list--view="'+ currentViewId +'"] [bebop-list--field]');
+			// Loop through all fields and update them with current data from previous view
+			_.each(this.views[view].fields, function(field, name) {
 
-			_.each($fields, function(field, index) {
+				if (view == 'edit') {
 
-				var $field       = $(field),
-					fieldString  = $field.attr('bebop-list--field'),
-					fieldDetails = fieldString.split(':'),
-					fieldName    = fieldDetails[0],
-					fieldTarget  = fieldDetails.length > 1 ? fieldDetails[1] : null;
-
-				if (currentViewId == 'edit') {
-
-					$currentView.find('[bebop-list--field="'+ fieldName +'"]').val(self.model.get(fieldName));
+					field.$el.val(this.model.get(name));
 
 				} else {
 
-					if (fieldTarget) {
+					if (field.targetAttr) {
 
-						$currentView.find('[bebop-list--field="'+ fieldString +'"]').attr(fieldTarget, self.model.get(fieldName));
+						field.$el.attr(field.targetAttr, this.model.get(name));
 
 					} else {
 
-						$currentView.find('[bebop-list--field="'+ fieldName +'"]').text(self.model.get(fieldName));
+						field.$el.text(this.model.get(name));
 					}
 				}
-			});
 
-			$currentView.show().siblings().hide();
+			}, this);
 
-			if (currentViewId == 'edit') {
+			// Show current view and hide all other
+			this.views[view].$el.show().siblings().hide();
+
+			// Handle action buttons
+			if (view == 'edit') {
 
 				this.$el.find('[bebop-list--action="edit"]').attr('bebop-list--action', 'save')
 						.find('b').text('Save').end()
@@ -144,15 +180,6 @@
 			if(!this.$el.is(':visible')) this.$el.slideDown(200);
 
 			return this;
-		},
-
-		destroy: function() {
-
-			var self = this;
-
-			this.$el.slideUp(250, function() {
-				$(this).remove();
-			})
 		}
 	});
 
