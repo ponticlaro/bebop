@@ -1,0 +1,31 @@
+{
+	"name": "ponticlaro/bebop",
+	"description": "WordPress development library",
+    "version" : "0.7.0",
+    "type": "library",
+    "keywords": [
+        "wordpress",
+        "tool",
+        "api"
+    ],
+    "authors": [
+        {
+            "name": "Ponticlaro",
+            "email": "info@ponticlaro.com",
+            "homepage": "http://www.ponticlaro.com",
+            "role": "Developer"
+        }
+    ],
+	"require": {
+		"php": ">=5.3.0"
+	},
+    "require-dev": {
+        "codeception/codeception": "1.8.*",
+        "wp-cli/wp-cli": "0.14.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Ponticlaro\\Bebop": "src/"
+        }
+    }
+}
