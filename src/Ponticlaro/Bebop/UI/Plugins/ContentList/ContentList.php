@@ -24,6 +24,10 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		self::$__base_url = Bebop::getPathUrl(__DIR__);
 
 		$this->__instances = Bebop::Collection();
+
+		$args = func_get_args();
+
+		if ($args) call_user_func_array(array($this, '__createInstance'), $args);
 	}
 
 	/**
@@ -73,36 +77,25 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		wp_enqueue_script('bebop-ui--list');
 	}
 
-	public function single($key, array $config = array(), $fn)
+	private function __createInstance($key, array $data, array $config = array())
 	{	
-		if (!is_callable($fn))
-			throw new \Exception("Third parameter must be callable", 1);
-
 		$this->__enqueueScripts();
 
 		$label = $key;
 		$key   = Bebop::util('slugify', $key);
 
 		$default_config = array(
-			'key'                    => $key,
-			'field_name'             => $key,
-			'fn'                     => $fn,
-			'data'                   => array(),
-			'form__show_fields'      => false,
-			'add_button_text'        => 'Add item',
-			'form__fields'           => array(),
-			'list__is_draggable'     => true,
-			'list__is_empty_message' => 'List have no items'
+			'key'               => $key,
+			'field_name'        => $key,
+			'label__add_button' => 'Add Item',
+			'data'              => $data ?: array(),
+			'browse_view'       => '',
+			'edit_view'         => '',
+			'reorder_view'      => ''
 		);
 
-		$instance           = new \stdClass;
-		$instance->template = 'single';
-		$config             = array_merge($default_config, $config);
-		$instance->config   = Bebop::Collection($config);
-
-		// Save reference to this instance
-		$this->__current_instance_key = $key;
-		$this->__instances->set($key, $instance);
+		$this->template = 'single';
+		$this->config   = Bebop::Collection(array_merge($default_config, $config));
 
 		return $this;
 	}
@@ -112,13 +105,40 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		include __DIR__ . '/templates/'. $template_name .'.php';
 	}
 
+	public function setLabel($key, $value)
+	{
+		$tbis->config->set('label_'.$key, $value);
+	}
+
+	public function setItemView($view, $template)
+	{
+		if(!$view) return $this;
+
+		if (is_readable($template)) {
+
+			$html = file_get_contents($template);
+
+		} elseif (is_callable($template)) {
+
+			$html = call_user_func_array($template, $this->config->get('data'));
+			
+		} elseif (is_string($template)) {
+
+			$html = $template;
+
+		} else {
+
+			$html = '';
+		}
+
+		$this->config->set($view .'_view', $html);
+
+		return $this;
+	}
+
 	public function render()
 	{
-		$current_instance = $this->__instances->get($this->__current_instance_key);
-		$template_name    = $current_instance->template;
-		$config           = $current_instance->config;
-
-		$this->__renderTemplate($template_name, $config);
+		$this->__renderTemplate($this->template, $this->config);
 
 		return $this;
 	}

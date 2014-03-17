@@ -9,7 +9,7 @@ $field_name = $config->get('field_name');
 
 	<div bebop-list--el="form" class="bebop-list--form bebop-ui-clrfix">
 		<div class="bebop-list--formField">
-			<button bebop-list--action="addOne" class="button button-primary"><?php echo $config->get('add_button_text'); ?></button>
+			<button bebop-list--action="addOne" class="button button-primary"><?php echo $config->get('label__add_button'); ?></button>
 		</div>
 		<!-- <div class="bebop-list--formField">
 			<button bebop-list--action="enableReorderView" class="button button-small">Reorder</button>
@@ -26,7 +26,7 @@ $field_name = $config->get('field_name');
 		} ?>
 	</ul>
 	
-	<li bebop-list--el="item-template" class="bebop-list--item" style="display:none">
+	<script bebop-list--template="item" class="bebop-list--item" type="text/template" style="display:none">
 		
 		<input bebop-list--el="data-container" type="hidden">
 		
@@ -34,8 +34,8 @@ $field_name = $config->get('field_name');
 			<span class="bebop-ui-icon-move"></span>
 		</div>
 		
-		<div class="bebop-list--item-content">
-			<?php call_user_func($config->get('fn')); ?>
+		<div bebop-list--el="content" class="bebop-list--item-content">
+			
 		</div>
 
 		<div class="bebop-list--item-actions">
@@ -47,7 +47,19 @@ $field_name = $config->get('field_name');
 				<span class="bebop-ui-icon-remove"></span>
 			</button>
 		</div>
-	</li>
+	</script>
+
+	<script bebop-list--template="browse-view" type="text/template">
+		<?php echo $config->get('browse_view'); ?>
+	</script>
+
+	<script bebop-list--template="edit-view" type="text/template">
+		<?php echo $config->get('edit_view'); ?>
+	</script>
+
+	<script bebop-list--template="reorder-view" type="text/template">
+		<?php echo $config->get('reorder_view'); ?>
+	</script>
 
 	<div bebop-list--el="empty-state-indicator" class="bebop-list--empty-state-indicator" style="display:none">
 		<input type="hidden">

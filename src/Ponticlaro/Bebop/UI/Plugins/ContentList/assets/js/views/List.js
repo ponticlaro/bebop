@@ -45,14 +45,36 @@
 			// Get field name
 			this.fieldName = this.$el.attr('bebop-list--fieldName');
 
-			// Handle template
-			$rawTemplate = this.$el.find('[bebop-list--el="item-template"]');
+			//////////////////////
+			// Handle templates //
+			//////////////////////
+			$rawItemTemplate = this.$el.find('[bebop-list--template="item"]');
 
-			this.itemTemplate = $rawTemplate.clone().attr('bebop-list--el', 'item')
+			this.itemTemplate = $rawItemTemplate.clone()
 										    .find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end()
-									        .html();
+										    .html();
 
-			$rawTemplate.remove();
+			$rawItemTemplate.remove();
+
+			$browseView  = this.$el.find('[bebop-list--template="browse-view"]');
+			$editView    = this.$el.find('[bebop-list--template="edit-view"]');
+			$reorderView = this.$el.find('[bebop-list--template="reorder-view"]');
+
+			this.itemViews = {
+				browse: {
+					$template: $browseView
+				},
+				edit: {
+					$template: $editView
+				},
+				reorder: {
+					$template: $reorderView
+				}
+			}
+
+			$browseView.remove();
+			$editView.remove();
+			$reorderView.remove();
 
 			// Collect empty state indicator DOM element
 			this.$emptyStateIndicator = this.$el.find('[bebop-list--el="empty-state-indicator"]');
@@ -136,6 +158,7 @@
 			var itemView = new List.ItemView({
 				model: model,
 				template: this.itemTemplate,
+				views: this.itemViews,
 				fieldName: this.fieldName
 			});
 
@@ -147,6 +170,7 @@
 			var itemView = new List.ItemView({
 				model: model,
 				template: this.itemTemplate,
+				views: this.itemViews,
 				fieldName: this.fieldName
 			});
 

@@ -16,50 +16,50 @@
 
 		initialize: function(options) {
 
-			// Insert template html into item element
+			this.$template = $(options.template);
+
 			this.$el.html(options.template);
 
-			// Collect data container and pass data into it
-			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]');
-			this.$dataContainer.attr('name', options.fieldName +'[]').val(JSON.stringify(this.model.attributes));
+			this.views = options.views;
+			this.views.edit.fields = {};
 
-			// Collect views
-			this.views = {
-				browse: {
-					$el: this.$el.find('[bebop-list--view="browse"]'),
-					fields: {}
-				},
-				edit: {
-					$el: this.$el.find('[bebop-list--view="edit"]'),
-					fields: {}
-				},
-				reorder: {
-					$el: this.$el.find('[bebop-list--view="edit"]'),
-					fields: {}
-				}
-			}
+			// Get content container and empty it
+			this.$content = this.$el.find('[bebop-list--el="content"]');
 
-			// Collect fields from each view
-			_.each(this.views, function(view, key) {
+			// Collect data container input
+			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]').attr('name', options.fieldName +'[]');
 
-				_.each(view.$el.find('[bebop-list--field]'), function(field){
+			// Collect fields and add missing ones to the model
+			_.each($('<div>').html(this.views.edit.$template.html().replace(/\<%=?.*%\>/g, '')).find('[bebop-list--field]'), function(el, index){
 
-					var $field     = $(field),
-						fullValue  = $field.attr('bebop-list--field'),
-						details    = fullValue.split(':'),
-						name       = details[0],
-						targetAttr = details.length > 1 ? details[1] : null;
+			 	var $el  = $(el),
+			 		name = $el.attr('bebop-list--field');
 
-					this.views[key].fields[name] = {
-						$el: $field,
-						targetAttr: targetAttr
-					}
+			 	this.views.edit.fields[name] = {
+			 		$el: $el,
+			 		tagName: $el.get(0).tagName,
+			 		type: $el.attr('type')
+			 	}
 
-				}, this);
+			 	if (!this.model.has(name)) {
+
+			 		var value = '';
+
+			 		// Set value to empty array in case of a select with multiple values
+			 		if ($el.get(0).tagName == 'SELECT' && $el.attr('multiple')) {
+			 			value = [];
+			 		}
+
+			 		this.model.set(name, value);
+			 	}
 
 			}, this);
 
+			// Insert JSON data into data container
+			this.storeData();
+
 			// Add event listeners for model events
+			//this.listenTo(this.$el, 'keyup change', this.update);
 			this.listenTo(this.model, 'change:view', this.render);
 			this.listenTo(this.model, 'destroy', this.destroy);
 		},
@@ -75,13 +75,33 @@
 		},
 
 		edit: function(event) {
-
 			this.model.set('view', 'edit');
 		},
 
-		save: function(event) {
-
+		browse: function(event) {
 			this.model.set('view', 'browse');
+		},
+
+		update: function() {
+
+			_.each(this.views.edit.fields, function(field, name) {
+				
+				this.model.set(name, this.getFieldValue(name));
+
+			}, this);
+
+			this.storeData();
+		},
+
+		storeData: function() {
+
+			// Clone model attributes so that we can exclude 'view' from data to be saved
+			var data = _.clone(this.model.attributes);
+
+			// Remove 'view' from data to be saved
+			delete data.view;
+
+			this.$dataContainer.val(JSON.stringify(data));
 		},
 
 		remove: function(event) {
@@ -97,71 +117,89 @@
 			})
 		},
 
-		updateData: function(event) {
+		getFieldValue: function(name)
+		{
+			var $field = this.$el.find('[bebop-list--field="'+ name +'"]');
+				
+			switch($field.get(0).tagName) {
 
-			var view = this.model.previous('view');
+				case 'INPUT':
+				
+					if ($field.attr('type') == 'checkbox') {
 
-			_.each(this.views[view].fields, function(field, name) {
+						value = $field.is(':checked') ? $field.val() : '';
+					}
 
-				if (view == 'edit') {
+					else if ($field.attr('type') == 'radio') {
+						
+						if ($field.length > 1) {
 
-					 value = field.$el.val();
+							value = '';
 
-				} else {
+							_.each($field, function(el, index) {
 
-					if (field.targetAttr) {
+								var $el = $(el);
 
-						value = field.$el.attr(field.targetAttr);
+								if($el.is(':checked')) value = $el.val();
+							});
+
+						} else {
+
+							value = $field.is(':checked') ? $field.val() : '';
+						}
+					}
+
+					else {
+
+						value = $field.val();
+					}
+
+					break;
+
+				case 'SELECT':
+
+					if ($field.attr('multiple')) {
+
+						value = [];
+
+						_.each($field.find('option:selected'), function(option, index) {
+
+						   	value[index] = $(option).val();
+						});
 
 					} else {
 
-						value = field.$el.text();
+						value = $field.find('option:selected').val();
 					}
-				}
 
-				this.model.set(name, value);
+					break;
 
-			}, this);
+				default: 
 
-			this.$dataContainer.val(JSON.stringify(this.model.attributes));
+					value = $field.val();
+					break;
+			}
+
+			return value;
 		},
 
 		render: function() {
 
-			// Get current view
 			var view = this.model.get('view');
 
-			// Update data if view has changed
-			if(this.model.hasChanged('view')) this.updateData();
+			// Update model if we moved from the edit view
+			if (this.model.hasChanged('view') && this.model.previous('view') == 'edit') this.update();
+			
+			// Render target view with current model data
+			var viewHtml = _.template(this.views[view].$template.html(), this.model.toJSON());
 
-			// Loop through all fields and update them with current data from previous view
-			_.each(this.views[view].fields, function(field, name) {
-
-				if (view == 'edit') {
-
-					field.$el.val(this.model.get(name));
-
-				} else {
-
-					if (field.targetAttr) {
-
-						field.$el.attr(field.targetAttr, this.model.get(name));
-
-					} else {
-
-						field.$el.text(this.model.get(name));
-					}
-				}
-
-			}, this);
-
-			// Show current view and hide all other
-			this.views[view].$el.show().siblings().hide();
+			// Render current view
+			this.$content.html(viewHtml);
 
 			// Handle action buttons
 			if (view == 'edit') {
 
-				this.$el.find('[bebop-list--action="edit"]').attr('bebop-list--action', 'save')
+				this.$el.find('[bebop-list--action="edit"]').attr('bebop-list--action', 'browse')
 						.find('b').text('Save').end()
 						.find('span').removeClass('bebopools-ui-icon-edit').addClass('bebopools-ui-icon-save');
 				
@@ -169,7 +207,7 @@
 
 			} else {
 
-				this.$el.find('[bebop-list--action="save"]').attr('bebop-list--action', 'edit')
+				this.$el.find('[bebop-list--action="browse"]').attr('bebop-list--action', 'edit')
 						.find('b').text('Edit').end()
 						.find('span').removeClass('bebopools-ui-icon-save').addClass('bebopools-ui-icon-edit');
 			
