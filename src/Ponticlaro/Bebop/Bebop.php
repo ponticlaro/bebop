@@ -120,9 +120,13 @@ class Bebop
 		self::$__tracker->taxonomies = new Collection;
 		self::$__tracker->metaboxes  = new Collection;
 
-		/////////////////////////////////////////
-		// Shortcode support for in editor use //
-		/////////////////////////////////////////
+		// Instantiate UI
+		$this->UI();
+		
+		// Instantiate API
+		$this->API();
+
+		// Shortcode support for in editor use 
 		add_shortcode('Bebop', array($this, 'shortcode'));
 
 		// Register stuff on the init hook
