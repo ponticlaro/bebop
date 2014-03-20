@@ -11,55 +11,40 @@
 		className: 'bebop-list--item',
 
 		events: {
-			'click [bebop-list--action]': 'doAction'
+			'click [bebop-list--action]': 'doAction',
+			'change [bebop-list--view="edit"] [bebop-ui--field]': 'updateSingle',
+			'keyup [bebop-list--view="edit"] [bebop-ui--field]': 'updateSingle'
 		},
 
 		initialize: function(options) {
 
-			this.$template = $(options.template);
+			var self = this;
 
-			this.$el.html(options.template);
+			// Set main template as $el html
+			this.$el.html(options.templates.main);
 
-			this.views = options.views;
-			this.views.edit.fields = {};
-
-			// Get content container and empty it
-			this.$content = this.$el.find('[bebop-list--el="content"]');
+			// Build views object
+			this.views = {
+				browse: {
+					$el: this.$el.find('[bebop-list--view="browse"]'),
+					template: options.templates.browse,
+				},
+				edit: {
+					$el: this.$el.find('[bebop-list--view="edit"]'),
+					template: options.templates.edit,
+					cleanHTML: options.templates.edit.replace(/\{\{[^\}]*\}\}/g, ''),
+					fields: {}
+				}
+			}
 
 			// Collect data container input
 			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]').attr('name', options.fieldName +'[]');
-
-			// Collect fields and add missing ones to the model
-			_.each($('<div>').html(this.views.edit.$template.html().replace(/\<%=?.*%\>/g, '')).find('[bebop-list--field]'), function(el, index){
-
-			 	var $el  = $(el),
-			 		name = $el.attr('bebop-list--field');
-
-			 	this.views.edit.fields[name] = {
-			 		$el: $el,
-			 		tagName: $el.get(0).tagName,
-			 		type: $el.attr('type')
-			 	}
-
-			 	if (!this.model.has(name)) {
-
-			 		var value = '';
-
-			 		// Set value to empty array in case of a select with multiple values
-			 		if ($el.get(0).tagName == 'SELECT' && $el.attr('multiple')) {
-			 			value = [];
-			 		}
-
-			 		this.model.set(name, value);
-			 	}
-
-			}, this);
 
 			// Insert JSON data into data container
 			this.storeData();
 
 			// Add event listeners for model events
-			//this.listenTo(this.$el, 'keyup change', this.update);
+			this.listenTo(this.model, 'change', this.storeData);
 			this.listenTo(this.model, 'change:view', this.render);
 			this.listenTo(this.model, 'destroy', this.destroy);
 		},
@@ -74,12 +59,19 @@
 			if (this[action] != undefined) this[action](event);
 		},
 
-		edit: function(event) {
+		edit: function() {
 			this.model.set('view', 'edit');
 		},
 
-		browse: function(event) {
+		browse: function() {
 			this.model.set('view', 'browse');
+		},
+
+		updateSingle: function(event) {
+
+			var name = $(event.currentTarget).attr('bebop-ui--field');
+
+			this.model.set(name, this.getFieldValue(name));
 		},
 
 		update: function() {
@@ -89,8 +81,6 @@
 				this.model.set(name, this.getFieldValue(name));
 
 			}, this);
-
-			this.storeData();
 		},
 
 		storeData: function() {
@@ -104,7 +94,7 @@
 			this.$dataContainer.val(JSON.stringify(data));
 		},
 
-		remove: function(event) {
+		remove: function() {
 
  			this.model.destroy();
 		},
@@ -117,10 +107,66 @@
 			})
 		},
 
+		prepareView: function() {
+
+			var view = this.model.get('view');
+
+			if(view == 'edit') {
+
+				// Collect fields and add missing ones to the model
+				_.each(this.views.edit.$el.find('[name]'), function(el, index){
+
+				 	var $el     = $(el),
+				 		name    = $el.attr('name'),
+				 		type    = $el.attr('type');
+				 		newName = type == 'radio' || type == 'checkbox' ? '___bebop-ui--placeholder-'+ name : null;
+
+				 	$el.attr('name', newName).attr('bebop-ui--field', name);
+
+				 	this.views.edit.fields[name] = {
+				 		$el: $el,
+				 		tagName: $el.get(0).tagName,
+				 		type: $el.attr('type')
+				 	}
+
+				 	if (!this.model.has(name)) {
+
+				 		var value = '';
+
+				 		// Set value to empty array in case of a select with multiple values
+				 		if ($el.get(0).tagName == 'SELECT' && $el.attr('multiple')) {
+				 			value = [];
+				 		}
+
+				 		this.model.set(name, value);
+				 	}
+
+				}, this);
+			}
+
+			// Handle action buttons
+			if (view == 'edit') {
+
+				this.$el.find('[bebop-list--action="edit"]').attr('bebop-list--action', 'browse')
+						.find('b').text('Save').end()
+						.find('span').removeClass('bebop-ui-icon-edit').addClass('bebop-ui-icon-save');
+				
+				this.$el.find('[bebop-list--action="remove"]').attr('disabled', true);
+
+			} else {
+
+				this.$el.find('[bebop-list--action="browse"]').attr('bebop-list--action', 'edit')
+						.find('b').text('Edit').end()
+						.find('span').removeClass('bebop-ui-icon-save').addClass('bebop-ui-icon-edit');
+			
+				this.$el.find('[bebop-list--action="remove"]').attr('disabled', false);
+			}
+		},
+
 		getFieldValue: function(name)
 		{
-			var $field = this.$el.find('[bebop-list--field="'+ name +'"]');
-				
+			var $field = this.$el.find('[bebop-ui--field="'+ name +'"]');
+
 			switch($field.get(0).tagName) {
 
 				case 'INPUT':
@@ -183,36 +229,72 @@
 			return value;
 		},
 
-		render: function() {
+		getPrettyValue: function(name, value) {
 
-			var view = this.model.get('view');
+			if(name == 'view') return value;
+
+			var $field = $('<div>').html(this.views.edit.cleanHTML).find('[name="'+ name +'"]');
+
+			if ($field.get(0).tagName == 'SELECT') {
+
+				value = value ? $field.find('option[value="'+ value +'"]').text() : value;
+			};
+
+			return value;
+		},
+
+		getTemplateData: function() {
+
+			var view = this.model.get('view'),
+				data = _.clone(this.model.attributes);
+
+			// Add 'is_' values for mustache templates
+			_.each(data, function(value, key) {
+
+				if (value instanceof Array) {
+
+					_.each(value, function(singleValue, index, valuesList) {
+					
+						// Check for "pretty" values for browse or reorder view
+						if(view != 'edit') {
+							//data[key][index] = this.getPrettyValue(key, singleValue);
+						}
+
+						data[key + '_has_' + singleValue] = true;
+
+					}, this);
+
+				} else {
+
+					// Check for "pretty" values for browse or reorder view
+					if(view != 'edit') {
+						data[key] = this.getPrettyValue(key, value);
+					}
+
+					data[key + '_is_' + value] = true;
+				}
+
+			}, this);
+
+			return data;
+		},
+
+		render: function() {
 
 			// Update model if we moved from the edit view
 			if (this.model.hasChanged('view') && this.model.previous('view') == 'edit') this.update();
-			
-			// Render target view with current model data
-			var viewHtml = _.template(this.views[view].$template.html(), this.model.toJSON());
+
+			var view     = this.model.get('view'),
+				viewHtml = Mustache.render(this.views[view].template, this.getTemplateData());
 
 			// Render current view
-			this.$content.html(viewHtml);
+			this.views[view].$el.html(viewHtml)
 
-			// Handle action buttons
-			if (view == 'edit') {
+			// Prepare current view for interaction
+			this.prepareView();
 
-				this.$el.find('[bebop-list--action="edit"]').attr('bebop-list--action', 'browse')
-						.find('b').text('Save').end()
-						.find('span').removeClass('bebopools-ui-icon-edit').addClass('bebopools-ui-icon-save');
-				
-				this.$el.find('[bebop-list--action="remove"]').attr('disabled', true);
-
-			} else {
-
-				this.$el.find('[bebop-list--action="browse"]').attr('bebop-list--action', 'edit')
-						.find('b').text('Edit').end()
-						.find('span').removeClass('bebopools-ui-icon-save').addClass('bebopools-ui-icon-edit');
-			
-				this.$el.find('[bebop-list--action="remove"]').attr('disabled', false);
-			}
+			// Show current view
+			this.views[view].$el.show().siblings().hide();
 
 			// Show item if not already visible
 			if(!this.$el.is(':visible')) this.$el.slideDown(200);

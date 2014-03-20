@@ -11,9 +11,6 @@ $field_name = $config->get('field_name');
 		<div class="bebop-list--formField">
 			<button bebop-list--action="addOne" class="button button-primary"><?php echo $config->get('label__add_button'); ?></button>
 		</div>
-		<!-- <div class="bebop-list--formField">
-			<button bebop-list--action="enableReorderView" class="button button-small">Reorder</button>
-		</div> -->
 	</div>	
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
@@ -35,7 +32,8 @@ $field_name = $config->get('field_name');
 		</div>
 		
 		<div bebop-list--el="content" class="bebop-list--item-content">
-			
+			<div bebop-list--view="browse"></div>
+			<div bebop-list--view="edit"></div>
 		</div>
 
 		<div class="bebop-list--item-actions">
@@ -49,16 +47,12 @@ $field_name = $config->get('field_name');
 		</div>
 	</script>
 
-	<script bebop-list--template="browse-view" type="text/template">
+	<script bebop-list--template="browse-view" type="text/template" style="display:none">
 		<?php echo $config->get('browse_view'); ?>
 	</script>
 
-	<script bebop-list--template="edit-view" type="text/template">
+	<script bebop-list--template="edit-view" type="text/template" style="display:none">
 		<?php echo $config->get('edit_view'); ?>
-	</script>
-
-	<script bebop-list--template="reorder-view" type="text/template">
-		<?php echo $config->get('reorder_view'); ?>
 	</script>
 
 	<div bebop-list--el="empty-state-indicator" class="bebop-list--empty-state-indicator" style="display:none">

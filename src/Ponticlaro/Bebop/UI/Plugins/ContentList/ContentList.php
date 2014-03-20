@@ -77,7 +77,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		wp_enqueue_script('bebop-ui--list');
 	}
 
-	private function __createInstance($key, array $data, array $config = array())
+	private function __createInstance($key, $data = array(), array $config = array())
 	{	
 		$this->__enqueueScripts();
 
@@ -88,7 +88,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			'key'               => $key,
 			'field_name'        => $key,
 			'label__add_button' => 'Add Item',
-			'data'              => $data ?: array(),
+			'data'              => $data,
 			'browse_view'       => '',
 			'edit_view'         => '',
 			'reorder_view'      => ''
@@ -114,14 +114,17 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	{
 		if(!$view) return $this;
 
-		if (is_readable($template)) {
+		if (is_callable($template)) {
+
+			ob_start();
+			call_user_func($template);
+			$html = ob_get_contents();
+			ob_clean();
+
+		} elseif (is_file($template) && is_readable($template)) {
 
 			$html = file_get_contents($template);
 
-		} elseif (is_callable($template)) {
-
-			$html = call_user_func_array($template, $this->config->get('data'));
-			
 		} elseif (is_string($template)) {
 
 			$html = $template;

@@ -16,7 +16,8 @@
 			this.status = new Backbone.Model({
 				mode: 'browse',
 				empty: false,
-				isSortable: true
+				isSortable: true,
+				templateEngine: 'mustache'
 			});
 
 			this.collection = new List.Collection(),
@@ -48,33 +49,21 @@
 			//////////////////////
 			// Handle templates //
 			//////////////////////
+			this.templates = {};
+			
 			$rawItemTemplate = this.$el.find('[bebop-list--template="item"]');
+			$browseTemplate  = this.$el.find('[bebop-list--template="browse-view"]');
+			$editTemplate    = this.$el.find('[bebop-list--template="edit-view"]');
 
-			this.itemTemplate = $rawItemTemplate.clone()
-										    .find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end()
-										    .html();
-
-			$rawItemTemplate.remove();
-
-			$browseView  = this.$el.find('[bebop-list--template="browse-view"]');
-			$editView    = this.$el.find('[bebop-list--template="edit-view"]');
-			$reorderView = this.$el.find('[bebop-list--template="reorder-view"]');
-
-			this.itemViews = {
-				browse: {
-					$template: $browseView
-				},
-				edit: {
-					$template: $editView
-				},
-				reorder: {
-					$template: $reorderView
-				}
+			this.itemTemplates = {
+				main: $rawItemTemplate.clone().find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html(),
+				browse: $browseTemplate.html(),
+				edit: $editTemplate.html()
 			}
 
-			$browseView.remove();
-			$editView.remove();
-			$reorderView.remove();
+			$rawItemTemplate.remove();
+			$browseTemplate.remove();
+			$editTemplate.remove();
 
 			// Collect empty state indicator DOM element
 			this.$emptyStateIndicator = this.$el.find('[bebop-list--el="empty-state-indicator"]');
@@ -153,26 +142,25 @@
 			this.collection.add(new List.ItemModel({view: 'edit'}));
 		},
 
-		prependOne: function(model) {
+		getNewItemView: function(model) {
 
-			var itemView = new List.ItemView({
+			return new List.ItemView({
 				model: model,
-				template: this.itemTemplate,
-				views: this.itemViews,
+				templates: this.itemTemplates,
 				fieldName: this.fieldName
 			});
+		},
+
+		prependOne: function(model) {
+
+			var itemView = this.getNewItemView(model);
 
 			this.$list.prepend(itemView.render().el);
 		},
 
 		appendOne: function(model) {
 
-			var itemView = new List.ItemView({
-				model: model,
-				template: this.itemTemplate,
-				views: this.itemViews,
-				fieldName: this.fieldName
-			});
+			var itemView = this.getNewItemView(model);
 
 			this.$list.append(itemView.render().el);
 		},

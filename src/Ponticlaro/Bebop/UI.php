@@ -79,7 +79,15 @@ class UI {
 	public function registerScripts()
 	{
 		wp_register_style('bebop-ui', self::$__base_url .'/UI/assets/css/bebop-ui.css');
-		wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.js', array('jquery'), false, true);
+		wp_register_script('mustache', self::$__base_url .'/UI/assets/js/vendor/mustache.js', array(), '0.8.1', true);
+		wp_register_script('jquery.debounce', self::$__base_url .'/UI/assets/js/vendor/jquery.ba-throttle-debounce.min.js', array('jquery'), '0.8.1', true);
+		
+		$dependencies = array(
+			'jquery',
+			'jquery.debounce',
+			'mustache'
+		);
+		wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.js', $dependencies, false, true);
 	}
 
 	/**
