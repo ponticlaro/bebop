@@ -125,8 +125,14 @@ class Bebop
 		/////////////////////////////////////////
 		add_shortcode('Bebop', array($this, 'shortcode'));
 
-		// Intantiate UI class
-		self::$__ui = Bebop\UI::getInstance();
+		// Register stuff on the init hook
+		add_action('init', array($this, 'initRegister'), 1);
+
+		// Register custom rewrite rules
+		add_action('rewrite_rules_array', array($this, 'rewriteRules'), 99);
+
+		// Handle template includes
+		add_action('template_redirect', array($this, 'templateRedirects'));
 	}
 
 	/**
@@ -141,6 +147,47 @@ class Bebop
 			self::$__instance = new Bebop();
 		}
 	} 
+
+	/**
+	 * Register Bebop stuff on the init hook
+	 * 
+	 * @return void
+	 */
+	public function initRegister()
+	{
+		add_rewrite_tag('%bebop_api%','([^&]+)');
+	}
+
+	/**
+	 * Adds custom rewrite rules
+	 * 
+	 * @param  array $wp_rules Array of rewrite rules
+	 * @return array           Modified array of rewrite rules
+	 */
+	public function rewriteRules($wp_rules) 
+	{
+		$bebop_rules = array(
+			"_bebop-api/?(.*)?$" => 'index.php?bebop_api=1'
+		);
+
+		return array_merge($bebop_rules, $wp_rules);
+	}
+
+	/**
+	 * Addds template redirections
+	 * 
+	 * @return void
+	 */
+	public function templateRedirects() 
+	{
+		global $wp_query;
+
+		if($wp_query->get('bebop_api')) {
+			
+			new \Ponticlaro\Bebop\API\Router;
+			exit;
+		}
+	}
 
 	/**
 	 * Returns WordPress version
@@ -248,9 +295,21 @@ class Bebop
 		}
 	}
 
+	/**
+	 * Returns the UI class instance
+	 */
 	public static function UI()
 	{
-		return self::$__ui;
+		return Bebop\UI::getInstance();
+	}
+
+	/**
+	 * Returns the API class instance
+	 * 
+	 */
+	public static function API()
+	{
+		return Bebop\API::getInstance();
 	}
 
 	/**
@@ -272,14 +331,15 @@ class Bebop
 		}
 	} 
 
-	public static function getPathUrl($path)
+	public static function getPathUrl($path, $relative = false)
 	{
 		if (!is_string($path)) return null;
 
 		$content_base = basename(WP_CONTENT_URL);
-		$url          = home_url('/') . preg_replace("/.*$content_base/", "$content_base", $path);
-
-		return $url; 
+		$path         = str_replace(ABSPATH, '', $path);
+		$url          = '/'. preg_replace("/.*$content_base/", "$content_base", $path);
+		
+		return $relative ? $url : home_url() . $url; 
 	}
 
 	/**
