@@ -226,7 +226,9 @@ class Client {
         
         // Set request method from called method method
         $args[1]           = $args[1] ?: array();
-        $args[1]['method'] = $method;
+        $args[1]['method'] = strtoupper($method);
+
+        var_dump($args);
 
         // Make request and return response object
         $response = call_user_func_array('wp_remote_request', $args);
