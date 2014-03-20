@@ -97,7 +97,7 @@
 			}
 		})
 
-		$('.bebop-button').on('click', function(e) {
+		$(document).on('click', '.bebop-button', function(e) {
 
 			e.preventDefault();
 
