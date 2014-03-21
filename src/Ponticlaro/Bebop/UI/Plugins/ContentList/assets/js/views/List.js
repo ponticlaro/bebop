@@ -124,8 +124,7 @@
 
 				this.$list.sortable({
 					handle: ".bebop-list--drag-handle",
-					placeholder: "bebop-list--gallery-item-placeholder",
-					forcePlaceholderSize: true
+					placeholder: "bebop-list--item-placeholder bebop-ui-icon-target"
 				});
 			};
 
