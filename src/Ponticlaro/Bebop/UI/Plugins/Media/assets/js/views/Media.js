@@ -10,8 +10,6 @@
 
 		initialize: function(options) {
 
-			console.log('NEW MEDIA WIDGET INITIALIZED');
-
 			// Collect DOM elements
 			this.$el            = $(options.el);
 			this.$previewer     = this.$el.find('[bebop-media--el="previewer"]');
@@ -68,8 +66,6 @@
 
 				var selection = this.mediaPicker.state().get('selection').toJSON(),
 					file      = selection.length > 0 ? selection[0] : null;
-
-				console.log(file);
 
 				if (file) {
 
