@@ -39,8 +39,19 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function registerScripts()
 	{
-		wp_register_style('bebop-ui--media', self::$__base_url .'/assets/css/media.css', array('bebop-ui'));
-		wp_register_script('bebop-ui--media', self::$__base_url .'/assets/js/media.js', array('jquery', 'jquery-ui-sortable', 'bebop-ui'), false, true);
+		wp_register_style('bebop-ui--media', self::$__base_url .'/assets/css/bebop-ui--media.css', array('bebop-ui'));
+		
+		wp_register_script('bebop-ui--mediaView', self::$__base_url .'/assets/js/views/Media.js', array(), false, true);
+
+		$app_dependencies = array(
+			'jquery',
+			'jquery-ui-sortable',
+			'underscore',
+			'backbone',
+			'bebop-ui',
+			'bebop-ui--mediaView'
+		);		
+		wp_register_script('bebop-ui--media', self::$__base_url .'/assets/js/bebop-ui--media.js', $app_dependencies, false, true);
 	}
 
 	private function __enqueueScripts()
@@ -69,9 +80,6 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		$default_config = array(
 			'key'                  => $key,
-			'label'                => $label,
-			'container_id'         => 'bebop-media__single-'. $key . '-container',
-			'display_label'        => true,
 			'field_name'           => $key,
 			'select_button_class'  => '',
 			'select_button_text'   => 'Select '. $label,

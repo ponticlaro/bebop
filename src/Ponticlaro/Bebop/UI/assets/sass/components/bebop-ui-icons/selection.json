@@ -12,7 +12,8 @@
 					"arrows"
 				],
 				"defaultCode": 58194,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 850,
@@ -39,7 +40,8 @@
 					"document"
 				],
 				"defaultCode": 57465,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": true
 			},
 			"properties": {
 				"id": 121,
@@ -64,7 +66,8 @@
 					"graphic"
 				],
 				"defaultCode": 57387,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 43,
@@ -89,7 +92,8 @@
 					"pdf"
 				],
 				"defaultCode": 58594,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": true
 			},
 			"properties": {
 				"id": 1250,
@@ -113,7 +117,8 @@
 					"movie"
 				],
 				"defaultCode": 57410,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 66,
@@ -139,7 +144,8 @@
 					"movie"
 				],
 				"defaultCode": 57419,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 75,
@@ -164,7 +170,8 @@
 					"sound"
 				],
 				"defaultCode": 57402,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 58,
@@ -190,7 +197,8 @@
 					"paper"
 				],
 				"defaultCode": 57482,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": true
 			},
 			"properties": {
 				"id": 138,
@@ -216,7 +224,8 @@
 					"paper"
 				],
 				"defaultCode": 57481,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": true
 			},
 			"properties": {
 				"id": 137,
@@ -243,7 +252,8 @@
 					"dispose"
 				],
 				"defaultCode": 57937,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 593,
@@ -269,7 +279,8 @@
 					"note"
 				],
 				"defaultCode": 57361,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 17,
@@ -294,7 +305,8 @@
 					"arrow"
 				],
 				"defaultCode": 58050,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 706,
@@ -320,7 +332,8 @@
 					"audio"
 				],
 				"defaultCode": 57408,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 64,
@@ -342,7 +355,8 @@
 					"vimeo"
 				],
 				"defaultCode": 58535,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 1191,
@@ -367,7 +381,8 @@
 					"select"
 				],
 				"defaultCode": 58392,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 1048,
@@ -392,7 +407,8 @@
 					"selected"
 				],
 				"defaultCode": 58414,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 1070,
@@ -417,7 +433,8 @@
 					"checked"
 				],
 				"defaultCode": 58418,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 1074,
@@ -441,7 +458,8 @@
 					"floppy"
 				],
 				"defaultCode": 57652,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 308,
@@ -465,7 +483,8 @@
 					"sum"
 				],
 				"defaultCode": 58230,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 886,
@@ -490,7 +509,8 @@
 					"sum"
 				],
 				"defaultCode": 58206,
-				"grid": 16
+				"grid": 16,
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 862,
@@ -502,6 +522,88 @@
 			},
 			"setIdx": 0,
 			"iconIdx": 862
+		},
+		{
+			"icon": {
+				"paths": [
+					"M380.080 610.046c-95.378 51.858-165.792 158.21-183.652 285.956h631.14c-17.858-127.742-88.274-234.098-183.648-285.956-67.906-48.28-67.92-71.398-67.92-98.046s0.014-49.764 67.918-98.046c95.376-51.856 165.792-158.21 183.65-285.954h-631.14c17.86 127.742 88.276 234.098 183.652 285.954 67.904 48.282 67.92 71.398 67.92 98.046s-0.016 49.766-67.92 98.046zM128 960.002h768v63.998h-768zM128 0h768v64h-768z"
+				],
+				"tags": [
+					"busy",
+					"wait",
+					"loading",
+					"hour glass"
+				],
+				"defaultCode": 57766,
+				"grid": 16,
+				"matchesSearch": false
+			},
+			"properties": {
+				"id": 422,
+				"order": 21,
+				"prevSize": 32,
+				"code": 57766,
+				"name": "busy",
+				"ligatures": ""
+			},
+			"setIdx": 0,
+			"iconIdx": 422
+		},
+		{
+			"icon": {
+				"paths": [
+					"M256 640c0 0 58.824-192 384-192v192l384-256-384-256v192c-256 0-384 159.672-384 320zM704 768h-576v-384h125.876c10.094-11.918 20.912-23.334 32.488-34.18 43.964-41.19 96.562-72.652 156.114-93.82h-442.478v640h832v-268.624l-128 85.334v55.29z"
+				],
+				"tags": [
+					"share",
+					"out",
+					"external",
+					"outside"
+				],
+				"defaultCode": 58491,
+				"grid": 16,
+				"matchesSearch": false
+			},
+			"properties": {
+				"id": 1147,
+				"order": 22,
+				"prevSize": 32,
+				"code": 58491,
+				"name": "share",
+				"ligatures": ""
+			},
+			"setIdx": 0,
+			"iconIdx": 1147
+		},
+		{
+			"icon": {
+				"paths": [
+					"M903.432 199.43c27.492 27.492 50.554 78.672 55.552 120.57h-318.984v-318.984c41.898 4.998 93.076 28.060 120.568 55.552l142.864 142.862zM576 384v-384h-432c-44 0-80 36-80 80v864c0 44 36 80 80 80h736c44 0 80-36 80-80v-560h-384zM704 579.882l-124.118 124.118 124.118 124.118v67.882h-67.882l-124.118-124.118-124.118 124.118h-67.882v-67.882l124.118-124.118-124.118-124.118v-67.882h67.882l124.118 124.118 124.118-124.118h67.882v67.882z"
+				],
+				"tags": [
+					"file-remove",
+					"delete",
+					"remove",
+					"cancel",
+					"close",
+					"document",
+					"page",
+					"paper"
+				],
+				"defaultCode": 57476,
+				"grid": 16,
+				"matchesSearch": true
+			},
+			"properties": {
+				"id": 132,
+				"order": 23,
+				"prevSize": 32,
+				"code": 57476,
+				"name": "file-remove",
+				"ligatures": ""
+			},
+			"setIdx": 0,
+			"iconIdx": 132
 		}
 	],
 	"height": 1024,
