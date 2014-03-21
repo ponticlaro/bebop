@@ -1,11 +1,4 @@
-<?php
-
-$items      = $config->get('data');
-$field_name = $config->get('field_name');
-
-?>
-
-<div bebop-list--el="container" bebop-list--fieldName="<?php echo $field_name; ?>" class="bebop-list--container">
+<div bebop-list--el="container" bebop-list--mode="<?php echo $config->get('mode'); ?>" bebop-list--config='<?php echo json_encode($config->get()); ?>' class="bebop-list--container">
 
 	<div bebop-list--el="form" class="bebop-list--form bebop-ui-clrfix">
 		<div class="bebop-list--formField">
@@ -14,10 +7,10 @@ $field_name = $config->get('field_name');
 	</div>	
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
-		<?php if ($items) {
-			foreach ($items as $item) { ?>
+		<?php if ($config->get('data')) {
+			foreach ($config->get('data') as $item) { ?>
 				
-				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $field_name; ?>[]" value='<?php echo $item; ?>'>
+				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $config->get('field_name'); ?>[]" value='<?php echo $item; ?>'>
 
 			<?php }
 		} ?>
@@ -30,8 +23,14 @@ $field_name = $config->get('field_name');
 		<div class="bebop-list--drag-handle">
 			<span class="bebop-ui-icon-move"></span>
 		</div>
-		
-		<div bebop-list--el="content" class="bebop-list--item-content">
+
+		<div bebop-list--el="content" class="bebop-list--item-content bebop-ui-clrfix">
+			<?php Ponticlaro\Bebop::UI()->Media('Image', '', array(
+				'field_name' => 'id',
+				'mime_types' => array(
+					'image'
+				)
+			))->render(); ?>
 			<div bebop-list--view="browse"></div>
 			<div bebop-list--view="edit"></div>
 		</div>

@@ -17,27 +17,19 @@
 			this.$dataContainer = this.$el.find('input');
 
 			// Collect templates
-			var $imageTemplate    = this.$el.find('[bebop-media--template="image-view"]'),
-				$nonImageTemplate = this.$el.find('[bebop-media--template="non-image-view"]'),
-				$emptyTemplate    = this.$el.find('[bebop-media--template="empty-view"]'),
-				$loadingTemplate    = this.$el.find('[bebop-media--template="loading-view"]');
+			var $body = $(document.body);
 
 			this.templates = {
-				image: $imageTemplate.html(),
-				nonImage: $nonImageTemplate.html(),
-				empty: $emptyTemplate.html(),
-				loading: $loadingTemplate.html()
+				image: $body.find('[bebop-media--template="image-view"]').html(),
+				nonImage: $body.find('[bebop-media--template="non-image-view"]').html(),
+				empty: $body.find('[bebop-media--template="empty-view"]').html(),
+				loading: $body.find('[bebop-media--template="loading-view"]').html()
 			}
-
-			$imageTemplate.remove();
-			$nonImageTemplate.remove();
-			$emptyTemplate.remove();
-			$loadingTemplate.remove();
 
 			// Set default status model
 			this.status = new Backbone.Model({
 				view: 'loading',
-				id: this.$dataContainer.val(),
+				id: options.id != undefined ? options.id : this.$dataContainer.val(),
 				data: null
 			});
 
@@ -113,7 +105,7 @@
 		},
 
 		storeData: function() {
-			this.$dataContainer.val(this.status.get('id'));
+			this.$dataContainer.val(this.status.get('id')).trigger('change');
 		},
 
 		select: function() {
@@ -135,12 +127,18 @@
 				dataType: 'json',
 				success: function(data) {
 
-					if (data && data.ID != 'undefined') {
+					if (data && data.ID != undefined) {
+
 						self.status.set('data', data);
+
+					} else {
+
+						self.status.set('data', null);
 					}
 				},
 				error: function() {
 
+					self.status.set('data', null);
 				}
 			});
 		},

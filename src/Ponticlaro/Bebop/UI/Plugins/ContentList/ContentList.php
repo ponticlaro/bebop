@@ -88,14 +88,14 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			'key'               => $key,
 			'field_name'        => $key,
 			'label__add_button' => 'Add Item',
-			'data'              => $data,
+			'data'              => is_array($data) ? $data : array(),
 			'browse_view'       => '',
 			'edit_view'         => '',
-			'reorder_view'      => ''
+			'type'              => 'single',
+			'mode'              => 'default'
 		);
 
-		$this->template = 'single';
-		$this->config   = Bebop::Collection(array_merge($default_config, $config));
+		$this->config = Bebop::Collection(array_merge($default_config, $config));
 
 		return $this;
 	}
@@ -107,7 +107,16 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function setLabel($key, $value)
 	{
-		$tbis->config->set('label_'.$key, $value);
+		$this->config->set('label_'.$key, $value);
+
+		return $this;
+	}
+
+	public function setMode($mode)
+	{
+		$this->config->set('mode', $mode);
+
+		return $this;
 	}
 
 	public function setItemView($view, $template)
@@ -141,6 +150,8 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function render()
 	{
+		$this->template = $this->config->get('type') .'/'. $this->config->get('mode');
+
 		$this->__renderTemplate($this->template, $this->config);
 
 		return $this;

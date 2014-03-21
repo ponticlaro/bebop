@@ -13,17 +13,22 @@
 			// Store reference to current instance
 			var self = this;
 
+			// Collect container DOM element
+			this.$el = $(options.el);
+
+			// Get instance configuration
+			var config  = this.$el.attr('bebop-list--config');
+			this.config = new Backbone.Model(config ? JSON.parse(config) : {});
+			this.$el.attr('bebop-media--config', null);
+
 			this.status = new Backbone.Model({
-				mode: 'browse',
+				mode: this.config.get('mode'),
 				empty: false,
 				isSortable: true,
 				templateEngine: 'mustache'
 			});
 
 			this.collection = new List.Collection(),
-
-			// Collect container DOM element
-			this.$el = $(options.el);
 
 			// Collect form DOM element
 			this.$form = this.$el.find('[bebop-list--el="form"]');
@@ -44,7 +49,7 @@
 			}, this);
 
 			// Get field name
-			this.fieldName = this.$el.attr('bebop-list--fieldName');
+			this.fieldName = this.config.get('field_name');
 
 			//////////////////////
 			// Handle templates //
@@ -137,6 +142,10 @@
 			if (this[action] != undefined) this[action](event);
 		},
 
+		isMode: function(mode) {
+			return this.status.get('mode') == mode ? true : false;
+		},
+
 		addOne: function(event) {
 
 			this.collection.add(new List.ItemModel({view: 'edit'}));
@@ -147,7 +156,8 @@
 			return new List.ItemView({
 				model: model,
 				templates: this.itemTemplates,
-				fieldName: this.fieldName
+				fieldName: this.fieldName,
+				mode: this.status.get('mode')
 			});
 		},
 
@@ -172,7 +182,7 @@
 
 				this.appendOne(model);
 
-			}, this);		
+			}, this);
 
 			// Remove all data placeholders if we still have them
 			if (this.$dataPlaceholders.length > 0)

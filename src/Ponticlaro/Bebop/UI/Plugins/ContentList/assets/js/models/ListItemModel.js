@@ -6,6 +6,8 @@
 
 	var ItemModel = List.ItemModel = Backbone.Model.extend({	
 		
+		idAttribute: "_id",
+
 		defaults: {
 			view: 'browse'
 		},

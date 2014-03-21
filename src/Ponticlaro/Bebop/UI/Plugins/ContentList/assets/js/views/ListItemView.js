@@ -12,8 +12,8 @@
 
 		events: {
 			'click [bebop-list--action]': 'doAction',
-			'change [bebop-list--view="edit"] [bebop-ui--field]': 'updateSingle',
-			'keyup [bebop-list--view="edit"] [bebop-ui--field]': 'updateSingle'
+			'change [bebop-list--el="content"] [bebop-ui--field]': 'updateSingle',
+			'keyup [bebop-list--el="content"] [bebop-ui--field]': 'updateSingle'
 		},
 
 		initialize: function(options) {
@@ -22,6 +22,10 @@
 
 			// Set main template as $el html
 			this.$el.html(options.templates.main);
+
+			this.$content = this.$el.find('[bebop-list--el="content"]');
+
+			this.fields = {}
 
 			// Build views object
 			this.views = {
@@ -32,13 +36,23 @@
 				edit: {
 					$el: this.$el.find('[bebop-list--view="edit"]'),
 					template: options.templates.edit,
-					cleanHTML: options.templates.edit.replace(/\{\{[^\}]*\}\}/g, ''),
-					fields: {}
+					cleanHTML: options.templates.edit.replace(/\{\{[^\}]*\}\}/g, '')
 				}
 			}
 
 			// Collect data container input
 			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]').attr('name', options.fieldName +'[]');
+
+			this.mode = options.mode ? options.mode : null;
+
+			// Get image widget
+			if (this.mode == 'gallery') {
+
+				new Bebop.Media({
+					el: this.$el.find('[bebop-media--el="container"]'),
+					id: this.model.get('id')
+				});
+			}
 
 			// Insert JSON data into data container
 			this.storeData();
@@ -111,38 +125,36 @@
 
 			var view = this.model.get('view');
 
-			if(view == 'edit') {
+			// Collect fields and add missing ones to the model
+			_.each(this.$content.find('[name]:not([name^="___bebop-ui--placeholder-"])'), function(el, index){
 
-				// Collect fields and add missing ones to the model
-				_.each(this.views.edit.$el.find('[name]'), function(el, index){
+			 	var $el     = $(el),
+			 		name    = $el.attr('name'),
+			 		type    = $el.attr('type');
+			 		newName = type == 'radio' || type == 'checkbox' ? '___bebop-ui--placeholder-'+ name : null;
 
-				 	var $el     = $(el),
-				 		name    = $el.attr('name'),
-				 		type    = $el.attr('type');
-				 		newName = type == 'radio' || type == 'checkbox' ? '___bebop-ui--placeholder-'+ name : null;
+			 	$el.attr('name', newName).attr('bebop-ui--field', name);
 
-				 	$el.attr('name', newName).attr('bebop-ui--field', name);
+			 	this.fields[name] = {
+			 		$el: $el,
+			 		tagName: $el.get(0).tagName,
+			 		type: $el.attr('type')
+			 	}
 
-				 	this.views.edit.fields[name] = {
-				 		$el: $el,
-				 		tagName: $el.get(0).tagName,
-				 		type: $el.attr('type')
-				 	}
+			 	if (!this.model.has(name)) {
 
-				 	if (!this.model.has(name)) {
+			 		var value = '';
 
-				 		var value = '';
+			 		// Set value to empty array in case of a select with multiple values
+			 		if ($el.get(0).tagName == 'SELECT' && $el.attr('multiple')) {
+			 			value = [];
+			 		}
 
-				 		// Set value to empty array in case of a select with multiple values
-				 		if ($el.get(0).tagName == 'SELECT' && $el.attr('multiple')) {
-				 			value = [];
-				 		}
+			 		this.model.set(name, value);
+			 	}
 
-				 		this.model.set(name, value);
-				 	}
+			}, this);
 
-				}, this);
-			}
 
 			// Handle action buttons
 			if (view == 'edit') {
@@ -165,7 +177,7 @@
 
 		getFieldValue: function(name)
 		{
-			var $field = this.$el.find('[bebop-ui--field="'+ name +'"]');
+			var $field = this.$content.find('[bebop-ui--field="'+ name +'"]');
 
 			switch($field.get(0).tagName) {
 
@@ -235,7 +247,7 @@
 
 			var $field = $('<div>').html(this.views.edit.cleanHTML).find('[name="'+ name +'"]');
 
-			if ($field.get(0).tagName == 'SELECT') {
+			if ($field.length > 0 && $field.get(0).tagName == 'SELECT') {
 
 				value = value ? $field.find('option[value="'+ value +'"]').text() : value;
 			};
@@ -288,13 +300,13 @@
 				viewHtml = Mustache.render(this.views[view].template, this.getTemplateData());
 
 			// Render current view
-			this.views[view].$el.html(viewHtml)
+			this.views[view].$el.html(viewHtml);
 
 			// Prepare current view for interaction
 			this.prepareView();
 
 			// Show current view
-			this.views[view].$el.show().siblings().hide();
+			this.views[view].$el.show().siblings('[bebop-list--view]').hide();
 
 			// Show item if not already visible
 			if(!this.$el.is(':visible')) this.$el.slideDown(200);

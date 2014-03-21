@@ -24,6 +24,37 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		self::$__base_url = Bebop::getPathUrl(__DIR__);
 
 		$this->__instances = Bebop::Collection();
+
+		$args = func_get_args();
+
+		if ($args) call_user_func_array(array($this, '__createInstance'), $args);
+	}
+
+	private function __createInstance($key, $data = array(), array $config = array())
+	{	
+		$this->__enqueueScripts();
+
+		$label = $key;
+		$key   = Bebop::util('slugify', $key);
+
+		$default_config = array(
+			'key'                  => $key,
+			'field_name'           => $key,
+			'data'                 => $data,
+			'select_button_class'  => '',
+			'select_button_text'   => 'Select '. $label,
+			'remove_button_class'  => '',
+			'remove_button_text'   => 'Remove '. $label,
+			'no_selection_message' => 'No selected item',  
+			'modal_title'          => 'Upload or select existing resources',
+			'modal_button_text'    => 'Select '. $label,
+			'mime_types'           => array()
+		);
+
+		$this->config   = Bebop::Collection(array_merge($default_config, $config));
+		$this->template = 'single';
+
+		return $this;
 	}
 
 	/**
@@ -35,6 +66,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	public function load()
 	{
 		add_action('admin_enqueue_scripts', array($this, 'registerScripts'));
+		add_action('admin_footer', array($this, 'renderTemplates'));
 	}
 
 	public function registerScripts()
@@ -54,6 +86,42 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		wp_register_script('bebop-ui--media', self::$__base_url .'/assets/js/bebop-ui--media.js', $app_dependencies, false, true);
 	}
 
+	public function renderTemplates()
+	{
+		?>
+		<script bebop-media--template="image-view" type="text/template" style="display:none">
+			<div class="bebop-media--previewer-image">
+				<div class="bebop-media--previewer-image-inner">
+					<img src="{{sizes.thumbnail.url}}">
+				</div>
+			</div>
+		</script>
+
+		<script bebop-media--template="non-image-view" type="text/template" style="display:none">
+			<div class="bebop-media--previewer-inner">
+				<div class="bebop-media--previewer-icon bebop-ui-icon-file"></div>
+				<div class="bebop-media--previewer-file-title">{{title}}</div>
+				<div class="bebop-media--previewer-info">
+					<a href="{{url}}" target="_blank">Open file in new tab</a> <span class="bebop-ui-icon-share"></span>
+				</div>
+			</div>
+		</script>
+
+		<script bebop-media--template="empty-view" type="text/template" style="display:none">
+			<div class="bebop-media--previewer-inner">
+				<div class="bebop-media--previewer-icon bebop-ui-icon-file-remove"></div>
+				<div class="bebop-media--previewer-file-title">No file selected</div>
+			</div>
+		</script>
+
+		<script bebop-media--template="loading-view" type="text/template" style="display:none">
+			<div class="bebop-media--previewer-inner">
+				<div class="bebop-media--previewer-icon bebop-ui-icon-busy"></div>
+				<div class="bebop-media--previewer-file-title">Loading...</div>
+			</div>
+		</script>
+	<?php }
+
 	private function __enqueueScripts()
 	{
 		global $wp_version;
@@ -71,74 +139,6 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		wp_enqueue_script('bebop-ui--media');
 	}
 
-	public function single($key, $data, array $config = array())
-	{	
-		$this->__enqueueScripts();
-
-		$label = $key;
-		$key   = Bebop::util('slugify', $key);
-
-		$default_config = array(
-			'key'                  => $key,
-			'field_name'           => $key,
-			'select_button_class'  => '',
-			'select_button_text'   => 'Select '. $label,
-			'remove_button_class'  => '',
-			'remove_button_text'   => 'Remove '. $label,
-			'no_selection_message' => 'No selected item',  
-			'modal_title'          => 'Upload or select existing resources',
-			'modal_button_text'    => 'Select '. $label,
-			'mime_types'           => array()
-		);
-
-		$instance           = new \stdClass;
-		$instance->template = 'single';
-		$config             = array_merge($default_config, $config);
-		$instance->config   = Bebop::Collection($config);
-		$instance->config->set('data', $data);
-
-		// Save reference to this instance
-		$this->__current_instance_key = $key;
-		$this->__instances->set($key, $instance);
-
-		return $this;
-	}
-
-	public function gallery($key, $data, array $config = array())
-	{
-		$this->__enqueueScripts();
-
-		$label = $key;
-		$key   = Bebop::util('slugify', $key);
-
-		$default_config = array(
-			'key'                  => $key,
-			'label'                => $label,
-			'container_id'         => 'bebop-media__single-'. $key . '-container',
-			'display_label'        => true,
-			'field_name'           => $key,
-			'select_button_class'  => '',
-			'select_button_text'   => 'Add image',
-			'no_selection_message' => 'No selected images',  
-			'modal_title'          => 'Upload or select existing resources',
-			'modal_button_text'    => 'Add',
-			'mime_types'           => array('image'),
-			'multiple'             => true
-		);
-
-		$instance           = new \stdClass;
-		$instance->template = 'gallery';
-		$config             = array_merge($default_config, $config);
-		$instance->config   = Bebop::Collection($config);
-		$instance->config->set('data', $data);
-
-		// Save reference to this instance
-		$this->__current_instance_key = $key;
-		$this->__instances->set($key, $instance);
-
-		return $this;
-	}
-
 	private function __renderTemplate($template_name, $data)
 	{
 		include __DIR__ . '/templates/'. $template_name .'.php';
@@ -146,11 +146,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function render()
 	{
-		$current_instance = $this->__instances->get($this->__current_instance_key);
-		$template_name    = $current_instance->template;
-		$config           = $current_instance->config;
-
-		$this->__renderTemplate($template_name, $config);
+		$this->__renderTemplate($this->template, $this->config);
 
 		return $this;
 	}
