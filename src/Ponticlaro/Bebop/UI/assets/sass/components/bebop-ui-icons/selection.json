@@ -618,7 +618,7 @@
 				],
 				"defaultCode": 57978,
 				"grid": 16,
-				"matchesSearch": true
+				"matchesSearch": false
 			},
 			"properties": {
 				"id": 634,
@@ -630,6 +630,57 @@
 			},
 			"setIdx": 0,
 			"iconIdx": 634
+		},
+		{
+			"icon": {
+				"paths": [
+					"M1009.956 915.76l-437.074-871.112c-16.742-29.766-38.812-44.648-60.882-44.648s-44.14 14.882-60.884 44.648l-437.074 871.112c-33.486 59.532-5 108.24 63.304 108.24h869.308c68.302 0 96.792-48.708 63.302-108.24zM512 896c-35.346 0-64-28.654-64-64 0-35.348 28.654-64 64-64 35.348 0 64 28.652 64 64 0 35.346-28.652 64-64 64zM556 704h-88l-20-256c0-35.346 28.654-64 64-64s64 28.654 64 64l-20 256z"
+				],
+				"tags": [
+					"warning",
+					"sign"
+				],
+				"defaultCode": 58198,
+				"grid": 16,
+				"matchesSearch": true
+			},
+			"properties": {
+				"id": 854,
+				"order": 25,
+				"prevSize": 32,
+				"code": 58198,
+				"name": "warning",
+				"ligatures": ""
+			},
+			"setIdx": 0,
+			"iconIdx": 854
+		},
+		{
+			"icon": {
+				"paths": [
+					"M928 0h-832c-52.8 0-96 43.2-96 96v576c0 52.8 43.2 96 96 96h160v256l307.2-256h364.8c52.8 0 96-43.2 96-96v-576c0-52.8-43.2-96-96-96zM576 640h-128v-128h128v128zM576 384h-128v-256h128v256z"
+				],
+				"tags": [
+					"bubble-notification",
+					"comment",
+					"chat",
+					"talk",
+					"notification"
+				],
+				"defaultCode": 57721,
+				"grid": 16,
+				"matchesSearch": true
+			},
+			"properties": {
+				"id": 377,
+				"order": 26,
+				"prevSize": 32,
+				"code": 57721,
+				"name": "bubble-notification",
+				"ligatures": ""
+			},
+			"setIdx": 0,
+			"iconIdx": 377
 		}
 	],
 	"height": 1024,

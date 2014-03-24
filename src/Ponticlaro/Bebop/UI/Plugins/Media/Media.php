@@ -114,6 +114,14 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			</div>
 		</script>
 
+		<script bebop-media--template="error-view" type="text/template" style="display:none">
+			<div class="bebop-media--previewer-inner bebop-media--status-warning">
+				<div class="bebop-media--previewer-icon bebop-ui-icon-warning"></div>
+				<div class="bebop-media--previewer-status-code">{{status}}</div>
+				<div class="bebop-media--previewer-file-title">{{message}}</div>
+			</div>
+		</script>
+
 		<script bebop-media--template="loading-view" type="text/template" style="display:none">
 			<div class="bebop-media--previewer-inner">
 				<div class="bebop-media--previewer-icon bebop-ui-icon-busy"></div>

@@ -40,6 +40,10 @@
 	
 	.bebop-media--previewer-inner {
 		padding: 0 15px 50px 15px;
+
+		&.bebop-media--status-warning {
+			color: #f49922;
+		}
 	}
 
 	.bebop-media--previewer-icon {
@@ -48,6 +52,11 @@
 		text-align: center;
 		padding: 20px 0 10px 0;
 		width:100%;
+
+		&.bebop-ui-icon-warning {
+			color: #f49922;
+			padding-bottom:0;
+		}
 	}
 
 	.bebop-media--previewer-file-title {
@@ -70,6 +79,14 @@
 				margin-left: 3px;
 			}
 		}
+	}
+
+	.bebop-media--previewer-status-code {
+		color: #f49922;
+		display: block;
+		text-align: center;
+		font-size: 11px;
+		text-transform: uppercase;
 	}
 
 	.bebop-media--previewer-image {

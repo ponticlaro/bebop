@@ -23,6 +23,7 @@
 				image: $body.find('[bebop-media--template="image-view"]').html(),
 				nonImage: $body.find('[bebop-media--template="non-image-view"]').html(),
 				empty: $body.find('[bebop-media--template="empty-view"]').html(),
+				error: $body.find('[bebop-media--template="error-view"]').html(),
 				loading: $body.find('[bebop-media--template="loading-view"]').html()
 			}
 
@@ -127,7 +128,7 @@
 				dataType: 'json',
 				success: function(data) {
 
-					if (data && data.ID != undefined) {
+					if (data) {
 
 						self.status.set('data', data);
 
@@ -136,26 +137,40 @@
 						self.status.set('data', null);
 					}
 				},
-				error: function() {
+				error: function(xhr) {
 
-					self.status.set('data', null);
+					self.status.set('data', {
+						error: true,
+						status: xhr.status,
+						message: xhr.statusText
+					});
 				}
 			});
 		},
 
 		handleNewData: function() {
 
+			console.log('HANDLE NEW DATA');
+
 			var data = this.status.get('data');
 
 			if (data) {
-				id          = data.id != undefined ? data.id : data.ID,
-				typeValue   = data.post_mime_type != undefined ? data.post_mime_type : data.mime,
-				view        = typeValue.indexOf('image') != -1 ? 'image' : 'nonImage',
-				data.url    = data.permalink != undefined ? data.permalink : data.url;
-				data.title  = data.post_title != undefined ? data.post_title : data.title;
 
-				this.status.set('id', id);
-				this.status.set('view', view);
+				if(data.error != undefined && data.error) {
+
+					this.status.set('view', 'error');
+
+				} else if(data.ID != undefined || data.id != undefined) {
+
+					id          = data.id != undefined ? data.id : data.ID,
+					typeValue   = data.post_mime_type != undefined ? data.post_mime_type : data.mime,
+					view        = typeValue.indexOf('image') != -1 ? 'image' : 'nonImage',
+					data.url    = data.permalink != undefined ? data.permalink : data.url;
+					data.title  = data.post_title != undefined ? data.post_title : data.title;
+
+					this.status.set('id', id);
+					this.status.set('view', view);
+				}
 
 			} else {
 
