@@ -118,6 +118,10 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	{
 		$this->config->set('mode', $mode);
 
+		if ($mode == 'gallery') {
+			$this->config->set('label__add_button', 'Add image');
+		}
+
 		return $this;
 	}
 

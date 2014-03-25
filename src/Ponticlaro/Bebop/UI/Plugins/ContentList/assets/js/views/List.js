@@ -100,11 +100,11 @@
 
 				if (insertAction == 'append') {
 
-					this.appendOne(model);
+					this.appendItem(model);
 
 				} else if(insertAction == 'prepend') {
 
-					this.prependOne(model);
+					this.prependItem(model);
 				}
 
 				if(this.collection.length == 1) this.status.set('empty', false);
@@ -131,6 +131,36 @@
 				});
 			};
 
+			if (this.isMode('gallery')) {
+
+				// Instantiate WordPress media picker
+				this.mediaPicker = wp.media({
+					frame: 'select',
+		            multiple: true,
+		            title: 'Upload or select existing resources',
+		            library: {
+		                type: 'image'
+		            },
+		            button: {
+		                text: 'Add images'
+		            }
+				});
+
+				this.mediaPicker.on("select", function() {
+
+					var selection = this.mediaPicker.state().get('selection').toJSON();
+
+					_.each(selection, function(file, index, selection) {
+
+						if (file.type == 'image') {
+
+							this.collection.add(new List.ItemModel({id: file.id}));
+						} 
+					}, this);
+
+				}, this);
+			}
+
 			this.render();
 		},
 
@@ -152,14 +182,28 @@
 
 			this.status.set('insertAction', 'prepend');
 
-			this.collection.add(new List.ItemModel({view: 'edit'}));
+			if (this.isMode('gallery')) {
+
+				this.mediaPicker.open();
+
+			} else {
+
+				this.addNewEmptyModel();
+			}
 		},
 
 		insertAtTheBottom: function(event) {
 
 			this.status.set('insertAction', 'append');
 
-			this.collection.add(new List.ItemModel({view: 'edit'}));
+			if (this.isMode('gallery')) {
+
+				this.mediaPicker.open();
+
+			} else {
+				
+				this.addNewEmptyModel();
+			}
 		},
 
 		getNewItemView: function(model) {
@@ -172,14 +216,19 @@
 			});
 		},
 
-		prependOne: function(model) {
+		addNewEmptyModel: function() {
+
+			this.collection.add(new List.ItemModel({view: 'edit'}));
+		},
+
+		prependItem: function(model) {
 
 			var itemView = this.getNewItemView(model);
 
 			this.$list.prepend(itemView.render().el);
 		},
 
-		appendOne: function(model) {
+		appendItem: function(model) {
 
 			var itemView = this.getNewItemView(model);
 
@@ -191,7 +240,7 @@
 			// Render all 
 			this.collection.each(function(model) {	
 
-				this.appendOne(model);
+				this.appendItem(model);
 
 			}, this);
 
