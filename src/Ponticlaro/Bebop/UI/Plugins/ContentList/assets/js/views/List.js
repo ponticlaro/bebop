@@ -23,6 +23,7 @@
 
 			this.status = new Backbone.Model({
 				mode: this.config.get('mode'),
+				insertAction: null,
 				empty: false,
 				isSortable: true,
 				templateEngine: 'mustache'
@@ -95,13 +96,15 @@
 			// Remove empty state item
 			this.collection.on('add', function(model) {
 
-				if (model.get('view') == 'edit') {
+				var insertAction = this.status.get('insertAction');
 
-					this.prependOne(model);
-
-				} else {
+				if (insertAction == 'append') {
 
 					this.appendOne(model);
+
+				} else if(insertAction == 'prepend') {
+
+					this.prependOne(model);
 				}
 
 				if(this.collection.length == 1) this.status.set('empty', false);
@@ -145,7 +148,16 @@
 			return this.status.get('mode') == mode ? true : false;
 		},
 
-		addOne: function(event) {
+		insertAtTheTop: function(event) {
+
+			this.status.set('insertAction', 'prepend');
+
+			this.collection.add(new List.ItemModel({view: 'edit'}));
+		},
+
+		insertAtTheBottom: function(event) {
+
+			this.status.set('insertAction', 'append');
 
 			this.collection.add(new List.ItemModel({view: 'edit'}));
 		},

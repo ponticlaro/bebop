@@ -1,10 +1,6 @@
 <div bebop-list--el="container" bebop-list--config='<?php echo json_encode($config->get()); ?>' class="bebop-list--container">
 
-	<div bebop-list--el="form" class="bebop-list--form bebop-ui-clrfix">
-		<div class="bebop-list--formField">
-			<button bebop-list--action="addOne" class="button button-primary"><?php echo $config->get('label__add_button'); ?></button>
-		</div>
-	</div>	
+	<?php if ($config->get('form_before_list')) include dirname(__FILE__) .'/../partials/form-before.php'; ?>
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
 		<?php if ($config->get('data')) {
@@ -15,6 +11,8 @@
 			<?php }
 		} ?>
 	</ul>
+
+	<?php if ($config->get('form_after_list')) include dirname(__FILE__) .'/../partials/form-after.php'; ?>
 	
 	<script bebop-list--template="item" class="bebop-list--item" type="text/template" style="display:none">
 		

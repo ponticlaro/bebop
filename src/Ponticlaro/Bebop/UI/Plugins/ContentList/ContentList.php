@@ -88,6 +88,8 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			'key'               => $key,
 			'field_name'        => $key,
 			'label__add_button' => 'Add Item',
+			'form_before_list'  => true,
+			'form_after_list'   => true,
 			'data'              => is_array($data) ? $data : array(),
 			'browse_view'       => '',
 			'edit_view'         => '',
