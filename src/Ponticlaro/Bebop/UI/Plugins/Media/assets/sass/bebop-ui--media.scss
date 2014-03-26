@@ -107,6 +107,8 @@
 				position: relative;
 				-webkit-box-shadow: 0 0 3px 3px #ddd;
 				box-shadow: 0 0 3px 3px #ddd;
+				max-width: 100%;
+				height: auto;
 
 				&:after {
 					opacity: 0.5;
