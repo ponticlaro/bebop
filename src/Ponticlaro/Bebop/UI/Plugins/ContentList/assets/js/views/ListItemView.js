@@ -25,6 +25,15 @@
 
 			this.$content = this.$el.find('[bebop-list--el="content"]');
 
+			this.buttons = {
+				edit: {
+					$el: this.$el.find('[bebop-list--action="edit"]')
+				},
+				remove: {
+					$el: this.$el.find('[bebop-list--action="remove"]')
+				}
+			}
+
 			this.fields = {}
 
 			// Build views object
@@ -37,6 +46,10 @@
 					$el: this.$el.find('[bebop-list--view="edit"]'),
 					template: options.templates.edit,
 					cleanHTML: options.templates.edit.replace(/\{\{[^\}]*\}\}/g, '')
+				},
+				reorder: {
+					$el: this.$el.find('[bebop-list--view="reorder"]'),
+					template: options.templates.reorder
 				}
 			}
 
@@ -48,10 +61,16 @@
 			// Get image widget
 			if (this.mode == 'gallery') {
 
-				new Bebop.Media({
+				this.image = new Bebop.Media({
 					el: this.$el.find('[bebop-media--el="container"]'),
 					id: this.model.get('id')
 				});
+
+				this.image.status.on('change:data', function() {
+
+					this.render();
+
+				}, this);
 			}
 
 			// Insert JSON data into data container
@@ -79,6 +98,10 @@
 
 		browse: function() {
 			this.model.set('view', 'browse');
+		},
+
+		reorder: function() {
+			this.model.set('view', 'reorder');
 		},
 
 		updateSingle: function(event) {
@@ -159,19 +182,28 @@
 			// Handle action buttons
 			if (view == 'edit') {
 
-				this.$el.find('[bebop-list--action="edit"]').attr('bebop-list--action', 'browse')
+				this.buttons.edit.$el.attr('bebop-list--action', 'browse')
 						.find('b').text('Save').end()
 						.find('span').removeClass('bebop-ui-icon-edit').addClass('bebop-ui-icon-save');
 				
-				this.$el.find('[bebop-list--action="remove"]').attr('disabled', true);
+				this.buttons.remove.$el.attr('disabled', true);
 
 			} else {
 
-				this.$el.find('[bebop-list--action="browse"]').attr('bebop-list--action', 'edit')
+				this.buttons.edit.$el.attr('bebop-list--action', 'edit')
 						.find('b').text('Edit').end()
 						.find('span').removeClass('bebop-ui-icon-save').addClass('bebop-ui-icon-edit');
 			
-				this.$el.find('[bebop-list--action="remove"]').attr('disabled', false);
+				this.buttons.remove.$el.prop('disabled', false);
+			}
+
+			if (view == 'reorder') {
+
+				this.buttons.edit.$el.prop('disabled', true);
+
+			} else {
+
+				this.buttons.edit.$el.prop('disabled', false);
 			}
 		},
 
@@ -288,6 +320,12 @@
 
 			}, this);
 
+			if (this.mode == 'gallery') {
+
+				data.image = this.image.status.get('data');
+				
+			}
+
 			return data;
 		},
 
@@ -296,8 +334,11 @@
 			// Update model if we moved from the edit view
 			if (this.model.hasChanged('view') && this.model.previous('view') == 'edit') this.update();
 
-			var view     = this.model.get('view'),
+			var prevView = this.model.previous('view'),
+				view     = this.model.get('view'),
 				viewHtml = Mustache.render(this.views[view].template, this.getTemplateData());
+
+			this.$el.removeClass('view--' + prevView).addClass('view--' + view);
 
 			// Render current view
 			this.views[view].$el.html(viewHtml);

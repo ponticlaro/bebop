@@ -103,41 +103,23 @@
 			vertical-align: middle;
 
 			img {
-				border: 1px solid #fafafa;
 				display: inline-block;
+				position: relative;
 				-webkit-box-shadow: 0 0 3px 3px #ddd;
 				box-shadow: 0 0 3px 3px #ddd;
+
+				&:after {
+					opacity: 0.5;
+					content: "";
+					border: 1px solid #fafafa;
+					position: absolute;
+					display: block;
+					top:0;
+					left:0;
+					height:100%;
+					width:100%;
+				}
 			}
 		}
-	}
-}
-
-[bebop-list--mode="gallery"] {
-
-	[bebop-media--el="container"] {
-		float: left;
-		margin: 0;
-		width: 120px;
-
-		.bebop-media--previewer-image {
-			padding: 8px;
-			
-			img {
-				max-width: 100%;
-				height: auto;
-			}
-		}
-
-		.bebop-media--previewer-icon {
-			font-size:30px;
-		}
-
-		.bebop-media--previewer-file-title {
-			font-size:11px;
-		}
-	}
-
-	[bebop-list--view] {
-		margin-left: 130px;
 	}
 }

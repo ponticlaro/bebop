@@ -38,7 +38,7 @@ class Router {
 		}); 
 
 		// Routes
-		$app->get('/_bebop-api(/)', function() use($app) {
+		$app->get('/_bebop/api(/)', function() use($app) {
 			
 			$data = array('Hello' => true);
 
@@ -49,7 +49,7 @@ class Router {
 			$response->body(json_encode($data)); 
 		});
 
-		$app->get('/_bebop-api/posts(/)(:id)(/)', function($id = null) use($app) {
+		$app->get('/_bebop/api/posts(/)(:id)(/)', function($id = null) use($app) {
 
 			$response = array();
 

@@ -1,6 +1,6 @@
 <div bebop-list--el="container" bebop-list--mode="<?php echo $config->get('mode'); ?>" bebop-list--config='<?php echo json_encode($config->get()); ?>' class="bebop-list--container">
 
-	<?php if ($config->get('form_before_list')) include dirname(__FILE__) .'/../partials/gallery/form-before.php'; ?>
+	<?php if ($config->get('form_before_list')) include dirname(__FILE__) .'/../../partials/form-before.php'; ?>
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
 		<?php if ($config->get('data')) {
@@ -17,7 +17,7 @@
 		<span class="bebop-list--item-name">No items added until now</span>
 	</div>
 
-	<?php if ($config->get('form_after_list')) include dirname(__FILE__) .'/../partials/gallery/form-after.php'; ?>
+	<?php if ($config->get('form_after_list')) include dirname(__FILE__) .'/../../partials/form-after.php'; ?>
 	
 	<script bebop-list--template="item" class="bebop-list--item" type="text/template" style="display:none">
 		
@@ -35,6 +35,7 @@
 				)
 			))->render(); ?>
 			<div bebop-list--view="browse"></div>
+			<div bebop-list--view="reorder"></div>
 			<div bebop-list--view="edit"></div>
 		</div>
 
@@ -51,6 +52,10 @@
 
 	<script bebop-list--template="browse-view" type="text/template" style="display:none">
 		<?php echo $config->get('browse_view'); ?>
+	</script>
+
+	<script bebop-list--template="reorder-view" type="text/template" style="display:none">
+		<?php echo $config->get('reorder_view'); ?>
 	</script>
 
 	<script bebop-list--template="edit-view" type="text/template" style="display:none">

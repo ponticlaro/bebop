@@ -9,20 +9,23 @@
 
 	li {
 		background-color: #fff;
-		padding: 10px 140px 10px 50px;
+		padding: 10px 140px 10px 10px;
 		margin-bottom: 0;
 		border-bottom: 1px solid #d0d0d0;
 		position: relative;
 		min-height: 20px;
 
 		&.ui-sortable-helper {
+			opacity: 0.75;
 			border-top: 1px solid #d0d0d0;
+			-webkit-box-shadow: 0 0 5px 0 #999;
+			box-shadow: 0 0 5px 0 #999;
 		}
 
 		&.bebop-list--item-placeholder {
 			background-color: #bbb;
 			position: relative;
-			min-height: 36px;
+			min-height: 40px;
 			padding:0;
 
 			&:before {
@@ -32,7 +35,8 @@
 				display: block;
 				position: absolute;
 				top:50%;
-				left:7px;
+				left:50%;
+				margin-top: -13px;
 				margin-top: -13px;
 				height:26%;
 				width:26%;
@@ -59,6 +63,7 @@
 		}
 
 		.bebop-list--drag-handle {
+			display: none;
 			cursor: move;
 			background-color: #e0e0e0;
 			border-right: 1px solid #ddd;
@@ -124,11 +129,60 @@
 		[bebop-list--subview="edit"] {
 			display: none;
 		}
+
+		&.view--reorder {
+			padding-left: 50px;
+
+			.bebop-list--item-image {
+				height: 40px;
+				width: 40px;
+				padding: 0;
+			}
+
+			.bebop-list--drag-handle {
+				display: block;
+			}
+		}
 	}
 }
 
-.bebop-list--form {
+[bebop-list--el="form"] {
 	padding: 10px;
+
+	.button {
+		padding-left: 8px;
+		padding-right: 8px; 
+	}
+
+	[bebop-list--action="toggleReorder"].is-enabled {
+		background-color: #bbb;
+		border-color: #888;
+		color: #fff;
+		-webkit-box-shadow:inset 3px 3px 3px 0 #999;
+		box-shadow:inset 3px 3px 3px 0 #999;
+
+		[class^="bebop-ui-icon"] {
+			border-left: 1px solid #fff;
+		}
+	}
+
+	[class^="bebop-ui-icon"] {
+		border-left: 1px solid #bbb;
+		padding-left: 4px;
+		margin-left: 4px;
+	}
+
+	[class="bebop-ui-icon-add"] {
+		padding-left: 6px;
+		font-size: 10px;
+	}
+
+	.button-primary {
+
+		[class^="bebop-ui-icon"] {
+			border-color: #208db2;
+		}
+	}
 }
 
 .bebop-list--formField {
@@ -139,4 +193,88 @@
 .bebop-list--empty-state-indicator {
 	padding: 10px;
 	border-bottom: 1px solid #d0d0d0;
+}
+
+[bebop-list--mode="gallery"] {
+
+	.bebop-list--media-title {
+		font-size: 16px;
+		font-weight: 600;
+		color: #444;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	[bebop-media--el="container"] {
+		float: left;
+		margin: 0;
+		overflow: hidden;
+		width: 120px;
+
+		[bebop-media--el="previewer"] {
+
+			.bebop-media--previewer-image {
+				padding: 8px;
+				
+				img {
+					max-width: 100%;
+					height: auto;
+				}
+			}
+
+			.bebop-media--previewer-icon {
+				font-size:30px;
+			}
+
+			.bebop-media--previewer-file-title {
+				font-size:11px;
+			}
+		}
+	}
+	
+	[bebop-list--view] {
+		margin-left: 130px;
+	}
+
+	.bebop-list--item.view--reorder {
+			
+		[bebop-media--el="container"] {	
+			height: 40px;
+			width: 40px;
+			margin: -10px;
+
+			[bebop-media--el="previewer"] {
+				height: 40px;
+				width: 40px;
+			
+				.bebop-media--previewer-inner {
+					padding: 0;
+				}
+
+				.bebop-media--previewer-image {
+					padding: 0;
+				}
+
+				.bebop-media--previewer-icon {
+					font-size:16px;
+					padding:0 0 0 0;
+					line-height: 40px;
+				}
+				
+				.bebop-media--previewer-status-code,
+				.bebop-media--previewer-file-title {
+					display: none;
+				}
+			}
+
+			[bebop-media--el="actions"] {		
+				display: none;
+			}
+		}
+
+		[bebop-list--view] {
+			margin-left: 40px;
+		}
+	}
 }

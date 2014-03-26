@@ -171,7 +171,7 @@ class Bebop
 	public function rewriteRules($wp_rules) 
 	{
 		$bebop_rules = array(
-			"_bebop-api/?(.*)?$" => 'index.php?bebop_api=1'
+			"_bebop/api/?(.*)?$" => 'index.php?bebop_api=1'
 		);
 
 		return array_merge($bebop_rules, $wp_rules);

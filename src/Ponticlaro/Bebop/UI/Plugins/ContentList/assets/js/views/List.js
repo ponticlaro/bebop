@@ -23,6 +23,7 @@
 
 			this.status = new Backbone.Model({
 				mode: this.config.get('mode'),
+				view: 'browse',
 				insertAction: null,
 				empty: false,
 				isSortable: true,
@@ -31,8 +32,17 @@
 
 			this.collection = new List.Collection(),
 
-			// Collect form DOM element
+			// Collect form DOM element and action buttons
 			this.$form = this.$el.find('[bebop-list--el="form"]');
+
+			this.buttons = {
+				add: {
+					$el: this.$form.find('[bebop-list--action^="insertAtThe"]')
+				},
+				sort: {
+					$el: this.$form.find('[bebop-list--action="toggleReorder"]')
+				}
+			}
 
 			// Collect list DOM element
 			this.$list = this.$el.find('[bebop-list--el="list"]');
@@ -59,16 +69,19 @@
 			
 			$rawItemTemplate = this.$el.find('[bebop-list--template="item"]');
 			$browseTemplate  = this.$el.find('[bebop-list--template="browse-view"]');
+			$reorderTemplate = this.$el.find('[bebop-list--template="reorder-view"]');
 			$editTemplate    = this.$el.find('[bebop-list--template="edit-view"]');
 
 			this.itemTemplates = {
 				main: $rawItemTemplate.clone().find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html(),
 				browse: $browseTemplate.html(),
+				reorder: $reorderTemplate.html(),
 				edit: $editTemplate.html()
 			}
 
 			$rawItemTemplate.remove();
 			$browseTemplate.remove();
+			$reorderTemplate.remove();
 			$editTemplate.remove();
 
 			// Collect empty state indicator DOM element
@@ -122,15 +135,6 @@
 			if (this.$list.attr('bebop-list--is-sortable') == 'true')
 				this.status.set('isSortable', true);
 
-			// Make list sortable if isSortable is true
-			if (this.status.get('isSortable')) {
-
-				this.$list.sortable({
-					handle: ".bebop-list--drag-handle",
-					placeholder: "bebop-list--item-placeholder bebop-ui-icon-target"
-				});
-			};
-
 			if (this.isMode('gallery')) {
 
 				// Instantiate WordPress media picker
@@ -154,12 +158,28 @@
 
 						if (file.type == 'image') {
 
-							this.collection.add(new List.ItemModel({id: file.id}));
+							this.collection.add(new List.ItemModel({
+								id: file.id,
+								view: this.status.get('view'),
+								mode: this.status.get('mode')
+							}));
 						} 
+
 					}, this);
 
 				}, this);
 			}
+
+			this.status.on('change:view', function() {
+
+				this.refresh();
+
+			}, this);
+
+			this.$list.sortable({
+				handle: ".bebop-list--drag-handle",
+				placeholder: "bebop-list--item-placeholder bebop-ui-icon-target"
+			});
 
 			this.render();
 		},
@@ -175,7 +195,22 @@
 		},
 
 		isMode: function(mode) {
+
 			return this.status.get('mode') == mode ? true : false;
+		},
+
+		toggleReorder: function() {
+
+			if (this.status.get('view') != 'reorder') {
+
+				this.status.set('view', 'reorder');
+				this.buttons.sort.$el.addClass('is-enabled');
+
+			} else {
+
+				this.status.set('view', 'browse');
+				this.buttons.sort.$el.removeClass('is-enabled');
+			}
 		},
 
 		insertAtTheTop: function(event) {
@@ -235,9 +270,22 @@
 			this.$list.append(itemView.render().el);
 		},
 
+		refresh: function() {
+
+			var previousView = this.status.previous('view'),
+				currentView  = this.status.get('view');
+
+			// Re-render all 
+			this.collection.each(function(model) {	
+
+				model.set('view', currentView);	
+
+			}, this);
+		},
+
 		render: function(){
 
-			// Render all 
+			// Re-render all 
 			this.collection.each(function(model) {	
 
 				this.appendItem(model);

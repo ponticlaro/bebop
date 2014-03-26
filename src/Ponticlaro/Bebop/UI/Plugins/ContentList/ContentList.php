@@ -92,6 +92,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			'form_after_list'   => true,
 			'data'              => is_array($data) ? $data : array(),
 			'browse_view'       => '',
+			'reorder_view'      => '',
 			'edit_view'         => '',
 			'type'              => 'single',
 			'mode'              => 'default'
@@ -119,7 +120,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		$this->config->set('mode', $mode);
 
 		if ($mode == 'gallery') {
-			$this->config->set('label__add_button', 'Add image');
+			$this->config->set('label__add_button', 'Add images');
 		}
 
 		return $this;
@@ -156,8 +157,22 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function render()
 	{
-		$this->template = $this->config->get('type') .'/'. $this->config->get('mode');
+		// Add default reorder view if in gallery mode
+		if ($this->config->get('mode') == 'gallery') {
+			
+			$this->setItemView('reorder', __DIR__ .'/templates/views/single/gallery/reorder.mustache');
+		}
 
+		// Fallback to browse view if there is no reorder view
+		if (!$this->config->get('reorder_view')) {
+
+			$this->setItemView('reorder', $this->config->get('browse_view'));
+		}
+
+		// Set path to template
+		$this->template = 'views/'. $this->config->get('type') .'/'. $this->config->get('mode');
+
+		// Render list
 		$this->__renderTemplate($this->template, $this->config);
 
 		return $this;

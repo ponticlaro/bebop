@@ -120,7 +120,7 @@
 		fetchMedia: function() {
 
 			var self = this,
-				url  = location.protocol +'//'+ location.host +'/_bebop-api/posts/'+ this.status.get('id');
+				url  = location.protocol +'//'+ location.host +'/_bebop/api/posts/'+ this.status.get('id');
 
 			$.ajax({
 				url: url,
@@ -149,8 +149,6 @@
 		},
 
 		handleNewData: function() {
-
-			console.log('HANDLE NEW DATA');
 
 			var data = this.status.get('data');
 
