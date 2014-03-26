@@ -1,8 +1,27 @@
-.bebop-list--container {
-	margin: -6px -12px -12px -12px;
+[bebop-list--el="container"] {
+	background-color: #fff;
+	border: 1px solid #ccc;
 }
 
-.bebop-list--list {
+[bebop-list--el="title"] {
+	padding: 10px 10px 0 10px;
+	font-size:18px;
+	color: #333;
+}
+
+.metabox-holder {
+	
+	[bebop-list--el="container"] {
+		margin: -6px -12px -12px -12px;
+		border: none;
+	}
+
+	[bebop-list--el="title"] {
+		display: none;
+	}
+}
+
+[bebop-list--el="list"] {
 	border-top: 1px solid #d0d0d0;
 	margin: 0;
 	padding: 0;

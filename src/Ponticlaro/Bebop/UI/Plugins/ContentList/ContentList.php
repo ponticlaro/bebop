@@ -87,11 +87,12 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	{	
 		$this->__enqueueScripts();
 
-		$label = $key;
+		$title = $key;
 		$key   = Bebop::util('slugify', $key);
 
 		$default_config = array(
 			'key'               => $key,
+			'title'             => $title,
 			'field_name'        => $key,
 			'label__add_button' => 'Add Item',
 			'form_before_list'  => true,

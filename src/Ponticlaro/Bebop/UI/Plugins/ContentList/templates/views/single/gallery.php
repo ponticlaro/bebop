@@ -1,5 +1,9 @@
 <div bebop-list--el="container" bebop-list--mode="<?php echo $config->get('mode'); ?>" bebop-list--config='<?php echo json_encode($config->get()); ?>' class="bebop-list--container">
 
+	<div bebop-list--el="title">
+		<?php echo $config->get('title'); ?>
+	</div>
+
 	<?php if ($config->get('form_before_list')) include dirname(__FILE__) .'/../../partials/form-before.php'; ?>
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
