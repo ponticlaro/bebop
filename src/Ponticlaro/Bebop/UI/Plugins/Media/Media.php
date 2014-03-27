@@ -108,7 +108,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		</script>
 
 		<script bebop-media--template="empty-view" type="text/template" style="display:none">
-			<div class="bebop-media--previewer-inner">
+			<div bebop-media--action="select" title="Click to select media" class="bebop-media--previewer-inner">
 				<div class="bebop-media--previewer-icon bebop-ui-icon-file-remove"></div>
 				<div class="bebop-media--previewer-file-title">No file selected</div>
 			</div>

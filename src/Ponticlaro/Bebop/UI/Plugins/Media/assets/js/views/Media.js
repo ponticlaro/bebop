@@ -181,9 +181,12 @@
 
 		render: function(){
 
-			var view = this.status.get('view'),
-				data = this.status.get('data'),
-				html = Mustache.render(this.templates[view], data);
+			var prevView    = this.status.previous('view'),
+				currentView = this.status.get('view'),
+				data        = this.status.get('data'),
+				html        = Mustache.render(this.templates[currentView], data);
+
+			this.$el.removeClass('view--' + prevView).addClass('view--' + currentView);
 
 			if (data && data.url != undefined) {
 
