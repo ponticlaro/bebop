@@ -1,8 +1,6 @@
-<div bebop-media--el="container" class="bebop-media--container" bebop-media--config='<?php echo json_encode($data->get()); ?>'>
+<div bebop-media--el="container" bebop-media--config='<?php echo json_encode($data->get()); ?>'>
 
-	<div bebop-media--el="previewer" class="bebop-media--previewer">
-		
-	</div>
+	<div bebop-media--el="previewer"></div>
 	
 	<div bebop-media--el="actions">
 		<button bebop-media--action="select" class="button button-small">

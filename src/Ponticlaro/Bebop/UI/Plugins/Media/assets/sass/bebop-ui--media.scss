@@ -2,6 +2,26 @@
 	background: #fafafa;
 	margin-bottom: 10px;
 	position: relative;
+
+	&.view--empty {
+		[bebop-media--el="previewer"] {
+			cursor: pointer;
+		}
+	}
+}
+
+.metabox-holder {
+
+	[bebop-media--el="container"] {
+		
+		&:first-child {
+			margin-top: 10px;
+		}
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
 }
 
 [bebop-media--el="actions"] {
