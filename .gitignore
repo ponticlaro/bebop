@@ -23,5 +23,5 @@ nbproject
 *.sublime-workspace
 
 # Composer
-vendor
+/vendor
 composer.lock
