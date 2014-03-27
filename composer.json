@@ -1,7 +1,7 @@
 {
 	"name": "ponticlaro/bebop",
 	"description": "WordPress development library",
-    "version" : "0.7.0",
+    "version" : "0.7.8",
     "type": "library",
     "keywords": [
         "wordpress",
