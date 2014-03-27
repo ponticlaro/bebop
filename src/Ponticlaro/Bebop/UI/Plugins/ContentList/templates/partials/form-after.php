@@ -6,7 +6,7 @@
 	</div>
 	<div class="bebop-list--formField">
 		<button bebop-list--action="toggleReorder" class="button">
-			Sort <span class="bebop-ui-icon-menu"></span>
+			<span class="bebop-ui-icon-move"></span> Sort
 		</button>
 	</div>
 </div>	

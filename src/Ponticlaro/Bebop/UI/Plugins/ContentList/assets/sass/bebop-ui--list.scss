@@ -181,26 +181,22 @@
 		box-shadow:inset 3px 3px 3px 0 #999;
 
 		[class^="bebop-ui-icon"] {
-			border-left: 1px solid #fff;
+			border-color: #fff;
 		}
 	}
 
-	[class^="bebop-ui-icon"] {
-		border-left: 1px solid #bbb;
-		padding-left: 4px;
-		margin-left: 4px;
-	}
-
 	[class="bebop-ui-icon-add"] {
+		border-left: 1px solid #208db2;
+		margin-left: 4px;
 		padding-left: 6px;
 		font-size: 10px;
 	}
 
-	.button-primary {
-
-		[class^="bebop-ui-icon"] {
-			border-color: #208db2;
-		}
+	[class="bebop-ui-icon-move"] {
+		border-right: 1px solid #ccc;
+		padding-right: 4px;
+		margin-right: 4px;
+		font-size: 12px;
 	}
 }
 
