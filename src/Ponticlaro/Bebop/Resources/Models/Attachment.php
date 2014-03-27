@@ -16,19 +16,17 @@ class Attachment {
 		// Get permalink
 		$this->permalink = get_permalink($post->ID);
 
-		$this->sizes = get_intermediate_image_sizes();
-
 		///////////
 		// Media //
 		///////////
-		$this->sizes = new \stdClass;
+		$this->sizes = array();
 		
 		foreach (get_intermediate_image_sizes() as $size) {
 			
 			$image_data = wp_get_attachment_image_src($this->ID, $size);
 
 			if ($image_data) {
-				$this->sizes->$size = array(
+				$this->sizes[$size] = (object) array(
 					'url'     => $image_data[0],
 					'width'   => $image_data[1],
 					'height'  => $image_data[2],
