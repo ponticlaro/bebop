@@ -23,5 +23,8 @@
         "psr-0": {
             "Ponticlaro\\Bebop": "src/"
         }
+    },
+    "support": {
+        "email": "hello@ponticlaro.com"
     }
 }
