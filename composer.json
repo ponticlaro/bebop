@@ -1,6 +1,6 @@
 {
 	"name": "ponticlaro/bebop",
-	"description": "WordPress development library",
+	"description": "Develop WordPress sites faster and more elegantly.",
     "version" : "0.7.8",
     "type": "library",
     "keywords": [
@@ -11,7 +11,7 @@
     "authors": [
         {
             "name": "Ponticlaro",
-            "email": "info@ponticlaro.com",
+            "email": "hello@ponticlaro.com",
             "homepage": "http://www.ponticlaro.com",
             "role": "Developer"
         }
