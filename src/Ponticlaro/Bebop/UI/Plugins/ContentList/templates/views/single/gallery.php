@@ -1,3 +1,17 @@
+<?php 
+
+$data         = $config->get('data');
+$browse_view  = $config->get('browse_view');
+$reorder_view = $config->get('reorder_view');
+$edit_view    = $config->get('edit_view');
+
+$config->remove('data');
+$config->remove('browse_view');
+$config->remove('reorder_view');
+$config->remove('edit_view');
+
+?>
+
 <div bebop-list--el="container" bebop-list--mode="<?php echo $config->get('mode'); ?>" bebop-list--config='<?php echo json_encode($config->get()); ?>' class="bebop-list--container">
 
 	<div bebop-list--el="title">
@@ -7,8 +21,8 @@
 	<?php if ($config->get('form_before_list')) include dirname(__FILE__) .'/../../partials/form-before.php'; ?>
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
-		<?php if ($config->get('data')) {
-			foreach ($config->get('data') as $item) { ?>
+		<?php if ($data) {
+			foreach ($data as $item) { ?>
 				
 				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $config->get('field_name'); ?>[]" value='<?php echo $item; ?>'>
 
@@ -55,15 +69,15 @@
 	</script>
 
 	<script bebop-list--template="browse-view" type="text/template" style="display:none">
-		<?php echo $config->get('browse_view'); ?>
+		<?php echo $browse_view; ?>
 	</script>
 
 	<script bebop-list--template="reorder-view" type="text/template" style="display:none">
-		<?php echo $config->get('reorder_view'); ?>
+		<?php echo $reorder_view; ?>
 	</script>
 
 	<script bebop-list--template="edit-view" type="text/template" style="display:none">
-		<?php echo $config->get('edit_view'); ?>
+		<?php echo $edit_view; ?>
 	</script>
 	
 </div>
