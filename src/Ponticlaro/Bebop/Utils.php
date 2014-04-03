@@ -47,4 +47,17 @@ class Utils
 
 
 	}
+
+	/**
+	 * Checks if a variable contains valid JSON
+	 * 
+	 * @param  string  $value String to be checked
+	 * @return boolean        True if the string is JSON, false if not
+	 */
+	public static function isJson($value)
+	{
+		json_decode($value);
+
+ 		return ((preg_match('/^\[/', $value) || preg_match('/^{/', $value)) && json_last_error() == JSON_ERROR_NONE) ? true : false;
+	}
 }

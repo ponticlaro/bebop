@@ -2,9 +2,17 @@
 
 namespace Ponticlaro\Bebop\API;
 
+use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\Resources\Models\Attachment;
 
 class Router {
+
+	/**
+	 * Slim app container
+	 * 
+	 * @var object Slim\Slim
+	 */
+	private $app;
 
 	public function __construct()
 	{
@@ -49,32 +57,63 @@ class Router {
 			$response->body(json_encode($data)); 
 		});
 
-		$app->get('/_bebop/api/posts(/)(:id)(/)', function($id = null) use($app) {
+		/////////////////////////////////////////////////
+		// Add endpoints for all available posts types //
+		/////////////////////////////////////////////////
+		$post_types = get_post_types(array(), 'objects');
 
-			$response = array();
+		foreach ($post_types as $post_type) {
+			
+			$resource_name = Bebop::util('slugify', $post_type->labels->name);
 
-			if ($id) {
+			$app->get("/_bebop/api/$resource_name(/)(:id)(/)", function($id = null) use($app, $post_type, $resource_name) {
 
-				$post = get_post($id);
+				if (is_numeric($id)) {
 
-				if ($post instanceof \WP_Post) {
+					$post = get_post($id);
 
-					if ($post->post_type == 'attachment') {
-						
-						$post = new Attachment($post);
+					if ($post instanceof \WP_Post) {
+
+						if ($post->post_type == 'attachment') {
+							
+							$post = new Attachment($post);
+						}
+
+						$response = $post;
 					}
 
-					$response = $post;
+				} else {
+
+					if($resource_name != 'posts') {
+
+						if (isset($_GET['type'])) unset($_GET['type']);
+
+						if ($resource_name == 'media') {
+
+							if (isset($_GET['status'])) unset($_GET['status']);
+
+							$_GET['post_type']   = 'attachment';
+							$_GET['post_status'] = 'inherit';
+
+						} else {
+
+							$_GET['post_type'] = Bebop::util('slugify', $post_type->labels->singular_name);
+						}
+					}
+
+					$query = self::__queryDb();
+					$meta  = self::__getPaginationMeta($query, $resource_name);
+					
+					$response = array(
+						'meta'  => $meta,
+						'items' => $query->posts
+					);
 				}
-			
-			} else {
 
-				// TO DO
-			}
-
-			// Send response
-			$app->applyHook('handle_response', $response);
-		});
+				// Send response
+				$app->applyHook('handle_response', $response);
+			});
+		}
 
 		// Handle Response 
 		$app->hook('handle_response', function($data) use($app) {		 
@@ -90,5 +129,159 @@ class Router {
 
 		// Run SLIM app 
 		$app->run();
+	}
+
+	private static function __queryDb()
+	{
+		// Map short references to full query argument key
+		$params_map = array(
+			'type'           => 'post_type',
+			'status'         => 'post_status',
+			'parent'         => 'post_parent',
+			'mime_type'      => 'post_mime_type',
+			'max_results'    => 'posts_per_page',
+			'sort_by'        => 'orderby',
+			'sort_direction' => 'order',
+			'page'           => 'paged'
+		);
+
+		$raw_params      = $_GET;
+		$filtered_params = array(
+
+			'tax_query' => array(
+
+				'relation' => isset($raw_params['tax_relation']) ? $raw_params['tax_relation'] : 'AND'
+			),
+
+			'meta_query' => array(
+
+				'relation' => isset($raw_params['meta_relation']) ? $raw_params['meta_relation'] : 'AND'
+			)
+		);
+
+		foreach ($raw_params as $key => $value) {
+
+			// Check for tax query params
+			if (preg_match('/^tax\:/', $key)) {
+
+				$data_string = str_replace('tax:', '', $key);
+
+				if ($data_string) {
+					
+					$data = null;
+					
+					if (Bebop::util('isJson', $data_string)) {
+						
+						$data = $data_string ? json_decode($data_string, true) : null;
+						
+					} else {
+
+						$data = array('taxonomy' => $data_string);
+					}
+
+					if ($data) {
+
+						if (!isset($data['operator'])) $data['operator'] = 'IN';
+						if (!isset($data['field'])) $data['field'] = 'slug';
+
+						$data['terms'] = array();
+
+						$values = explode(',', $value);
+
+						foreach ($values as $value) {
+							$data['terms'][] = $value;
+						}
+
+						$filtered_params['tax_query'][] = $data;
+					}
+				}
+
+			// Check for meta query params
+			} elseif (preg_match('/^meta\:/', $key)) {
+
+				$data_string = str_replace('meta:', '', $key);
+
+				if ($data_string) {
+					
+					$data = null;
+					
+					if (Bebop::util('isJson', $data_string)) {
+						
+						$data = $data_string ? json_decode($data_string, true) : null;
+						
+					} else {
+
+						$data = array('key' => $data_string);
+					}
+
+					if ($data) {
+
+						if (!isset($data['compare'])) $data['compare'] = '=';
+						if (!isset($data['type'])) $data['type'] = 'CHAR';
+		
+						$data['value'] = $value;
+
+						$filtered_params['meta_query'][] = $data;
+					}
+				}
+
+			} else {
+
+				// Check if we should map a query parameter to a built-in query parameter
+				if (array_key_exists($key, $params_map)) $key = $params_map[$key];
+
+				$filtered_params[$key] = $value;
+			}
+		}
+
+		return new \WP_Query($filtered_params);
+	}
+
+	public static function __getPaginationMeta(\WP_Query $query, $resource_name)
+	{
+		$meta  = array();
+		$posts = $query->posts;
+
+		$meta['items_total']    = (int) $query->found_posts;
+		$meta['items_returned'] = (int) $query->post_count;
+		$meta['total_pages']    = (int) $query->max_num_pages;
+		$meta['current_page']   = (int) max(1, $query->query_vars['paged']);
+		$meta['has_more']       = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? false : true;
+
+		$params = $_GET;
+
+		// Remove post_type parameter when not querying the /posts resource
+		if ($resource_name != 'posts' && isset($params['post_type'])) {
+
+			unset($params['post_type']);
+		} 
+
+		$meta['previous_page'] = $meta['current_page'] == 1 ? null : self::__buildPreviousPageUrl($params);
+		$meta['next_page']     = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? null : self::__buildNextPageUrl($params);
+
+		return $meta;
+	}
+
+	private static function __buildPreviousPageUrl(array $params = array())
+	{
+		$params['page'] = isset($params['page']) ? $params['page'] - 1 : 1; 
+
+		return '?'. self::__buildQuery($params);
+	}
+
+	private static function __buildNextPageUrl(array $params = array())
+	{
+		$params['page'] = isset($params['page']) ? $params['page'] + 1 : 2;
+
+		return '?'. self::__buildQuery($params);
+	}
+
+	private static function __buildQuery(array $params = array())
+	{
+		array_walk($params, function(&$value, $key) {
+			$value = urldecode($value);
+		});
+
+		return http_build_query($params);
 	}
 }
