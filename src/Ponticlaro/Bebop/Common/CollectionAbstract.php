@@ -134,7 +134,7 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 */
 	public function push($values, $key = null)
 	{
-		if(is_string($values)) $this->__pushItem($values);
+		if(is_string($values) || is_object($values)) $this->__pushItem($values);
 
 		if(is_array($values)) {
 
@@ -176,6 +176,8 @@ abstract class CollectionAbstract implements CollectionInterface {
 	        }
 
 		} else {
+
+			var_dump('EHEHEHJBHJA');
 
 			 $this->data[] = $value;
 
