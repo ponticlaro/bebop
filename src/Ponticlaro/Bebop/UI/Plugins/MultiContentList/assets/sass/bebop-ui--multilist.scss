@@ -1,0 +1,74 @@
+[bebop-multilist--el="container"] {
+	background-color: #eaeaea;
+	padding: 6px;
+
+	[bebop-list--el="title"] {
+		display: none;
+	}
+}
+
+.metabox-holder {
+	
+	[bebop-multilist--el="container"] {
+		margin: -6px -12px -12px -12px;
+
+		[bebop-list--el="container"] {
+			margin: 0;
+			border: 1px solid #ccc;
+		}
+	}
+}
+
+[bebop-multilist--el="tabs"] {
+	position: relative;
+	z-index: 2;
+	
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+
+		li {
+			cursor: pointer;
+			background-color: #ddd;
+			border: 1px solid #ccc;
+			border-bottom: none;
+			font-size: 14px;
+			color: #444;
+			display: block;
+			float:left;
+			margin:0 4px 0 0;
+			padding: 3px 12px;
+			font-weight: 600px;
+
+			&:hover {
+				background-color: #eaeaea;
+			}
+
+			&.is-active,
+			&.is-active:hover {
+				background: #fff;
+				border: 1px solid #ccc;
+				border-bottom: none;
+				margin-bottom: -1px;
+				padding-bottom: 4px;
+			}
+		}
+	}
+}
+
+[bebop-multilist--el="tab"] {
+	
+}
+
+[bebop-multilist--el="panes"] {
+
+}
+
+[bebop-multilist--el="pane"] {
+	display: none;
+
+	&.is-active {
+		display: block;
+	}
+}

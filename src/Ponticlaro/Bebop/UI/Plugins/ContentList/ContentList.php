@@ -115,6 +115,30 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		include __DIR__ . '/templates/'. $template_name .'.php';
 	}
 
+	public function setData(array $data = array())
+	{
+		$this->config->set('data', $data);
+
+		return $this;
+	}
+
+	public function getData()
+	{
+		return $this->config->get('data');
+	}
+
+	public function setTitle($title)
+	{
+		if ($title) $this->config->set('title', $title);
+
+		return $this;
+	}
+
+	public function getTitle()
+	{
+		return $this->config->get('title');
+	}
+
 	public function setLabel($key, $value)
 	{
 		$this->config->set('label_'.$key, $value);

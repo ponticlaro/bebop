@@ -47,7 +47,8 @@ class UI {
 		// Add built-in plugins
 		$this->addPlugins(array(
 			'Ponticlaro\Bebop\UI\Plugins\Media',
-			'Ponticlaro\Bebop\UI\Plugins\ContentList'
+			'Ponticlaro\Bebop\UI\Plugins\ContentList',
+			'Ponticlaro\Bebop\UI\Plugins\MultiContentList'
 		));
 
 		$this->__instances = Bebop::Collection();
