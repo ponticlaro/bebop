@@ -57,12 +57,42 @@ class Router {
 			$response->body(json_encode($data)); 
 		});
 
+		$post_types = get_post_types(array(), 'objects');
+
+		// Add endpoint to inform about available endpoints
+		$app->get("/_bebop/api/_resources(/)", function() use($app, $post_types) {
+
+			if (!current_user_can('manage_options')) {
+		
+				$app->halt(403, json_encode(array(
+					'error' => array(
+						'status' => 403,
+						'message' => "You're not an authorized user."
+					)
+				)));
+
+				exit;
+			}
+
+			$home      = Bebop::getUrl('home');
+			$resources = array();
+
+			foreach ($post_types as $post_type) {
+
+				$resources[] = array(
+					'name' => $post_type->labels->name, 
+					'url'  => $home .'/_bebop/api/'. Bebop::util('slugify', $post_type->labels->name)
+				);
+			}
+
+			// Send response
+			$app->applyHook('handle_response', $resources);
+		});
+
 		/////////////////////////////////////////////////
 		// Add endpoints for all available posts types //
 		/////////////////////////////////////////////////
-		$post_types = get_post_types(array(), 'objects');
-
-		foreach ($post_types as $post_type) {
+		foreach ($post_types as $slug => $post_type) {
 			
 			$resource_name = Bebop::util('slugify', $post_type->labels->name);
 
@@ -97,7 +127,7 @@ class Router {
 
 						} else {
 
-							$_GET['post_type'] = Bebop::util('slugify', $post_type->labels->singular_name);
+							$_GET['post_type'] = $post_type->query_var;
 						}
 					}
 
