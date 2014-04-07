@@ -168,9 +168,30 @@
 
 			 		var value = '';
 
+			 		if ($el.get(0).tagName == 'INPUT') {
+
+			 			value = $el.val();
+			 		}
+
 			 		// Set value to empty array in case of a select with multiple values
-			 		if ($el.get(0).tagName == 'SELECT' && $el.attr('multiple')) {
-			 			value = [];
+			 		if ($el.get(0).tagName == 'SELECT') {
+
+			 			$options = $el.find('option:selected');
+
+			 			if ($el.attr('multiple')) {
+
+			 				value = [];
+
+			 				_.each($selected_options, function(option, index, options) {
+
+			 					value[index] = $(option).val();
+
+			 				},this);
+			 			
+			 			} else {
+
+			 				value = $options.val();
+			 			}
 			 		}
 
 			 		this.model.set(name, value);
@@ -209,6 +230,8 @@
 
 		getFieldValue: function(name)
 		{
+			console.log(name);
+
 			var $field = this.$content.find('[bebop-ui--field="'+ name +'"]');
 
 			switch($field.get(0).tagName) {
@@ -269,6 +292,8 @@
 					value = $field.val();
 					break;
 			}
+
+			console.log(value);
 
 			return value;
 		},
