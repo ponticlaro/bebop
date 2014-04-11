@@ -22,8 +22,11 @@ $config->remove('edit_view');
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
 		<?php if ($data) {
-			foreach ($data as $item) { ?>
-				
+			foreach ($data as $item) {
+
+				// Escape single quotes
+				$item = preg_replace("/([^\"]*)'([^\"]*)/", "$1&#39;$2", $item); ?>
+								
 				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $config->get('field_name'); ?>[]" value='<?php echo $item; ?>'>
 
 			<?php }
