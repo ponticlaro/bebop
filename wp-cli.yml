@@ -1,7 +1,4 @@
 url: http://localhost
-user: admin
-require:
-  - vendor/autoload.php
 
 core config:
   dbname: wp_bebop
@@ -9,8 +6,8 @@ core config:
   dbhost: localhost
 
 core install:
-  url: http://localhost
-  title: Bebop CI
+  url: "http://localhost"
+  title: "Bebop CI"
   admin_user: admin
-  admin_password: 123456789
+  admin_password: "123456789"
   admin_email: cristiano@ponticlaro.com
