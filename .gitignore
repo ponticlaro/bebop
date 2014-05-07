@@ -22,30 +22,8 @@ nbproject
 *.sublime-project
 *.sublime-workspace
 
-# WordPress Stuff
-/.htaccess
-/index.php
-/license.txt
-/sitemap.xml
-/sitemap.xml.gz
-/readme.html
-/wp-*.php
-/wp-admin/
-/wp-includes/
-/wp-content/index.php
-/wp-content/plugins/index.php
-/wp-content/themes/twenty*
-/wp-content/themes/index.php
-/wp-content/uploads/
-/wp-content/blogs.dir/
-/wp-content/backups/
-/wp-content/backup-db/
-/wp-content/cache/
-/wp-content/upgrade/
-/wp-content/advanced-cache.php
-/wp-content/wp-cache-config.php
-/xmlrpc.php
-*.log
+# WordPress Core
+/wp-core
 
 # Composer
 /vendor

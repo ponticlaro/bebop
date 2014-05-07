@@ -1,4 +1,5 @@
 url: http://localhost
+path: wp-core
 
 core config:
   dbname: wp_bebop
