@@ -57,6 +57,7 @@ before_script:
   - ./vendor/bin/wp core install
 
   # Make codeception logs dir writable
-  - chmod 777 ./tests/_log
+  - mkdir -p ./tests/_log
+  - chmod 755 ./tests/_log
 
 script: ./vendor/bin/codecept run
