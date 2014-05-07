@@ -1,5 +1,6 @@
 Bebop
 ==================
+[![Build Status](https://travis-ci.org/ponticlaro/bebop.svg?branch=feature/ci)](https://travis-ci.org/ponticlaro/bebop)
 
 ## Usage Goals & Examples
 
