@@ -39,7 +39,7 @@ before_script:
   - php -S 127.0.0.1:4000 -t ./wp-core &
 
   # Create database
-  - sh ./mysql -e 'create database wp_bebop'
+  - mysql -e 'create database wp_bebop'
 
   # Install WordPress
   - source ./ci/install-wordpress $WORDPRESS_VERSION
