@@ -42,9 +42,9 @@ before_script:
   - mysql -e 'create database wp_bebop'
 
   # Install WordPress
-  - source ./ci/install-wordpress $WORDPRESS_VERSION
+  - source ./ci/install-wordpress.sh $WORDPRESS_VERSION
 
   # Setup testing theme
-  - source ./ci/setup-theme
+  - source ./ci/setup-theme.sh
 
 script: ./vendor/bin/codecept run
