@@ -1,0 +1,13 @@
+<?php
+
+use \Ponticlaro\Bebop;
+
+///////////////////////////
+// Autoload dependencies //
+///////////////////////////
+require_once ABSPATH . '/vendor/autoload.php';
+
+////////////////
+// Boot Bebop //
+////////////////
+Bebop::boot();

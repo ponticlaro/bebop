@@ -1,7 +1,6 @@
 language: php
 
 php:
-  - 5.3
   - 5.4
   - 5.5
   - 5.6
@@ -23,44 +22,29 @@ mysql:
 env:
   global:
   matrix:
+    - WORDPRESS_VERSION=3.5
+    - WORDPRESS_VERSION=3.9
 
 before_install:
 
-  # Update machine
+  # Update testing machine
   - sudo apt-get update -qq
   - sudo apt-get install -qq
 
 install: composer install
 
 before_script:
-  
-  - sudo apt-get install apache2 libapache2-mod-fastcgi
 
-  # enable php-fpm
-  #- sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  #- sudo a2enmod rewrite actions fastcgi alias
-  #- echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  #- ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
-  
-  # configure apache virtual hosts
-  #- sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/default
-  #- sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
-  #- sudo service apache2 restart
+  # Start built-in PHP server (PHP >= 5.4)
+  - php -S 127.0.0.1:4000 -t ./wp-core &
 
   # Create database
-  - mysql -e 'create database wp_bebop'
-
-  # Download wordpress
-  - ./vendor/bin/wp core download
-
-  # Create config file
-  - ./vendor/bin/wp core config
+  - sh ./mysql -e 'create database wp_bebop'
 
   # Install WordPress
-  - ./vendor/bin/wp core install
+  - source ./ci/install-wordpress $WORDPRESS_VERSION
 
-  # Make codeception logs dir writable
-  - mkdir -p ./tests/_log
-  - chmod 755 ./tests/_log
+  # Setup testing theme
+  - source ./ci/setup-theme
 
 script: ./vendor/bin/codecept run

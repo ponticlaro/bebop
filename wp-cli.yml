@@ -1,13 +1,14 @@
-url: http://localhost
+url: http://localhost:4000
 path: wp-core
 
 core config:
   dbname: wp_bebop
   dbuser: root
   dbhost: localhost
+  extra-php: "define('WP_HOME', 'http://localhost:4000');define('WP_SITEURL', WP_HOME);"
 
 core install:
-  url: "http://localhost"
+  url: "http://localhost:4000"
   title: "Bebop CI"
   admin_user: admin
   admin_password: "123456789"
