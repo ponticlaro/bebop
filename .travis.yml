@@ -22,7 +22,7 @@ mysql:
 env:
   global:
   matrix:
-    - WORDPRESS_VERSION=3.5
+    - WORDPRESS_VERSION=3.5.2
     - WORDPRESS_VERSION=3.9
 
 before_install:
