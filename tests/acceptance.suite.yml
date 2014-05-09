@@ -10,9 +10,11 @@
 
 class_name: WebGuy
 modules:
-    enabled:
-        - PhpBrowser
-        - WebHelper
+    enabled: [WebDriver]
     config:
-        PhpBrowser:
-            url: 'http://127.0.0.1:4000'
+        WebDriver:
+            url: 'http://localhost:4000'
+            browser: phantomjs
+            wait: 10
+            capabilities:
+                unexpectedAlertBehaviour: 'accept'
