@@ -44,7 +44,7 @@ before_install:
   - mkdir wp-core
   - php -S localhost:8000 -t ./wp-core &
 
-install: composer install
+install: composer install -o --no-interaction
 
 before_script:
 
