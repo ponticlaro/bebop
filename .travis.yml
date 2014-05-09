@@ -41,6 +41,7 @@ before_install:
   - java -jar selenium-server-standalone-2.41.0.jar &
 
   # Start built-in PHP server (PHP >= 5.4)
+  - mkdir wp-core
   - php -S localhost:8000 -t ./wp-core &
 
 install: composer install
