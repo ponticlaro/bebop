@@ -22,7 +22,4 @@ echo "     > Creating configuration file"
 echo "     > Installing"
 ./vendor/bin/wp core install
 
-echo "     > Setting permalink structure"
-./vendor/bin/wp rewrite structure --hard '/%postname%/'
-
 echo "     > Done\n"

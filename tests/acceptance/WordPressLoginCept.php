@@ -42,7 +42,3 @@ $I->fillField('form input[type="text"]', 'admin');
 $I->fillField('form input[type="password"]','123456789');
 $I->click('#wp-submit');
 $I->seeCurrentUrlEquals('/wp-admin/');
-
-$I->executeInSelenium(function($browser) {
-  $browser->takeScreenshot('tests/_screenshots/admin_page.png');
-});

@@ -13,7 +13,7 @@ modules:
     enabled: [WebDriver]
     config:
         WebDriver:
-            url: 'http://localhost:4000'
+            url: 'http://localhost:8000'
             browser: phantomjs
             wait: 10
             capabilities:

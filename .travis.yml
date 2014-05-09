@@ -40,12 +40,15 @@ before_install:
   - wget http://selenium-release.storage.googleapis.com/2.41/selenium-server-standalone-2.41.0.jar
   - java -jar selenium-server-standalone-2.41.0.jar &
 
+  # Start built-in PHP server (PHP >= 5.4)
+  - php -S localhost:8000 -t ./wp-core &
+
 install: composer install
 
 before_script:
 
-  # Start built-in PHP server (PHP >= 5.4)
-  - php -S localhost:4000 -t ./wp-core &
+  # Check if server successfuly started
+  - curl http://localhost:8000/wp-login.php
 
   # Create database
   - mysql -e 'create database wp_bebop'
