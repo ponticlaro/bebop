@@ -38,7 +38,7 @@ before_install:
 
   # Install and run Selenium WebDriver
   - wget http://selenium-release.storage.googleapis.com/2.41/selenium-server-standalone-2.41.0.jar
-  - java -jar selenium-server-standalone-2.41.0.jar -role hub &
+  - java -jar selenium-server-standalone-2.41.0.jar &
 
 install: composer install
 
