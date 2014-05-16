@@ -1,6 +1,9 @@
 Bebop
 ==================
 [![Build Status](https://travis-ci.org/ponticlaro/bebop.svg?branch=feature/ci)](https://travis-ci.org/ponticlaro/bebop)
+[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop)
+[![License](https://poser.pugx.org/ponticlaro/bebop/license.png)](https://packagist.org/packages/ponticlaro/bebop)
+[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop/downloads.png)](https://packagist.org/packages/ponticlaro/bebop)
 
 ## Usage Goals & Examples
 
