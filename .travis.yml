@@ -48,9 +48,6 @@ install: composer install -o --no-interaction
 
 before_script:
 
-  # Check if server successfuly started
-  - curl http://localhost:8000/wp-login.php
-
   # Create database
   - mysql -e 'create database wp_bebop'
 

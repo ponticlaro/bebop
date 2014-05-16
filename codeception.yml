@@ -13,6 +13,8 @@ modules:
     config:
         Db:
             dsn: 'mysql:host=localhost;dbname=wp_bebop'
-            user: 'admin'
-            password: '123456789'
+            user: 'root'
+            password: ''
             dump: tests/_data/dump.sql
+            populate: false
+            cleanup: false

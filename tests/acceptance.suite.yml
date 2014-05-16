@@ -10,7 +10,7 @@
 
 class_name: WebGuy
 modules:
-    enabled: [WebDriver]
+    enabled: [WebDriver, Db, WebHelper]
     config:
         WebDriver:
             url: 'http://localhost:8000'
