@@ -15,6 +15,12 @@
             "role": "Developer"
         }
     ],
+    "repositories":[
+        {
+            "type":"composer",
+            "url":"http://wpackagist.org"
+        }
+    ],
     "require": {
         "php": ">=5.3.0",
         "slim/slim": "~2.4.2"
@@ -22,11 +28,17 @@
     "require-dev": {
         "codeception/codeception": "~1.8",
         "wp-cli/wp-cli": "*",
-        "mandrill/mandrill": "~1.0"
+        "mandrill/mandrill": "~1.0",
+        "wpackagist/rewrite-rules-inspector": "~1.2.1"
     },
     "autoload": {
         "psr-0": {
             "Ponticlaro\\Bebop": "src/"
+        }
+    },
+    "extra": {
+        "installer-paths": {
+            "wp-core/wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
         }
     },
     "support": {
