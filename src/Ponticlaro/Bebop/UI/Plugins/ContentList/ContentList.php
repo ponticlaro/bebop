@@ -93,10 +93,13 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		$default_config = array(
 			'key'               => $key,
 			'title'             => $title,
+			'description'       => '',
 			'field_name'        => $key,
 			'label__add_button' => 'Add Item',
-			'form_before_list'  => true,
-			'form_after_list'   => true,
+			'show_top_form'     => true,
+			'show_bottom_form'  => true,
+			'top_form'          => __DIR__ .'/templates/forms/default/top-form.php',
+			'bottom_form'       => __DIR__ .'/templates/forms/default/bottom-form.php',
 			'data'              => is_array($data) ? $data : array(),
 			'browse_view'       => '',
 			'reorder_view'      => '',
@@ -115,19 +118,39 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		include __DIR__ . '/templates/'. $template_name .'.php';
 	}
 
-	public function setLabel($key, $value)
+	public function setTitle($title)
 	{
-		$this->config->set('label_'.$key, $value);
+		if (is_string($title)) 
+			$this->config->set('title', $title);
+
+		return $this;
+	}
+
+	public function setDescription($description)
+	{
+		if (is_string($description)) 
+			$this->config->set('description', $description);
+
+		return $this;
+	}
+
+	public function setLabel($key, $value)
+	{	
+		if (is_string($key) && is_string($value)) 
+			$this->config->set('label_'.$key, $value);
 
 		return $this;
 	}
 
 	public function setMode($mode)
-	{
-		$this->config->set('mode', $mode);
+	{	
+		if (is_string($mode)) {
 
-		if ($mode == 'gallery') {
-			$this->config->set('label__add_button', 'Add images');
+			$this->config->set('mode', $mode);
+
+			if ($mode == 'gallery') {
+				$this->config->set('label__add_button', 'Add images');
+			}
 		}
 
 		return $this;
@@ -137,29 +160,82 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	{
 		if(!$view) return $this;
 
-		if (is_callable($template)) {
+		$this->config->set($view .'_view', self::__getHtml($template));
+
+		return $this;
+	}
+
+	public function setForms($template)
+	{
+		$this->setTopForm($template);
+		$this->setBottomForm($template);
+
+		return $this;
+	}
+
+	public function setTopForm($template)
+	{
+		if (is_string($template)) 
+			$this->config->set('top_form', $template);
+
+		return $this;
+	}
+
+	public function setBottomForm($template)
+	{
+		if (is_string($template)) 
+			$this->config->set('bottom_form', $template);
+
+		return $this;
+	}
+
+	public function showForms($value)
+	{
+		$this->showTopForm($value);
+		$this->showBottomForm($value);
+
+		return $this;
+	}
+
+	public function showTopForm($value)
+	{
+		if (is_bool($value))
+			$this->config->set('show_top_form', $value);
+
+		return $this;
+	}
+
+	public function showBottomForm($value)
+	{
+		if (is_bool($value))
+			$this->config->set('show_bottom_form', $value);
+
+		return $this;
+	}
+
+	private static function __getHtml($source) 
+	{
+		if (is_callable($source)) {
 
 			ob_start();
-			call_user_func($template);
+			call_user_func($source);
 			$html = ob_get_contents();
 			ob_clean();
 
-		} elseif (is_file($template) && is_readable($template)) {
+		} elseif (is_file($source) && is_readable($source)) {
 
-			$html = file_get_contents($template);
+			$html = file_get_contents($source);
 
-		} elseif (is_string($template)) {
+		} elseif (is_string($source)) {
 
-			$html = $template;
+			$html = $source;
 
 		} else {
 
 			$html = '';
 		}
 
-		$this->config->set($view .'_view', $html);
-
-		return $this;
+		return $html;
 	}
 
 	public function render()

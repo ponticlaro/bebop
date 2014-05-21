@@ -18,7 +18,7 @@ $config->remove('edit_view');
 		<?php echo $config->get('title'); ?>
 	</div>
 
-	<?php if ($config->get('form_before_list')) include dirname(__FILE__) .'/../../partials/form-before.php'; ?>
+	<div bebop-list--el="top-form" class="bebop-list--form bebop-ui-clrfix"></div>
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
 		<?php if ($data) {
@@ -38,8 +38,8 @@ $config->remove('edit_view');
 		<span class="bebop-list--item-name">No items added until now</span>
 	</div>
 
-	<?php if ($config->get('form_after_list')) include dirname(__FILE__) .'/../../partials/form-after.php'; ?>
-	
+	<div bebop-list--el="bottom-form" class="bebop-list--form bebop-ui-clrfix"></div>
+
 	<script bebop-list--template="item" class="bebop-list--item" type="text/template" style="display:none">
 		
 		<input bebop-list--el="data-container" type="hidden">
@@ -69,6 +69,14 @@ $config->remove('edit_view');
 				<span class="bebop-ui-icon-remove"></span>
 			</button>
 		</div>
+	</script>
+
+	<script bebop-list--template="top-form" type="text/template" style="display:none">
+		<?php if ($config->get('show_top_form')) include $config->get('top_form'); ?>
+	</script>
+
+	<script bebop-list--template="bottom-form" type="text/template" style="display:none">
+		<?php if ($config->get('show_bottom_form')) include $config->get('bottom_form'); ?>
 	</script>
 
 	<script bebop-list--template="browse-view" type="text/template" style="display:none">

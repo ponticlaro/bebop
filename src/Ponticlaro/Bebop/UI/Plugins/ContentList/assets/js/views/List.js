@@ -32,6 +32,17 @@
 
 			this.collection = new List.Collection(),
 
+			$topFormTemplate    = this.$el.find('[bebop-list--template="top-form"]');
+			$bottomFormTemplate = this.$el.find('[bebop-list--template="bottom-form"]');
+			topFormHtml         = $topFormTemplate.html();
+			bottomFormHtml      = $bottomFormTemplate.html();
+
+			if (topFormHtml) this.$el.find('[bebop-list--el="top-form"]').html(topFormHtml).attr('bebop-list--el', 'form');
+			if (bottomFormHtml) this.$el.find('[bebop-list--el="bottom-form"]').html(bottomFormHtml).attr('bebop-list--el', 'form');
+
+			$topFormTemplate.remove();
+			$bottomFormTemplate.remove();
+
 			// Collect form DOM element and action buttons
 			this.$form = this.$el.find('[bebop-list--el="form"]');
 
@@ -67,10 +78,10 @@
 			//////////////////////
 			this.templates = {};
 			
-			$rawItemTemplate = this.$el.find('[bebop-list--template="item"]');
-			$browseTemplate  = this.$el.find('[bebop-list--template="browse-view"]');
-			$reorderTemplate = this.$el.find('[bebop-list--template="reorder-view"]');
-			$editTemplate    = this.$el.find('[bebop-list--template="edit-view"]');
+			$rawItemTemplate    = this.$el.find('[bebop-list--template="item"]');
+			$browseTemplate     = this.$el.find('[bebop-list--template="browse-view"]');
+			$reorderTemplate    = this.$el.find('[bebop-list--template="reorder-view"]');
+			$editTemplate       = this.$el.find('[bebop-list--template="edit-view"]');
 
 			this.itemTemplates = {
 				main: $rawItemTemplate.clone().find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html(),
@@ -79,6 +90,7 @@
 				edit: $editTemplate.html()
 			}
 
+			
 			$rawItemTemplate.remove();
 			$browseTemplate.remove();
 			$reorderTemplate.remove();
