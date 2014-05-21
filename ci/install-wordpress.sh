@@ -24,5 +24,6 @@ echo "     > Installing"
 
 echo "     > Configuring"
 ./vendor/bin/wp rewrite structure '/%postname%/' --hard
+ls -al
 
 echo "     > Done\n"
