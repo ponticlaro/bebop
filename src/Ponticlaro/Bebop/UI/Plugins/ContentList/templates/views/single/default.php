@@ -25,7 +25,7 @@ $config->remove('edit_view');
 			foreach ($data as $item) {
 
 				// Escape single quotes
-				$item = preg_replace("/([^\"]*)'([^\"]*)/", "$1&#39;$2", $item); ?>
+				$item = preg_replace("/'/", "&#39;", $item); ?>
 								
 				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $config->get('field_name'); ?>[]" value='<?php echo $item; ?>'>
 
