@@ -1,12 +1,8 @@
 class_name: ApiGuy
 modules:
-    enabled: [WebDriver, Db, REST, ApiHelper]
+    enabled: [PhpBrowser, Db, REST, ApiHelper]
     config:
-        WebDriver:
-            url: 'http://localhost:8000/_bebop/api'
-            browser: phantomjs
-            wait: 10
-            capabilities:
-                unexpectedAlertBehaviour: 'accept'
+        PhpBrowser:
+            url: 'http://localhost:8000/_bebop/api/'
         REST:
-            url: http://localhost:8000/_bebop/api
+            url: http://localhost:8000/_bebop/api/

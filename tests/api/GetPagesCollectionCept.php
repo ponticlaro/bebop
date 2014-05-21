@@ -2,7 +2,7 @@
 
 $I = new ApiGuy($scenario);
 $I->wantTo('check if [GET /_bebop/api/pages] is returning JSON with the correct structure');
-$I->sendGET('_bebop/api/pages');
+$I->sendGET('pages');
 $I->seeResponseCodeIs(200);
 $I->seeResponseIsJson();
 $I->seeResponseContains('"meta":{');
