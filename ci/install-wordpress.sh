@@ -22,4 +22,7 @@ echo "     > Creating configuration file"
 echo "     > Installing"
 ./vendor/bin/wp core install
 
+echo "     > Configuring"
+./vendor/bin/wp rewrite structure '/%postname%/'
+
 echo "     > Done\n"
