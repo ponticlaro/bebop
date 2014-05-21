@@ -13,3 +13,6 @@ core install:
   admin_user: admin
   admin_password: "123456789"
   admin_email: cristiano@ponticlaro.com
+
+apache_modules:
+  - mod_rewrite
