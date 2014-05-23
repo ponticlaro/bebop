@@ -175,7 +175,9 @@ class Router {
 			'max_results'    => 'posts_per_page',
 			'sort_by'        => 'orderby',
 			'sort_direction' => 'order',
-			'page'           => 'paged'
+			'page'           => 'paged',
+			'include'        => 'post__in',
+			'exclude'        => 'post__not_in'
 		);
 
 		$raw_params      = $_GET;
@@ -262,6 +264,42 @@ class Router {
 
 				// Check if we should map a query parameter to a built-in query parameter
 				if (array_key_exists($key, $params_map)) $key = $params_map[$key];
+
+				// Make sure comma delimited values are converted to arrays
+				// on parameters that require or admit arrays as the value
+				$parameters_requiring_arrays = array(
+					'author__in',
+					'author__not_in',
+					'category__and',
+					'category__in',
+					'category__not_in',
+					'tag__and',
+					'tag__in',
+					'tag__not_in',
+					'tag_slug__and',
+					'tag_slug__in',
+					'post_parent__in',
+					'post_parent__not_in',
+					'post__in',
+					'post__not_in',
+				);
+
+				$parameters_admitting_arrays = array(
+					'post_type',
+					'post_status'
+				);
+
+				if (in_array($key, $parameters_requiring_arrays)) {
+					
+					$value = explode(',', $value);
+				}
+
+				if (in_array($key, $parameters_admitting_arrays)) {
+					
+					$value = explode(',', $value);
+
+					if (count($value) == 1) $value = $value[0];
+				}
 
 				$filtered_params[$key] = $value;
 			}
