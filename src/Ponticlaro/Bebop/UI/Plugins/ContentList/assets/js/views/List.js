@@ -220,7 +220,7 @@
 			this.status.set('currentEvent', event);
 
 			// Execute action if available
-			if (this['action_' + action] != undefined) this['action_' + action](event);
+			if (this['formAction_' + action] != undefined) this['formAction_' + action](event);
 		},
 
 		isMode: function(mode) {
@@ -228,7 +228,7 @@
 			return this.status.get('mode') == mode ? true : false;
 		},
 
-		action_toggleReorder: function(event) {
+		formAction_toggleReorder: function(event) {
 
 			if (this.status.get('view') != 'reorder') {
 
@@ -248,7 +248,7 @@
 			}
 		},
 
-		action_insertItem: function(event) {
+		formAction_insertItem: function(event) {
 
 			this.addNewitem();
 		},
@@ -341,9 +341,9 @@
 		}
 	});
 
-	List.addAction = function(name, fn) {
+	List.addFormAction = function(name, fn) {
 
-		var actionFn = 'action_' + name;
+		var actionFn = 'formAction_' + name;
 
 		this.prototype[actionFn] = fn;
 	}
