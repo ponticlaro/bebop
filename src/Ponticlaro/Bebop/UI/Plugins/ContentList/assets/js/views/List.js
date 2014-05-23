@@ -5,7 +5,7 @@
 	var List = Bebop.List = Backbone.View.extend({
 
 		events: {
-			'click [bebop-list--el="form"] [bebop-list--action]': 'doAction'
+			'click [bebop-list--el="form"] [bebop-list--formAction]': 'doAction'
 		},
 
 		initialize: function(options) {
@@ -24,10 +24,11 @@
 			this.status = new Backbone.Model({
 				mode: this.config.get('mode'),
 				view: 'browse',
-				insertAction: null,
+				insertPosition: null,
 				empty: false,
 				isSortable: true,
-				templateEngine: 'mustache'
+				templateEngine: 'mustache',
+				currentEvent: null
 			});
 
 			this.collection = new List.Collection(),
@@ -37,8 +38,8 @@
 			topFormHtml         = $topFormTemplate.html();
 			bottomFormHtml      = $bottomFormTemplate.html();
 
-			if (topFormHtml) this.$el.find('[bebop-list--el="top-form"]').html(topFormHtml).attr('bebop-list--el', 'form');
-			if (bottomFormHtml) this.$el.find('[bebop-list--el="bottom-form"]').html(bottomFormHtml).attr('bebop-list--el', 'form');
+			if (topFormHtml) this.$el.find('[bebop-list--formId="top"]').html(topFormHtml);
+			if (bottomFormHtml) this.$el.find('[bebop-list--formId="bottom"]').html(bottomFormHtml);
 
 			$topFormTemplate.remove();
 			$bottomFormTemplate.remove();
@@ -48,10 +49,10 @@
 
 			this.buttons = {
 				add: {
-					$el: this.$form.find('[bebop-list--action^="insertAtThe"]')
+					$el: this.$form.find('[bebop-list--formAction="insertItem"]')
 				},
 				sort: {
-					$el: this.$form.find('[bebop-list--action="toggleReorder"]')
+					$el: this.$form.find('[bebop-list--formAction="toggleReorder"]')
 				}
 			}
 
@@ -121,13 +122,13 @@
 			// Remove empty state item
 			this.collection.on('add', function(model) {
 
-				var insertAction = this.status.get('insertAction');
+				var insertPosition = this.status.get('insertPosition');
 
-				if (insertAction == 'append') {
+				if (insertPosition == 'append') {
 
 					this.appendItem(model);
 
-				} else if(insertAction == 'prepend') {
+				} else if(insertPosition == 'prepend') {
 
 					this.prependItem(model);
 				}
@@ -198,12 +199,13 @@
 
 		doAction: function(event) {
 
-			event.preventDefault();
+			var action = $(event.currentTarget).attr('bebop-list--formAction');
 
-			var action = $(event.currentTarget).attr('bebop-list--action');
+			// Save current event
+			this.status.set('currentEvent', event);
 
 			// Execute action if available
-			if (this[action] != undefined) this[action](event);
+			if (this['action_' + action] != undefined) this['action_' + action](event);
 		},
 
 		isMode: function(mode) {
@@ -211,7 +213,7 @@
 			return this.status.get('mode') == mode ? true : false;
 		},
 
-		toggleReorder: function() {
+		action_toggleReorder: function(event) {
 
 			if (this.status.get('view') != 'reorder') {
 
@@ -225,9 +227,16 @@
 			}
 		},
 
-		insertAtTheTop: function(event) {
+		action_insertItem: function(event) {
 
-			this.status.set('insertAction', 'prepend');
+			this.addNewitem();
+		},
+
+		addNewitem: function(data) {
+
+			this.setInsertPosition();
+
+			if (!data) data = {};
 
 			if (this.isMode('gallery')) {
 
@@ -235,22 +244,17 @@
 
 			} else {
 
-				this.addNewEmptyModel();
+				this.addNewModel(data);
 			}
 		},
 
-		insertAtTheBottom: function(event) {
+		setInsertPosition: function() {
 
-			this.status.set('insertAction', 'append');
+			var event          = this.status.get('currentEvent'),
+				formEl         = $(event.currentTarget).parents('[bebop-list--el]').attr('bebop-list--el'),
+				insertPosition = formEl == 'top-form' ? 'prepend' : 'append';
 
-			if (this.isMode('gallery')) {
-
-				this.mediaPicker.open();
-
-			} else {
-				
-				this.addNewEmptyModel();
-			}
+			this.status.set('insertPosition', insertPosition);
 		},
 
 		getNewItemView: function(model) {
@@ -263,9 +267,13 @@
 			});
 		},
 
-		addNewEmptyModel: function() {
+		addNewModel: function(data) {
 
-			this.collection.add(new List.ItemModel({view: 'edit'}));
+			if (!data) data = {};
+
+			data.view = 'edit'
+
+			this.collection.add(new List.ItemModel(data));
 		},
 
 		prependItem: function(model) {
@@ -311,5 +319,12 @@
 			return this;
 		}
 	});
+
+	List.addAction = function(name, fn) {
+
+		var actionFn = 'action_' + name;
+
+		this.prototype[actionFn] = fn;
+	}
 
 })(window, document, undefined, jQuery || $);

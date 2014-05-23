@@ -14,7 +14,7 @@
 
 	<?php } ?>
 
-	<div bebop-list--el="top-form" class="bebop-list--form bebop-ui-clrfix"></div>
+	<div bebop-list--el="form" bebop-list--formId="top" class="bebop-list--form bebop-ui-clrfix"></div>
 
 	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
 		<?php if ($data) {
@@ -34,7 +34,7 @@
 		<span class="bebop-list--item-name">No items added until now</span>
 	</div>
 
-	<div bebop-list--el="bottom-form" class="bebop-list--form bebop-ui-clrfix"></div>
+	<div bebop-list--el="form" bebop-list--formId="bottom" class="bebop-list--form bebop-ui-clrfix"></div>
 
 	<script bebop-list--template="item" class="bebop-list--item" type="text/template" style="display:none">
 		
