@@ -1,27 +1,15 @@
-<?php 
+<?php $data = $this->data->get(); ?>
 
-$data         = $config->get('data');
-$browse_view  = $config->get('browse_view');
-$reorder_view = $config->get('reorder_view');
-$edit_view    = $config->get('edit_view');
-
-$config->remove('data');
-$config->remove('browse_view');
-$config->remove('reorder_view');
-$config->remove('edit_view');
-
-?>
-
-<div bebop-list--el="container" bebop-list--config='<?php echo json_encode($config->get()); ?>' class="bebop-list--container">
+<div bebop-list--el="container" bebop-list--config='<?php echo json_encode($this->config->get()); ?>' class="bebop-list--container">
 
 	<div bebop-list--el="title">
-		<?php echo $config->get('title'); ?>
+		<?php echo $this->config->get('title'); ?>
 	</div>
 	
-	<?php if ($config->get('description')) { ?>
+	<?php if ($this->config->get('description')) { ?>
 
 		<div bebop-list--el="description">
-			<?php echo $config->get('description'); ?>
+			<?php echo $this->config->get('description'); ?>
 		</div>
 
 	<?php } ?>
@@ -35,7 +23,7 @@ $config->remove('edit_view');
 				// Escape single quotes
 				$item = preg_replace("/([^\"]*)'([^\"]*)/", "$1&#39;$2", $item); ?>
 								
-				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $config->get('field_name'); ?>[]" value='<?php echo $item; ?>'>
+				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $this->config->get('field_name'); ?>[]" value='<?php echo $item; ?>'>
 
 			<?php }
 		} ?>
@@ -72,29 +60,26 @@ $config->remove('edit_view');
 			</button>
 		</div>
 	</script>
+	<?php echo $this->config->get('form'); ?>
 
 	<script bebop-list--template="top-form" type="text/template" style="display:none">
-		<?php if ($config->get('show_top_form')) include $config->get('top_form'); ?>
+		<?php if ($this->config->get('show_top_form')) echo $this->getForm(); ?>
 	</script>
 
 	<script bebop-list--template="bottom-form" type="text/template" style="display:none">
-		<?php if ($config->get('show_bottom_form')) include $config->get('bottom_form'); ?>
+		<?php if ($this->config->get('show_bottom_form')) echo $this->getForm(); ?>
 	</script>
 
 	<script bebop-list--template="browse-view" type="text/template" style="display:none">
-		<?php echo $browse_view; ?>
-	</script>
-
-	<script bebop-list--template="browse-view" type="text/template" style="display:none">
-		<?php echo $browse_view; ?>
+		<?php echo $this->getItemView('browse'); ?>
 	</script>
 
 	<script bebop-list--template="reorder-view" type="text/template" style="display:none">
-		<?php echo $reorder_view; ?>
+		<?php echo $this->getItemView('reorder'); ?>
 	</script>
 
 	<script bebop-list--template="edit-view" type="text/template" style="display:none">
-		<?php echo $edit_view; ?>
+		<?php echo $this->getItemView('edit'); ?>
 	</script>
 	
 </div>
