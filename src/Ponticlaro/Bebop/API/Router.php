@@ -140,6 +140,9 @@ class Router {
 					);
 				}
 
+				// Enable developers to modify response
+				$response = apply_filters('bebop:api:response', $response);
+
 				// Send response
 				$app->applyHook('handle_response', $response);
 			});
