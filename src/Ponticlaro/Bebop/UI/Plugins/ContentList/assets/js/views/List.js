@@ -45,16 +45,31 @@
 			$bottomFormTemplate.remove();
 
 			// Collect form DOM element and action buttons
-			this.$form = this.$el.find('[bebop-list--el="form"]');
+			this.$form   = this.$el.find('[bebop-list--el="form"]');
+			this.buttons = {};
 
-			this.buttons = {
-				add: {
-					$el: this.$form.find('[bebop-list--formAction="insertItem"]')
-				},
-				sort: {
-					$el: this.$form.find('[bebop-list--formAction="toggleReorder"]')
-				}
-			}
+			// handle forms & buttons
+			_.each(this.$form, function(el, index) {
+
+				var $form    = $(el),
+					formId   = $form.attr('bebop-list--formId'),
+					$buttons = $form.find('[bebop-list--formAction]');
+
+				_.each($buttons, function(el, index) {
+
+					var $button  = $(el);
+						buttonId = $button.attr('bebop-list--formElId');
+
+					if (!$.isArray(this.buttons[buttonId])) this.buttons[buttonId] = [];
+
+					this.buttons[buttonId].push({
+						$el: $button,
+						formId: formId
+					});
+
+				}, this);
+
+			}, this);
 
 			// Collect list DOM element
 			this.$list = this.$el.find('[bebop-list--el="list"]');
@@ -218,12 +233,18 @@
 			if (this.status.get('view') != 'reorder') {
 
 				this.status.set('view', 'reorder');
-				this.buttons.sort.$el.addClass('is-enabled');
+
+				_.each(this.buttons.sort, function(item) {
+					item.$el.addClass('is-enabled');
+				});
 
 			} else {
 
 				this.status.set('view', 'browse');
-				this.buttons.sort.$el.removeClass('is-enabled');
+
+				_.each(this.buttons.sort, function(item) {
+					item.$el.removeClass('is-enabled');
+				});
 			}
 		},
 
@@ -251,8 +272,8 @@
 		setInsertPosition: function() {
 
 			var event          = this.status.get('currentEvent'),
-				formEl         = $(event.currentTarget).parents('[bebop-list--el]').attr('bebop-list--el'),
-				insertPosition = formEl == 'top-form' ? 'prepend' : 'append';
+				$form          = $(event.currentTarget).parents('[bebop-list--el="form"]'),
+				insertPosition = $form.attr('bebop-list--formId') == 'top' ? 'prepend' : 'append';
 
 			this.status.set('insertPosition', insertPosition);
 		},
