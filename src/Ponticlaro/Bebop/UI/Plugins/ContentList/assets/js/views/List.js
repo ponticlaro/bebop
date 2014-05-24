@@ -92,25 +92,36 @@
 			//////////////////////
 			// Handle templates //
 			//////////////////////
-			this.templates = {};
-			
-			$rawItemTemplate    = this.$el.find('[bebop-list--template="item"]');
-			$browseTemplate     = this.$el.find('[bebop-list--template="browse-view"]');
-			$reorderTemplate    = this.$el.find('[bebop-list--template="reorder-view"]');
-			$editTemplate       = this.$el.find('[bebop-list--template="edit-view"]');
+			$itemTemplates     = this.$el.find('[bebop-list--itemTemplate]');
+			this.itemTemplates = {};
 
-			this.itemTemplates = {
-				main: $rawItemTemplate.clone().find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html(),
-				browse: $browseTemplate.html(),
-				reorder: $reorderTemplate.html(),
-				edit: $editTemplate.html()
-			}
+			_.each($itemTemplates, function(el, index) {
 
-			
-			$rawItemTemplate.remove();
-			$browseTemplate.remove();
-			$reorderTemplate.remove();
-			$editTemplate.remove();
+				var $el        = $(el),
+					templateId = $el.attr('bebop-list--itemTemplate');
+
+				// If we have a template ID, store it in the templates object
+				if (templateId) {
+
+					var html;
+
+					if (templateId == 'main') {
+
+						html = $el.clone().find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html();
+					}
+
+					else {
+
+						html = $el.html();
+					}
+
+					this.itemTemplates[templateId] = html;
+				}
+
+				// Remove element from DOM
+				$el.remove();
+				
+			}, this);
 
 			// Collect empty state indicator DOM element
 			this.$emptyStateIndicator = this.$el.find('[bebop-list--el="empty-state-indicator"]');
@@ -292,7 +303,7 @@
 
 			if (!data) data = {};
 
-			data.view = 'edit'
+			if (data.view == undefined) data.view = 'edit'
 
 			this.collection.add(new List.ItemModel(data));
 		},

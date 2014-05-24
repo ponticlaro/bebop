@@ -37,20 +37,23 @@
 			this.fields = {}
 
 			// Build views object
-			this.views = {
-				browse: {
-					$el: this.$el.find('[bebop-list--view="browse"]'),
-					template: options.templates.browse,
-				},
-				edit: {
-					$el: this.$el.find('[bebop-list--view="edit"]'),
-					template: options.templates.edit,
-					cleanHTML: options.templates.edit.replace(/\{\{[^\}]*\}\}/g, '')
-				},
-				reorder: {
-					$el: this.$el.find('[bebop-list--view="reorder"]'),
-					template: options.templates.reorder
-				}
+			this.views = {}
+
+			this.views.browse = {
+				$el: this.$el.find('[bebop-list--view="browse"]'),
+				template: options.templates.browse,
+			};
+
+			this.views.edit = {
+				$el: this.$el.find('[bebop-list--view="edit"]'),
+				template: options.templates.edit,
+				cleanHTML: options.templates.edit.replace(/\{\{[^\}]*\}\}/g, '')
+			};
+
+			// Reorder template falls back to browse template
+			this.views.reorder = {
+				$el: this.$el.find('[bebop-list--view="reorder"]'),
+				template: options.templates.reorder == undefined ? options.templates.reorder : options.templates.browse
 			}
 
 			// Collect data container input

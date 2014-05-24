@@ -47,6 +47,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		wp_register_script('bebop-ui--listView', self::$__base_url .'/assets/js/views/List.js', array(), false, true);
 		wp_register_script('bebop-ui--listItemView', self::$__base_url .'/assets/js/views/ListItemView.js', array(), false, true);
+		wp_register_script('bebop-ui--childListView', self::$__base_url .'/assets/js/views/ChildListView.js', array(), false, true);
 		wp_register_script('bebop-ui--listItemModel', self::$__base_url .'/assets/js/models/ListItemModel.js', array(), false, true);
 		wp_register_script('bebop-ui--listCollection', self::$__base_url .'/assets/js/collections/ListCollection.js', array(), false, true);
 
@@ -58,6 +59,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			'mustache',
 			'bebop-ui--listView',
 			'bebop-ui--listItemView',
+			'bebop-ui--childListView',
 			'bebop-ui--listItemModel',
 			'bebop-ui--listCollection'
 		);		
@@ -195,6 +197,11 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		return $this->views->get($view);
 	}
 
+	public function getAllItemViews()
+	{
+		return $this->views->get();
+	}
+
 	public function clearForm()
 	{
 		$this->form_elements->clear();
@@ -314,12 +321,6 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			
 			$this->setLabel('add_button', 'Add Images');
 			$this->setItemView('reorder', __DIR__ .'/templates/partials/items/gallery/reorder.mustache');
-		}
-
-		// Fallback to browse view if there is no reorder view
-		if (!$this->getItemView('reorder')) {
-
-			$this->setItemView('reorder', $this->getItemView('browse'));
 		}
 
 		// Set path to template

@@ -36,7 +36,7 @@
 
 	<div bebop-list--el="form" bebop-list--formId="bottom" class="bebop-list--form bebop-ui-clrfix"></div>
 
-	<script bebop-list--template="item" class="bebop-list--item" type="text/template" style="display:none">
+	<script bebop-list--itemTemplate="main" class="bebop-list--item" type="text/template" style="display:none">
 		
 		<input bebop-list--el="data-container" type="hidden">
 		
@@ -60,7 +60,18 @@
 			</button>
 		</div>
 	</script>
-	<?php echo $this->config->get('form'); ?>
+	
+	<?php $views = $this->getAllItemViews();
+
+	if ($views) {
+		foreach ($views as $key => $template) { ?>
+			 
+			<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none">
+				<?php echo $template ?>
+			</script>
+
+		<?php }
+	} ?>
 
 	<script bebop-list--template="top-form" type="text/template" style="display:none">
 		<?php if ($this->config->get('show_top_form')) echo $this->getForm(); ?>
@@ -68,18 +79,6 @@
 
 	<script bebop-list--template="bottom-form" type="text/template" style="display:none">
 		<?php if ($this->config->get('show_bottom_form')) echo $this->getForm(); ?>
-	</script>
-
-	<script bebop-list--template="browse-view" type="text/template" style="display:none">
-		<?php echo $this->getItemView('browse'); ?>
-	</script>
-
-	<script bebop-list--template="reorder-view" type="text/template" style="display:none">
-		<?php echo $this->getItemView('reorder'); ?>
-	</script>
-
-	<script bebop-list--template="edit-view" type="text/template" style="display:none">
-		<?php echo $this->getItemView('edit'); ?>
 	</script>
 	
 </div>
