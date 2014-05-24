@@ -14,6 +14,11 @@
 	[bebop-list--el="container"] {
 		margin: -6px -12px -12px -12px;
 		border: none;
+
+		[bebop-list--el="container"] {
+			margin: 0;
+			border: 1px solid #ccc;
+		}
 	}
 
 	[bebop-list--el="title"] {
