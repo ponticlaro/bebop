@@ -378,6 +378,8 @@
 
 		doFormAction: function(event) {
 
+			event.preventDefault();
+
 			var action = $(event.currentTarget).attr('bebop-list--formAction');
 
 			// Save current event
