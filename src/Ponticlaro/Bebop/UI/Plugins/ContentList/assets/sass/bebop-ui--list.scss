@@ -134,7 +134,7 @@
 			
 		}
 
-		.bebop-list--item-actions {
+		[bebop-list--el="item-actions"] {
 			position: absolute;
 			top: 8px;
 			right: 8px;
@@ -167,6 +167,10 @@
 
 [bebop-list--el="form"] {
 	padding: 10px;
+	
+	input[type="text"] {
+		width: auto !important;
+	}
 
 	.button {
 		padding-left: 8px;

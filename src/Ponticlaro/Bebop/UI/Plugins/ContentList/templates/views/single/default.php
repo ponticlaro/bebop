@@ -17,7 +17,7 @@
 			<div bebop-list--view="edit"></div>
 		</div>
 
-		<div class="bebop-list--item-actions">
+		<div bebop-list--el="item-actions">
 			<button bebop-list--action="edit" class="button button-small">
 				<b>Edit</b>
 				<span class="bebop-ui-icon-edit"></span>
@@ -34,19 +34,17 @@
 
 		foreach ($views as $key => $template) { ?>
 			 
-			<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none">
-				<?php echo $template ?>
-			</script>
+			<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none"><?php echo $template; ?></script>
 
 		<?php }
 
 	} ?>
 
-	<script bebop-list--template="top-form" type="text/template" style="display:none">
+	<script bebop-list--formTemplate="top" type="text/template" style="display:none">
 		<?php if ($this->config->get('show_top_form')) echo $this->getForm(); ?>
 	</script>
 
-	<script bebop-list--template="bottom-form" type="text/template" style="display:none">
+	<script bebop-list--formTemplate="bottom" type="text/template" style="display:none">
 		<?php if ($this->config->get('show_bottom_form')) echo $this->getForm(); ?>
 	</script>
 
