@@ -85,8 +85,10 @@ class UI {
 		$dependencies = array(
 			'jquery',
 			'jquery.debounce',
+			'jquery-ui-datepicker',
 			'mustache'
 		);
+		
 		wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.js', $dependencies, false, true);
 	}
 
