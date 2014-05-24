@@ -5,7 +5,7 @@
 	var List = Bebop.List = Backbone.View.extend({
 
 		events: {
-			'click [bebop-list--el="form"] [bebop-list--formAction]': 'doAction'
+			'click [bebop-list--el="form"] [bebop-list--formAction]': 'doFormAction'
 		},
 
 		initialize: function(options) {
@@ -13,14 +13,14 @@
 			// Store reference to current instance
 			var self = this;
 
-			// Collect container DOM element
-			this.$el = $(options.el);
-
-			// Get instance configuration
+			//////////////////////////
+			// Handle configuration //
+			//////////////////////////
 			var config  = this.$el.attr('bebop-list--config');
 			this.config = new Backbone.Model(config ? JSON.parse(config) : {});
 			this.$el.attr('bebop-media--config', null);
 
+			// Build status object
 			this.status = new Backbone.Model({
 				mode: this.config.get('mode'),
 				view: 'browse',
@@ -31,7 +31,66 @@
 				currentEvent: null
 			});
 
-			this.collection = new List.Collection(),
+			//////////////////////////////
+			// END Handle configuration //
+			//////////////////////////////
+
+			//////////////////////////////////
+			// Build default HTML structure //
+			//////////////////////////////////
+			
+			// Collect container DOM element
+			this.$el = $(options.el);
+
+			// Title
+			this.$title = $('<div>').attr('bebop-list--el', 'title');
+
+			if (this.config.get('title')) 
+				this.$el.append(this.$title.text(this.config.get('title')));
+
+			// Description
+			this.$description = $('<div>').attr('bebop-list--el', 'description');
+
+			if (this.config.get('description')) 
+				this.$el.append(this.$description.text(this.config.get('description')));
+
+			// Top Form
+			this.$topForm = $('<div>').attr('bebop-list--el', 'form').attr('bebop-list--formId', 'top').addClass('bebop-ui-clrfix');
+			this.$el.append(this.$topForm);
+
+			// List
+			this.$list = $('<ul>').attr('bebop-list--el', 'list');
+			this.$el.append(this.$list);
+
+			// Empty state indicatior
+			this.$emptyStateIndicator = $('<div>').attr('bebop-list--el', 'empty-state-indicator').css('display', 'none')
+												  .append('<input type="hidden"><span class="bebop-list--item-name">No items added until now</span>');
+			this.$el.append(this.$emptyStateIndicator);
+
+			// Bottom Form
+			this.$bottomForm = $('<div>').attr('bebop-list--el', 'form').attr('bebop-list--formId', 'bottom').addClass('bebop-ui-clrfix');
+			this.$el.append(this.$bottomForm);
+
+			//////////////////////////////////////
+			// END Build default HTML structure //
+			//////////////////////////////////////
+
+			//////////////////
+			// Collect data //
+			//////////////////
+			this.collection = new List.Collection;
+
+			var dataJSON = this.$el.attr('bebop-list--data'),
+				data     = dataJSON ? JSON.parse(dataJSON) : [];
+
+			_.each(data, function(item) {
+
+				this.collection.add(JSON.parse(item));
+			}, this);
+
+			//////////////////////
+			// END Collect data //
+			//////////////////////
 
 			$topFormTemplate    = this.$el.find('[bebop-list--template="top-form"]');
 			$bottomFormTemplate = this.$el.find('[bebop-list--template="bottom-form"]');
@@ -71,21 +130,6 @@
 
 			}, this);
 
-			// Collect list DOM element
-			this.$list = this.$el.find('[bebop-list--el="list"]');
-
-			// Collect item DOM elements
-			this.$dataPlaceholders = this.$list.find('[bebop-list--el="data-placeholder"]');
-
-			// Add each item to collection
-			_.each(this.$dataPlaceholders, function(el, index) {
-
-				var jsonData = $(el).val();
-
-				if (jsonData) this.collection.add(JSON.parse(jsonData));
-
-			}, this);
-
 			// Get field name
 			this.fieldName = this.config.get('field_name');
 
@@ -122,9 +166,6 @@
 				$el.remove();
 				
 			}, this);
-
-			// Collect empty state indicator DOM element
-			this.$emptyStateIndicator = this.$el.find('[bebop-list--el="empty-state-indicator"]');
 
 			this.handleEmptyIndicator = function() {
 
@@ -223,7 +264,7 @@
 			this.render();
 		},
 
-		doAction: function(event) {
+		doFormAction: function(event) {
 
 			var action = $(event.currentTarget).attr('bebop-list--formAction');
 
@@ -343,10 +384,6 @@
 				this.appendItem(model);
 
 			}, this);
-
-			// Remove all data placeholders if we still have them
-			if (this.$dataPlaceholders.length > 0)
-				this.$dataPlaceholders.remove();
 
 			return this;
 		}
