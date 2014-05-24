@@ -173,6 +173,11 @@
 
 				$(this).remove();
 			})
+
+			if (this.list.status.get('isChildList')) {
+
+				this.list.collection.trigger('updateParentCollection');
+			}
 		},
 
 		prepareView: function() {
