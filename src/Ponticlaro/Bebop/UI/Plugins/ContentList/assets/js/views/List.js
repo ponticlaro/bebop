@@ -137,7 +137,6 @@
 					var indexOfA = self.$list.find('li[bebop-list--model-id="'+ modelA.cid +'"]').index(),
 						indexOfB = self.$list.find('li[bebop-list--model-id="'+ modelB.cid +'"]').index();
 					
-					
 					if (indexOfA < indexOfB) {
 
 						return -1;
@@ -152,8 +151,6 @@
 
 						return 0;
 					}
-
-					self.collection.trigger('updateParentCollection');
 				}
 
 				this.itemTemplates = this.parentList.itemTemplates;
@@ -291,6 +288,7 @@
 				if (this.status.get('isChildList')) {
 
 					this.collection.sort();
+					this.collection.trigger('updateParentCollection');
 				}
 
 			}, this);
@@ -370,6 +368,7 @@
 				this.$list.on("sortstop", function(event, ui) {
 
 					self.collection.sort();
+					self.collection.trigger('updateParentCollection');
 				});
 			}
 
