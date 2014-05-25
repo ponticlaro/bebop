@@ -165,6 +165,11 @@
 		remove: function() {
 
  			this.model.destroy();
+
+ 			if (this.list.status.get('isChildList')) {
+
+				this.list.collection.trigger('updateParentCollection');
+			}
 		},
 
 		destroy: function() {
@@ -173,11 +178,6 @@
 
 				$(this).remove();
 			})
-
-			if (this.list.status.get('isChildList')) {
-
-				this.list.collection.trigger('updateParentCollection');
-			}
 		},
 
 		prepareView: function() {
