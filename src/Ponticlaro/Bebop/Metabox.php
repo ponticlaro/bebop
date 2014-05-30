@@ -4,6 +4,8 @@ namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
 
+use Ponticlaro\Bebop\Helpers\MetaboxData;
+
 class Metabox
 {
 	protected $__config;
@@ -41,7 +43,7 @@ class Metabox
 		$this->__post_types  = Bebop::Collection();
 		$this->__meta_fields = Bebop::Collection();
 		$this->__fields      = Bebop::Collection();
-		$this->__data        = Bebop::Collection();
+		$this->__data        = new MetaboxData;
 	}
 
 	private function __init()
@@ -170,7 +172,7 @@ class Metabox
 
 				foreach ($meta_fields as $meta_field) {
 
-					$this->__data->set($meta_field, get_post_meta($entry->ID, $meta_field, true) );
+					$this->__data->set($meta_field, get_post_meta($entry->ID, $meta_field));
 				}
 			}
 
@@ -233,7 +235,30 @@ class Metabox
 
 				$value = isset($_POST[$field]) ? $_POST[$field] : '';
 
-				update_post_meta($post_id, $field, $value);
+				// Empty values
+				if (!$value) {
+					
+					delete_post_meta($post_id, $field);
+				}
+
+				// Arrays
+				elseif (is_array($value)) {
+					
+					// Delete all entries
+					delete_post_meta($post_id, $field);
+
+					foreach ($value as $v) {
+
+						// Add single entry with same meta_key
+						add_post_meta($post_id, $field, $v);
+					}
+				}
+
+				// Strings, booleans, etc
+				else {
+
+					update_post_meta($post_id, $field, $value);
+				}
 			}
 		}
 	}

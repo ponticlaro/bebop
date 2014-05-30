@@ -130,7 +130,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		$this->config = Bebop::Collection(array_merge($default_config, $config));
 
 		// Data
-		$this->data = Bebop::Collection($data);
+		$this->data = Bebop::Collection($data ?: array());
 
 		// Views
 		$this->views = Bebop::Collection(array(

@@ -1,6 +1,6 @@
 <div bebop-list--el="container" 
 	 bebop-list--config='<?php echo json_encode($this->config->get()); ?>'
-	 bebop-list--data='<?php echo json_encode(preg_replace("/'/", "&#39;", $this->data->get())); ?>'
+	 bebop-list--data='<?php echo preg_replace("/'/", "&#39;", json_encode($this->data->get())); ?>'
 	 >
 
 	<script bebop-list--itemTemplate="main" class="bebop-list--item" type="text/template" style="display:none">
