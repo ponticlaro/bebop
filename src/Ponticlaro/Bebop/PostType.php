@@ -236,11 +236,8 @@ class PostType
 
 				if(is_string($args[0])) {
 
-					$key   = $args[0];
-					$value = isset($args[1]) ? $args[1] : null;
-
-					if($is_removeConfig) $this->__config->remove($key, $value);
-					if($is_removeSupport) $this->__supports->pop($value);
+					if($is_removeConfig) $this->__config->remove($args[0], isset($args[1]) ? $args[1] : null);
+					if($is_removeSupport) $this->__supports->pop($args[0]);
 
 				} elseif(is_array($args[0])) {
 
