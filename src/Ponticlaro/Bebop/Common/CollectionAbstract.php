@@ -281,7 +281,7 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 */
     public function clear()
     {
-        $this->set(array());
+        $this->data = array();
 
         return $this;
     }
