@@ -79,18 +79,40 @@ class UI {
 	 */
 	public function registerScripts()
 	{
+		// Register CSS
 		wp_register_style('bebop-ui', self::$__base_url .'/UI/assets/css/bebop-ui.css');
-		wp_register_script('mustache', self::$__base_url .'/UI/assets/js/vendor/mustache.js', array(), '0.8.1', true);
-		wp_register_script('jquery.debounce', self::$__base_url .'/UI/assets/js/vendor/jquery.ba-throttle-debounce.min.js', array('jquery'), '0.8.1', true);
-		
-		$dependencies = array(
-			'jquery',
-			'jquery.debounce',
-			'jquery-ui-datepicker',
-			'mustache'
-		);
-		
-		wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.js', $dependencies, false, true);
+
+		// Register development JS
+		if (Bebop::isDevEnvEnabled()) {
+			
+			wp_register_script('mustache', self::$__base_url .'/UI/assets/js/vendor/mustache.js', array(), '0.8.1', true);
+			wp_register_script('jquery.debounce', self::$__base_url .'/UI/assets/js/vendor/jquery.ba-throttle-debounce.min.js', array('jquery'), '0.8.1', true);
+			
+			$dependencies = array(
+				'jquery',
+				'jquery-ui-datepicker',
+				'jquery.debounce'
+			);
+			
+			wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.js', $dependencies, false, true);
+		}
+
+		// Register optimized JS
+		else {
+
+			// Mustache is optimized separately 
+			// so that other components can load it only if needed
+			wp_register_script('mustache', self::$__base_url .'/UI/assets/js/vendor/mustache.min.js', array(), '0.8.1', true);
+
+			// The following dependencies should never be concatenated and minified
+			// These are used by other WordPress features and plugins
+			$dependencies = array(
+				'jquery',
+				'jquery-ui-datepicker'
+			);
+
+			wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.min.js', $dependencies, false, true);
+		}
 	}
 
 	/**

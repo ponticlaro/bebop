@@ -39,29 +39,52 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function registerScripts()
 	{
-		$app_css_dependencies = array(
+		// Register CSS
+		$css_dependencies = array(
 			'bebop-ui'
 		);
 
-		wp_register_style('bebop-ui--list', self::$__base_url .'/assets/css/bebop-ui--list.css', $app_css_dependencies);
+		wp_register_style('bebop-ui--list', self::$__base_url .'/assets/css/bebop-ui--list.css', $css_dependencies);
 
-		wp_register_script('bebop-ui--listView', self::$__base_url .'/assets/js/views/List.js', array(), false, true);
-		wp_register_script('bebop-ui--listItemView', self::$__base_url .'/assets/js/views/ListItemView.js', array(), false, true);
-		wp_register_script('bebop-ui--listItemModel', self::$__base_url .'/assets/js/models/ListItemModel.js', array(), false, true);
-		wp_register_script('bebop-ui--listCollection', self::$__base_url .'/assets/js/collections/ListCollection.js', array(), false, true);
+		// Register development JS
+		if (Bebop::isDevEnvEnabled()) {
+			
+			wp_register_script('bebop-ui--listView', self::$__base_url .'/assets/js/views/List.js', array(), false, true);
+			wp_register_script('bebop-ui--listItemView', self::$__base_url .'/assets/js/views/ListItemView.js', array(), false, true);
+			wp_register_script('bebop-ui--listItemModel', self::$__base_url .'/assets/js/models/ListItemModel.js', array(), false, true);
+			wp_register_script('bebop-ui--listCollection', self::$__base_url .'/assets/js/collections/ListCollection.js', array(), false, true);
 
-		$app_dependencies = array(
-			'jquery',
-			'jquery-ui-sortable',
-			'underscore',
-			'backbone',
-			'mustache',
-			'bebop-ui--listView',
-			'bebop-ui--listItemView',
-			'bebop-ui--listItemModel',
-			'bebop-ui--listCollection'
-		);		
-		wp_register_script('bebop-ui--list', self::$__base_url .'/assets/js/bebop-ui--list.js', $app_dependencies, false, true);
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-sortable',
+				'underscore',
+				'backbone',
+				'mustache',
+				'bebop-ui--listView',
+				'bebop-ui--listItemView',
+				'bebop-ui--listItemModel',
+				'bebop-ui--listCollection'
+			);
+			
+			wp_register_script('bebop-ui--list', self::$__base_url .'/assets/js/bebop-ui--list.js', $js_dependencies, false, true);
+		}
+
+		// Register optimized JS
+		else {
+
+			// The following dependencies should never be concatenated and minified
+			// Some are use by other WordPress features and plugins
+			// and other are register by Bebop UI
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-sortable',
+				'underscore',
+				'backbone',
+				'mustache'
+			);
+
+			wp_register_script('bebop-ui--list', self::$__base_url .'/assets/js/bebop-ui--list.min.js', $js_dependencies, false, true);
+		}
 	}
 
 	private function __enqueueScripts()

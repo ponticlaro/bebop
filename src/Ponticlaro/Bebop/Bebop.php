@@ -22,6 +22,13 @@ class Bebop
 	private static $__instance;
 
 	/**
+	 * Contains flag for development environment
+	 * 
+	 * @var Bool
+	 */
+	private static $__dev_env_enabled = false;
+
+	/**
 	 * Configuration parameters
 	 * 
 	 * @var Ponticlaro\Bebop\Common\Collection
@@ -191,6 +198,21 @@ class Bebop
 			new \Ponticlaro\Bebop\API\Router;
 			exit;
 		}
+	}
+
+ 	public static function setDevEnv($enabled) 
+ 	{
+ 		self::$__dev_env_enabled = $enabled;
+	}
+
+	/**
+	 * Used to check if development environment is enabled
+	 * 
+	 * @return boolean True for enabled, false otherwise
+	 */
+	public function isDevEnvEnabled()
+	{
+		return self::$__dev_env_enabled;
 	}
 
 	/**

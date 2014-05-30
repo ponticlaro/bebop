@@ -41,12 +41,12 @@
 				remove: {
 					$el: this.$el.find('[bebop-list--action="remove"]')
 				}
-			}
+			};
 
-			this.fields = {}
+			this.fields = {};
 
 			// Build views object
-			this.views = {}
+			this.views = {};
 
 			var browseTplName  = this.dataContext ? this.dataContext + '.browse' : 'browse',
 				editTplName    = this.dataContext ? this.dataContext + '.edit' : 'edit',
@@ -66,8 +66,8 @@
 			// Reorder template falls back to browse template
 			this.views.reorder = {
 				$el: this.$el.find('[bebop-list--view="reorder"]'),
-				template: options.templates[reorderTplName] == undefined || options.templates[reorderTplName] == '' ? options.templates[browseTplName] : options.templates[reorderTplName]
-			}
+				template: options.templates[reorderTplName] === undefined || options.templates[reorderTplName] === '' ? options.templates[browseTplName] : options.templates[reorderTplName]
+			};
 
 			// Collect data container input
 			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]');
@@ -75,7 +75,7 @@
 			if (!this.list.status.get('isChildList')) {
 
 				this.$dataContainer.attr('name', options.fieldName +'[]');
-			};
+			}
 			
 			this.mode = options.mode ? options.mode : null;
 
@@ -110,7 +110,7 @@
 			var action = $(event.currentTarget).attr('bebop-list--action');
 
 			// Execute action if available
-			if (this[action] != undefined) this[action](event);
+			if (this[action] !== undefined) this[action](event);
 		},
 
 		edit: function() {
@@ -148,7 +148,7 @@
 			if (this.list.status.get('isChildList')) {
 
 				this.list.collection.trigger('updateParentCollection');
-			};
+			}
 		},
 
 		storeData: function() {
@@ -177,7 +177,7 @@
 			this.$el.slideUp(250, function() {
 
 				$(this).remove();
-			})
+			});
 		},
 
 		prepareView: function() {
@@ -198,7 +198,7 @@
 			 		$el: $el,
 			 		tagName: $el.get(0).tagName,
 			 		type: $el.attr('type')
-			 	}
+			 	};
 
 			 	if (!this.model.has(name)) {
 
@@ -266,8 +266,6 @@
 
 		getFieldValue: function(name)
 		{
-			console.log(name);
-
 			var $field = this.$content.find('[bebop-ui--field="'+ name +'"]');
 
 			switch($field.get(0).tagName) {
@@ -328,9 +326,7 @@
 					value = $field.val();
 					break;
 			}
-
-			console.log(value);
-
+			
 			return value;
 		},
 
@@ -343,7 +339,7 @@
 			if ($field.length > 0 && $field.get(0).tagName == 'SELECT') {
 
 				value = value ? $field.find('option[value="'+ value +'"]').text() : value;
-			};
+			}
 
 			return value;
 		},

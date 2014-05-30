@@ -71,19 +71,47 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function registerScripts()
 	{
-		wp_register_style('bebop-ui--media', self::$__base_url .'/assets/css/bebop-ui--media.css', array('bebop-ui'));
-		
-		wp_register_script('bebop-ui--mediaView', self::$__base_url .'/assets/js/views/Media.js', array(), false, true);
+		// Register CSS
+		// Register CSS
+		$css_dependencies = array(
+			'bebop-ui'
+		);
 
-		$app_dependencies = array(
-			'jquery',
-			'jquery-ui-sortable',
-			'underscore',
-			'backbone',
-			'bebop-ui',
-			'bebop-ui--mediaView'
-		);		
-		wp_register_script('bebop-ui--media', self::$__base_url .'/assets/js/bebop-ui--media.js', $app_dependencies, false, true);
+		wp_register_style('bebop-ui--media', self::$__base_url .'/assets/css/bebop-ui--media.css', $css_dependencies);
+		
+		// Register development JS
+		if (Bebop::isDevEnvEnabled()) {
+			
+			wp_register_script('bebop-ui--mediaView', self::$__base_url .'/assets/js/views/Media.js', array(), false, true);
+
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-sortable',
+				'underscore',
+				'backbone',
+				'bebop-ui',
+				'bebop-ui--mediaView'
+			);		
+
+			wp_register_script('bebop-ui--media', self::$__base_url .'/assets/js/bebop-ui--media.js', $js_dependencies, false, true);
+		}
+
+		// Register optimized JS
+		else {
+
+			// The following dependencies should never be concatenated and minified
+			// Some are use by other WordPress features and plugins
+			// and other are register by Bebop UI
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-sortable',
+				'underscore',
+				'backbone',
+				'bebop-ui',
+			);
+
+			wp_register_script('bebop-ui--media', self::$__base_url .'/assets/js/bebop-ui--media.min.js', $js_dependencies, false, true);
+		}
 	}
 
 	public function renderTemplates()

@@ -71,20 +71,40 @@ class MultiContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	 */
 	public function registerScripts()
 	{
-		$app_css_dependencies = array(
+		// Register CSS
+		$css_dependencies = array(
 			'bebop-ui'
 		);
 
-		wp_register_style('bebop-ui--multilist', self::$__base_url .'/assets/css/bebop-ui--multilist.css', $app_css_dependencies);
+		wp_register_style('bebop-ui--multilist', self::$__base_url .'/assets/css/bebop-ui--multilist.css', $css_dependencies);
 
-		wp_register_script('bebop-ui--multilistView', self::$__base_url .'/assets/js/views/MultiList.js', array(), false, true);
+		// Register development JS
+		if (Bebop::isDevEnvEnabled()) {
+			
+			wp_register_script('bebop-ui--multilistView', self::$__base_url .'/assets/js/views/MultiList.js', array(), false, true);
 
-		$app_dependencies = array(
-			'jquery',
-			'jquery-ui-tabs',
-			'bebop-ui--multilistView'
-		);		
-		wp_register_script('bebop-ui--multilist', self::$__base_url .'/assets/js/bebop-ui--multilist.js', $app_dependencies, false, true);
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-tabs',
+				'bebop-ui--multilistView'
+			);		
+
+			wp_register_script('bebop-ui--multilist', self::$__base_url .'/assets/js/bebop-ui--multilist.js', $js_dependencies, false, true);
+		}
+
+		// Register optimized JS
+		else {
+
+			// The following dependencies should never be concatenated and minified
+			// Some are use by other WordPress features and plugins
+			// and other are register by Bebop UI
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-tabs'
+			);
+
+			wp_register_script('bebop-ui--multilist', self::$__base_url .'/assets/js/bebop-ui--multilist.min.js', $js_dependencies, false, true);
+		}
 	}
 
 	/**

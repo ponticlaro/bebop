@@ -11,9 +11,10 @@
 		initialize: function(options) {
 
 			// Store reference to current instance
-			var self = this;
+			var self = this,	
+				data;
 
-			// Get parent list
+			// Get parent list & model
 			this.parentList  = options.parentList;
 			this.parentModel = options.parentModel;
 
@@ -60,8 +61,9 @@
 			// This is a child list
 			if (this.status.get('isChildList') && this.parentList) {
 
-				var data        = this.$el.attr('bebop-list--data'),
-					dataContext = data.replace('context:', '');
+				data = this.$el.attr('bebop-list--data');
+
+				var dataContext = data.replace('context:', '');
 
 				this.status.set('dataContext', dataContext);
 
@@ -73,10 +75,11 @@
 			// This is a parent list
 			else {
 
-				this.collection = new List.Collection;
+				this.collection = new List.Collection();
 
-				var dataJSON = this.$el.attr('bebop-list--data'),
-					data     = dataJSON ? JSON.parse(dataJSON) : [];
+				var dataJSON = this.$el.attr('bebop-list--data');
+
+				data = dataJSON ? JSON.parse(dataJSON) : [];
 
 				_.each(data, function(item) {
 
@@ -151,7 +154,7 @@
 
 						return 0;
 					}
-				}
+				};
 
 				this.itemTemplates = this.parentList.itemTemplates;
 				this.formTemplates = this.parentList.formTemplates;
@@ -263,11 +266,11 @@
 						self.$emptyStateIndicator.attr('name', '').slideUp(200);
 					}
 				}
-			}
+			};
 
 			this.listenTo(this.status, 'change:empty', this.handleEmptyIndicator);
 
-			if (this.collection.length == 0) this.status.set('empty', true);
+			if (this.collection.length === 0) this.status.set('empty', true);
 
 			// Remove empty state item
 			this.collection.on('add', function(model) {
@@ -296,7 +299,7 @@
 			// Add empty state item
 			this.collection.on('remove', function(model) {
 
-				if (this.collection.length == 0) this.status.set('empty', true);
+				if (this.collection.length === 0) this.status.set('empty', true);
 
 			}, this);
 
@@ -309,7 +312,7 @@
 					this.parentModel.set(this.status.get('dataContext'), this.collection.toJSON());
 					
 				}, this);
-			};
+			}
 
 			// Check sortable configuration attribute
 			if (this.$list.attr('bebop-list--is-sortable') == 'true')
@@ -385,7 +388,7 @@
 			this.status.set('currentEvent', event);
 
 			// Execute action if available
-			if (this['formAction_' + action] != undefined) this['formAction_' + action](event);
+			if (this['formAction_' + action] !== undefined) this['formAction_' + action](event);
 		},
 
 		isMode: function(mode) {
@@ -459,7 +462,7 @@
 
 			if (!data) data = {};
 
-			if (data.view == undefined) data.view = 'edit'
+			if (data.view === undefined) data.view = 'edit';
 
 			this.collection.add(new List.ItemModel(data));
 		},
@@ -509,6 +512,6 @@
 		var actionFn = 'formAction_' + name;
 
 		this.prototype[actionFn] = fn;
-	}
+	};
 
 })(window, document, undefined, jQuery || $);
