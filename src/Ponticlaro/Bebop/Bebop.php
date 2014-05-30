@@ -364,6 +364,7 @@ class Bebop
 		return call_user_func_array(array('\Ponticlaro\Bebop\Utils', $name), $args);
 	}
 
+
 	/**
 	 * Includes a path from the path collection
 	 * 
@@ -376,19 +377,10 @@ class Bebop
 		if (!is_string($path_key)) return;
 
 		// Check for path in path collection
-		$cached_path = self::getPath($path_key);
+		$cached_path = self::$__paths->get($path_key);
 
-		if ($cached_path && is_readable($cached_path) && is_file($cached_path)) {
-			
-			if ($once) {
-
-				include_once $cached_path;
-
-			} else {
-
-				include $cached_path;
-			}
-		}
+		// Try to include file if we have a path
+		if ($cached_path) self::__include($cached_path, $once);
 	}
 
 	/**
@@ -403,20 +395,36 @@ class Bebop
 		if (!is_string($path_key)) return;
 
 		// Check for path in path collection
-		$cached_path = self::getPath($path_key);
+		$cached_path = self::$__paths->get($path_key);
 
-		if ($cached_path && is_readable($cached_path) && is_file($cached_path)) {
-			
-			if ($once) {
-
-				require_once $cached_path;
-
-			} else {
-
-				require $cached_path;
-			}
-		}
+		// Try to include file if we have a path
+		if ($cached_path) self::__include($cached_path, $once, true);
 	}
+	
+	/**
+	 * Used to manage include/require functions
+	 * 
+	 * @param  string  $path Path of the file to include
+	 * @param  boolean $once True to include/require only once
+	 * @param  string  $fn   True to use 'require', false to use 'include'
+	 * @return void
+	 */
+	private static function __include($path, $once = false, $require = false)
+	{
+		// Return if $path is not a string or not readable
+		if (!is_string($path) || !is_readable($path)) return;
+
+		// Include / Require file
+		if ($require) {
+			
+			$once ? require_once $path : require $path;
+		}
+
+		else {
+
+			$once ? include_once $path : include $path;
+		}
+	} 
 
 	/**
 	 * Handles any call to undefined static methods
