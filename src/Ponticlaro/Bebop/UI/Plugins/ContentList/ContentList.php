@@ -40,11 +40,12 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	public function registerScripts()
 	{
 		// Register CSS
-		$css_dependencies = array(
-			'bebop-ui'
-		);
+		$css_path         = '/assets/css/bebop-ui--list.css';
+		$css_url          = self::$__base_url . $css_path;
+		$css_version      = Bebop::util('getFileVersion', __DIR__ . $css_path);
+		$css_dependencies = array('bebop-ui');
 
-		wp_register_style('bebop-ui--list', self::$__base_url .'/assets/css/bebop-ui--list.css', $css_dependencies);
+		wp_register_style('bebop-ui--list', $css_url, $css_dependencies, $css_version);
 
 		// Register development JS
 		if (Bebop::isDevEnvEnabled()) {
@@ -83,7 +84,11 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				'mustache'
 			);
 
-			wp_register_script('bebop-ui--list', self::$__base_url .'/assets/js/bebop-ui--list.min.js', $js_dependencies, false, true);
+			$js_path    = '/assets/js/bebop-ui--list.min.js';
+			$js_url     = self::$__base_url . $js_path;
+			$js_version = Bebop::util('getFileVersion', __DIR__ . $js_path);
+
+			wp_register_script('bebop-ui--list', $js_url, $js_dependencies, $js_version, true);
 		}
 	}
 

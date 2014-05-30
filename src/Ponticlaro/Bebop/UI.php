@@ -39,7 +39,7 @@ class UI {
 	private function __construct()
 	{
 		// Get URL for current directory
-		self::$__base_url = Bebop::getPathUrl(__DIR__);
+		self::$__base_url = Bebop::getPathUrl(__DIR__, true);
 
 		// Instantiate plugins collection object
 		$this->__plugins = Bebop::Collection();
@@ -80,7 +80,11 @@ class UI {
 	public function registerScripts()
 	{
 		// Register CSS
-		wp_register_style('bebop-ui', self::$__base_url .'/UI/assets/css/bebop-ui.css');
+		$css_path    = '/UI/assets/css/bebop-ui.css';
+		$css_url     = self::$__base_url . $css_path;
+		$css_version = Bebop::util('getFileVersion', __DIR__ . $css_path);
+
+		wp_register_style('bebop-ui', $css_url, array(), $css_version);
 
 		// Register development JS
 		if (Bebop::isDevEnvEnabled()) {
@@ -102,7 +106,11 @@ class UI {
 
 			// Mustache is optimized separately 
 			// so that other components can load it only if needed
-			wp_register_script('mustache', self::$__base_url .'/UI/assets/js/vendor/mustache.min.js', array(), '0.8.1', true);
+			$mustache_path    = '/UI/assets/js/vendor/mustache.min.js';
+			$mustache_url     = self::$__base_url . $mustache_path;
+			$mustache_version = Bebop::util('getFileVersion', __DIR__ . $mustache_path); 
+			
+			wp_register_script('mustache', $mustache_url, array(), $mustache_version, true);
 
 			// The following dependencies should never be concatenated and minified
 			// These are used by other WordPress features and plugins
@@ -111,7 +119,11 @@ class UI {
 				'jquery-ui-datepicker'
 			);
 
-			wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.min.js', $dependencies, false, true);
+			$bebop_ui_path    = '/UI/assets/js/bebop-ui.min.js';
+			$bebop_ui_url     = self::$__base_url . $bebop_ui_path;
+			$bebop_ui_version = Bebop::util('getFileVersion', __DIR__ . $bebop_ui_path); 
+
+			wp_register_script('bebop-ui', $bebop_ui_url, $dependencies, $bebop_ui_version, true);
 		}
 	}
 
