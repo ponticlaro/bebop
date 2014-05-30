@@ -90,6 +90,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				'underscore',
 				'backbone',
 				'bebop-ui',
+				'mustache',
 				'bebop-ui--mediaView'
 			);		
 
@@ -108,6 +109,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				'underscore',
 				'backbone',
 				'bebop-ui',
+				'mustache'
 			);
 
 			$js_path    = '/assets/js/bebop-ui--media.min.js';
