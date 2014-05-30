@@ -322,6 +322,18 @@ class Bebop
 	}
 
 	/**
+	 * Returns the Env class instance or 
+	 * the target environment by using its key
+	 * 
+	 */
+	public static function Env($key = null)
+	{
+		$env_manager = Bebop\Helpers\EnvManager::getInstance();
+
+		return is_string($key) && $env_manager->exists($key) ? $env_manager->get($key) : $env_manager;
+	}
+
+	/**
 	 * Returns the UI class instance
 	 */
 	public static function UI()
