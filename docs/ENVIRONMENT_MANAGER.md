@@ -62,7 +62,7 @@ The environment manager comes with 3 built-in empty environments that you can fi
 	$env->addHosts(array(
 		'localhost',
 		'local.dev'
-	);
+	));
 
 #### Get all hosts as an associative array
 
