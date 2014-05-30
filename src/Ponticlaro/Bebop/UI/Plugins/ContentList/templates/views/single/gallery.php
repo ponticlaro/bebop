@@ -1,4 +1,5 @@
 <div bebop-list--el="container" 
+	 bebop-list--mode="gallery" 
 	 bebop-list--config='<?php echo json_encode($this->config->get()); ?>'
 	 bebop-list--data='<?php echo json_encode(preg_replace("/'/", "&#39;", $this->data->get())); ?>'
 	 >
