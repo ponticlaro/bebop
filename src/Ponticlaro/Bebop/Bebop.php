@@ -374,13 +374,8 @@ class Bebop
 	 */
 	public static function inc($path_key, $once = false)
 	{
-		if (!is_string($path_key)) return;
-
-		// Check for path in path collection
-		$cached_path = self::$__paths->get($path_key);
-
-		// Try to include file if we have a path
-		if ($cached_path) self::__include($cached_path, $once);
+		// Include file
+		self::__includeFile($cached_path, $once);
 	}
 
 	/**
@@ -392,13 +387,8 @@ class Bebop
 	 */
 	public static function req($path_key, $once = false)
 	{
-		if (!is_string($path_key)) return;
-
-		// Check for path in path collection
-		$cached_path = self::$__paths->get($path_key);
-
-		// Try to include file if we have a path
-		if ($cached_path) self::__include($cached_path, $once, true);
+		// Require file
+		self::__includeFile($path_key, $once, true);
 	}
 	
 	/**
@@ -409,10 +399,16 @@ class Bebop
 	 * @param  string  $fn   True to use 'require', false to use 'include'
 	 * @return void
 	 */
-	private static function __include($path, $once = false, $require = false)
-	{
+	protected static function __includeFile($path_key, $once = false, $require = false)
+	{	
+		// Return if path key is not a string
+		if (!is_string($path_key)) return;
+
+		// Check for path in path collection
+		$path = self::$__paths->get($path_key);
+
 		// Return if $path is not a string or not readable
-		if (!is_string($path) || !is_readable($path)) return;
+		if (!$path || !is_string($path) || !is_readable($path)) return;
 
 		// Include / Require file
 		if ($require) {
