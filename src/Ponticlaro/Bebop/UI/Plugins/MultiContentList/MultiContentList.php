@@ -41,7 +41,7 @@ class MultiContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	public function __construct()
 	{
 		// Get URL for the directory containing this plugin
-		self::$__base_url = Bebop::getPathUrl(__DIR__);
+		self::$__base_url = Bebop::util('getPathUrl', __DIR__);
 
 		// Instantiate configuration collections
 		$this->__config = Bebop::Collection();

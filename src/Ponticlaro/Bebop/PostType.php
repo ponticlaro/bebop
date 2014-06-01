@@ -3,9 +3,12 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
-class PostType
+class PostType extends TrackableObjectAbstract
 {
+	protected $__type = 'post_type';
+
 	private $__config;
 
 	private $__supports;
@@ -54,19 +57,7 @@ class PostType
 			$this->register();
 		}
 
-		if(class_exists('\Ponticlaro\Bebop')){
-
-			// Keep track of this object on Bebop
-			Bebop::track($this);
-			$key = $this->getConfig('key');
-			unset($this);
-
-			return Bebop::getPostType($key);
-
-		} else {
-
-			return $this;
-		}
+		return $this;
 	}
 
 	private function __handleInit($name, array $config = array())
@@ -91,9 +82,9 @@ class PostType
 			}
 		} 
 
-		// Set post_type key
-		$key = Bebop::util('slugify', $this->__config->get('singular_name') );
-		$this->__config->set('key', $key);
+		// Set post_type id
+		$this->__id = Bebop::util('slugify', $this->__config->get('singular_name'));
+		$this->__config->set('key', $this->__id);
 
 		// Handle configuration arguments
 		if ($config) {	

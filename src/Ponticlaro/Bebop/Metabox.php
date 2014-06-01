@@ -3,11 +3,13 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
-
 use Ponticlaro\Bebop\Helpers\MetaboxData;
+use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
-class Metabox
+class Metabox extends TrackableObjectAbstract
 {
+	protected $__type = 'metabox';
+
 	protected $__config;
 
 	protected $__post_types;
@@ -54,19 +56,7 @@ class Metabox
 
 		add_action('save_post', array($this, 'saveMeta'));
 
-		if (class_exists('\Ponticlaro\Bebop')) {
-
-			// Keep track of this object on Bebop
-			Bebop::track($this);
-			$key = $this->getConfig('key');
-			unset($this);
-
-			return Bebop::getMetabox($key);
-
-		} else {
-
-			return $this;
-		}
+		return $this;
 	}
 
 	private function __handleInit($title, $post_types, array $meta_fields = array(), $fn = null,  array $config = array())
@@ -76,9 +66,9 @@ class Metabox
 
 		$this->__config->set('title', $title);
 
-		// Set key
-		$key = Bebop::util('slugify', $title);
-		$this->__config->set('key', $key);
+		// Set post_type id
+		$this->__id = Bebop::util('slugify', $title);
+		$this->__config->set('key', $this->__id);
 
 		if (!isset($post_types)) 
 			throw new ErrorException("You must define post types for this metabox");

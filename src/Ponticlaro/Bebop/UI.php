@@ -3,21 +3,15 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
-class UI {
+class UI extends SingletonAbstract {
 
 	/**
 	 * Class that plugins should be extending to get loaded
 	 * 
 	 */
 	const PLUGIN_ABSTRACT_CLASS = 'Ponticlaro\Bebop\UI\PluginAbstract';
-
-	/**
-	 * Bebop UI instance
-	 * 
-	 * @var Ponticlaro\Bebop\UI
-	 */
-	private static $__instance;
 
 	/**
 	 * URL for current directory
@@ -36,10 +30,10 @@ class UI {
 	 * Instantiates UI object
 	 * 
 	 */
-	private function __construct()
+	protected function __construct()
 	{
 		// Get URL for current directory
-		self::$__base_url = Bebop::getPathUrl(__DIR__, true);
+		self::$__base_url = Bebop::util('getPathUrl', __DIR__);
 
 		// Instantiate plugins collection object
 		$this->__plugins = Bebop::Collection();
@@ -55,21 +49,6 @@ class UI {
 
 		// Register common UI scripts
 		add_action('admin_enqueue_scripts', array($this, 'registerScripts'));
-	}
-
-	/**
-	 * Gets single instance of Bebop UI
-	 * 
-	 * @return Ponticlaro\Bebop\UI Bebop UI class instance
-	 */
-	public static function getInstance() 
-	{
-		if(!self::$__instance || !is_a(self::$__instance, 'Ponticlaro\Bebop\UI')) {
-
-			self::$__instance = new UI();
-		}
-
-		return self::$__instance;
 	}
 
 	/**

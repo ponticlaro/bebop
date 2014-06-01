@@ -1,6 +1,6 @@
 <?php
 
-namespace Ponticlaro\Bebop\Common;
+namespace Ponticlaro\Bebop\Patterns;
 
 abstract class CollectionAbstract implements CollectionInterface {
 

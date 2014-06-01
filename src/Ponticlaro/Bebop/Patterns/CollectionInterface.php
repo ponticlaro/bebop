@@ -1,6 +1,6 @@
 <?php
 
-namespace Ponticlaro\Bebop\Common;
+namespace Ponticlaro\Bebop\Patterns;
 
 interface CollectionInterface {	
 
@@ -18,5 +18,4 @@ interface CollectionInterface {
 	public function hasKey($key);
 	public function hasValue($value, $key = null);
     public function count($key = false);
-
 }

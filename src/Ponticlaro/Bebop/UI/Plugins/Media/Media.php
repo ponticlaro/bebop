@@ -21,7 +21,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function __construct()
 	{
-		self::$__base_url = Bebop::getPathUrl(__DIR__);
+		self::$__base_url = Bebop::util('getPathUrl', __DIR__);
 
 		$this->__instances = Bebop::Collection();
 

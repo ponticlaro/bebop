@@ -3,15 +3,9 @@
 namespace Ponticlaro\Bebop\Helpers;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
-class EnvManager {
-
-	/**
-	 * Bebop EnvManager instance
-	 * 
-	 * @var Ponticlaro\Bebop\Helpers\EnvManager
-	 */
-	private static $__instance;
+class EnvManager extends SingletonAbstract {
 
 	/**
 	 * List of environments
@@ -24,29 +18,14 @@ class EnvManager {
 	 * Instantiates Env Manager object
 	 * 
 	 */
-	private function __construct()
+	protected function __construct()
 	{
-		// Instantiate plugins collection object
+		// Instantiate environments collection object
 		self::$__environments = Bebop::Collection(array(
 			'development' => new Env('development'),
 			'staging'     => new Env('staging'),
 			'production'  => new Env('production')
 		));
-	}
-
-	/**
-	 * Gets single instance
-	 * 
-	 * @return Ponticlaro\Bebop\Helpers\EnvManager Environment Manger instance
-	 */
-	public static function getInstance() 
-	{
-		if(!is_a(self::$__instance, 'Ponticlaro\Bebop\Helpers\EnvManager')) {
-
-			self::$__instance = new EnvManager();
-		}
-
-		return self::$__instance;
 	}
 
 	/**
