@@ -37,6 +37,36 @@ class PathManager extends SingletonAbstract {
 	}
 
 	/**
+	 * Used to store a single path using a key
+	 * 
+	 * @param string $key  Key 
+	 * @param string $path Path
+	 */
+	public static function set($key, $path)
+	{
+		self::$__paths->set($key, rtrim($path, '/'));
+	}
+
+	/**
+	 * Returns a single path using a key
+	 * with an optionally suffixed realtive path
+	 * 
+	 * @param  string $key           Key for the target path
+	 * @param  string $relative_path Optional relative path
+	 * @return string                path
+	 */
+	public static function get($key, $relative_path = null)
+	{	
+		// Get path without trailing slash
+		$path = self::$__paths->get($key);
+
+		// Concatenate relative URL
+		if ($relative_path) $path .= '/'. ltrim($relative_path, '/');
+
+		return $path; 
+	}
+
+	/**
 	 * Sends all undefined method calls to the paths collection object
 	 * 
 	 * @param  string $name Method name

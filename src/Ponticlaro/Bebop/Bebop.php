@@ -235,12 +235,15 @@ class Bebop extends SingletonAbstract
 
 	/**
 	 * Echoes single URL
+	 * with an optionally suffixed realtive URL
 	 * 
-	 * @param string $key Key for target URL
+	 * @param  string $key          Key for the target URL
+	 * @param  string $relative_url Optional relative URL
+	 * @return void
 	 */
-	public static function Url($key)
+	public static function Url($key, $relative_url = null)
 	{
-		echo self::Urls()->get($key);	
+		echo self::Urls()->get($key, $relative_url);	
 	}
 
 	/**
@@ -269,13 +272,16 @@ class Bebop extends SingletonAbstract
 	}
 
 	/**
-	 * Returns single URL
+	 * Returns a single URL using a key
+	 * with an optionally suffixed realtive URL
 	 * 
-	 * @param string $key Key for target URL
+	 * @param  string $key          Key for the target URL
+	 * @param  string $relative_url Optional relative URL
+	 * @return string               URL
 	 */
-	public static function getUrl($key)
+	public static function getUrl($key, $relative_url = null)
 	{
-		return self::Urls()->get($key);
+		return self::Urls()->get($key, $relative_url);
 	}
 
 	/**
@@ -301,12 +307,15 @@ class Bebop extends SingletonAbstract
 
 	/**
 	 * Echoes single path
+	 * with an optionally suffixed realtive path
 	 * 
-	 * @param string $key Key for target path
+	 * @param  string $key           Key for target path
+	 * @param  string $relative_path Optional relative path
+	 * @return void
 	 */
-	public static function Path($key)
+	public static function Path($key, $relative_path = null)
 	{
-		echo self::Paths()->get($key);	
+		echo self::Paths()->get($key, $relative_path);	
 	}
 
 	/**
@@ -336,12 +345,15 @@ class Bebop extends SingletonAbstract
 
 	/**
 	 * Gets single path
+	 * with an optionally suffixed realtive path
 	 * 
-	 * @param string $key Key for target path
+	 * @param  string $key           Key for target path
+	 * @param  string $relative_path Optional relative path
+	 * @return string                Path
 	 */
-	public static function getPath($key)
+	public static function getPath($key, $relative_path = null)
 	{
-		return self::Paths()->get($key);
+		return self::Paths()->get($key, $relative_path);
 	}
 
 	/**

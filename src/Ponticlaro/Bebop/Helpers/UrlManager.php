@@ -37,6 +37,36 @@ class UrlManager extends SingletonAbstract {
 	}
 
 	/**
+	 * Used to store a single URL using a key
+	 * 
+	 * @param string $key Key 
+	 * @param string $url URL
+	 */
+	public static function set($key, $url)
+	{
+		self::$__urls->set($key, rtrim($url, '/'));
+	}
+
+	/**
+	 * Returns a single URL using a key
+	 * with an optionally suffixed realtive URL
+	 * 
+	 * @param  string $key          Key for the target URL
+	 * @param  string $relative_url Optional relative URL
+	 * @return string               URL
+	 */
+	public static function get($key, $relative_url = null)
+	{	
+		// Get URL without trailing slash
+		$url = self::$__urls->get($key);
+
+		// Concatenate relative URL
+		if ($relative_url) $url .= '/'. ltrim($relative_url, '/');
+
+		return $url; 
+	}
+
+	/**
 	 * Sends all undefined method calls to the paths collection object
 	 * 
 	 * @param  string $name Method name
