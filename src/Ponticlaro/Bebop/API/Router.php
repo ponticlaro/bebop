@@ -3,32 +3,87 @@
 namespace Ponticlaro\Bebop\API;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\DB;
+use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Resources\Models\Attachment;
 
-class Router {
+class Router extends SingletonAbstract {
 
 	/**
-	 * Slim app container
+	 * Sets the base URL for all resources
+	 */
+	const BASE_URL = '/_bebop/api/';
+
+	/**
+	 * Slim instance
 	 * 
 	 * @var object Slim\Slim
 	 */
-	private $app;
+	protected static $slim;
 
-	public function __construct()
+	/**
+	 * List of routes
+	 * 
+	 * @var Ponticlaro\Bebop\Common\Collection;
+	 */
+	protected static $routes;
+
+	/**
+	 * Instantiates Router
+	 */
+	protected function __construct()
 	{
-		// Remove WordPress Content-Type header
-		header_remove('Content-Type');
-
 		// Instantiate Slim
-		$app = new \Slim\Slim;
+		self::$slim = new \Slim\Slim;
 
 		// Set Response content-type header
-		$app->response()->header('Content-Type', 'application/json');
+		self::$slim->response()->header('Content-Type', 'application/json');
 
-		// Handle not found
-		$app->notFound(function() use ($app) {
+		// Set all default routes on instantiation
+		// so that users can modify then before running the router
+		self::setDefaultRoutes();
+	}
 
-			$app->status(404);
+	/**
+	 * Returns Slim instance
+	 * 
+	 */
+	public static function Slim()
+	{
+		return self::$slim;
+	}
+
+	/**
+	 * Returns Routes manager instance
+	 * 
+	 */
+	public static function Routes()
+	{
+		return Routes::getInstance();
+	}
+
+	/**
+	 * Does a pre-flight check
+	 * 
+	 * @return void
+	 */
+	public static function preFlightCheck()
+	{
+		self::$slim->hook('slim.before', function($data) {		 
+			
+		}); 
+	}
+
+	/**
+	 * Handles response when resource does not exist
+	 * 
+	 * @return void
+	 */
+	public static function handleNotFound()
+	{
+		self::$slim->notFound(function() {
+
+			self::$slim->status(404);
 
 			echo json_encode(array(
 				'errors' => array(
@@ -39,32 +94,55 @@ class Router {
 				)
 			));
 		});
+	}
 
-		// Pre-flight check 
-		$app->hook('slim.before', function($data) use($app) {		 
+	/**
+	 * Handles exceptions
+	 * 
+	 * @return void
+	 */
+	public static function handleErrors()
+	{
+		self::$slim->error(function (\Exception $e) {
+
+		});
+	}
+
+	/**
+	 * Handles the response and set the response bodu
+	 * 
+	 * @return void
+	 */
+	public static function handleResponse()
+	{
+		self::$slim->hook('handle_response', function ($data) {		 
 			
-		}); 
+			self::$slim->response()->body(json_encode($data)); 
+		});
+	}
 
-		// Routes
-		$app->get('/_bebop/api(/)', function() use($app) {
+	/**
+	 * Sets default API routes
+	 *
+	 * @return void
+	 */
+	public static function setDefaultRoutes()
+	{
+		// Hello World route
+		self::Routes()->set('GET', '/', function() {
 			
-			$data = array('Hello' => true);
-
-			// Get response object
-			$response = $app->response();
-
-			// Send response
-			$response->body(json_encode($data)); 
+			return array('Hello World');
 		});
 
+		// Get all registered post types 
 		$post_types = get_post_types(array(), 'objects');
 
 		// Add endpoint to inform about available endpoints
-		$app->get("/_bebop/api/_resources(/)", function() use($app, $post_types) {
+		self::Routes()->set('GET', "_resources", function() use($post_types) {
 
 			if (!current_user_can('manage_options')) {
 		
-				$app->halt(403, json_encode(array(
+				self::$slim->halt(403, json_encode(array(
 					'error' => array(
 						'status' => 403,
 						'message' => "You're not an authorized user."
@@ -85,8 +163,8 @@ class Router {
 				);
 			}
 
-			// Send response
-			$app->applyHook('handle_response', $resources);
+			// Return resources
+			return $resources;
 		});
 
 		/////////////////////////////////////////////////
@@ -96,7 +174,8 @@ class Router {
 			
 			$resource_name = Bebop::util('slugify', $post_type->labels->name);
 
-			$app->get("/_bebop/api/$resource_name(/)(:id)(/)", function($id = null) use($app, $post_type, $resource_name) {
+			// Add post resource
+			self::Routes()->set('GET', "$resource_name(/)(:id)(/)", function($id = null) use($post_type, $resource_name) {
 
 				if (is_numeric($id)) {
 
@@ -131,228 +210,67 @@ class Router {
 						}
 					}
 
-					$query = self::__queryDb();
-					$meta  = self::__getPaginationMeta($query, $resource_name);
-					
-					$response = array(
-						'meta'  => $meta,
-						'items' => $query->posts
-					);
+					$response = DB::query('posts', $_GET, array('with_meta' => true));
+				}
+
+				// Enable developers to modify response for target resource
+				$response = apply_filters("bebop:api:$resource_name:response", $response);
+
+				// Return response
+				return $response;
+			});
+			
+			// Add meta data resource
+			self::Routes()->set('GET', "$resource_name/:id/meta/:key(/)", function($id, $key) use($post_type, $resource_name) {
+
+				// Get meta data
+				$data = get_post_meta($id, $key, false);
+
+				// Decode JSON strings
+				foreach ($data as $index => $entry) {
+						
+					if (Bebop::util('isJson', $entry)) $data[$index] = json_decode($entry);
 				}
 
 				// Enable developers to modify response
-				$response = apply_filters('bebop:api:response', $response);
+				$response = apply_filters('bebop:api:meta:response', $data);
+
+				// Return response
+				return $response;
+			});
+		}
+	}
+
+	/**
+	 * Starts router 
+	 * 
+	 * @return void
+	 */
+	public function run()
+	{
+		// Remove WordPress Content-Type header
+		header_remove('Content-Type');
+
+		self::preFlightCheck();
+		self::handleNotFound();
+		self::handleErrors();
+		self::handleResponse();
+
+		foreach (Routes::getAll() as $route) {
+
+			self::$slim->{$route->getMethod()} (self::BASE_URL . rtrim(ltrim($route->getPath(), '/'), '/') .'/', function () use ($route) {
+				
+				// Get data from route function
+				$data = call_user_func_array($route->getFunction(), func_get_args());
+
+				// Enable developers to modify global response
+				$data = apply_filters('bebop:api:response', $data);
 
 				// Send response
-				$app->applyHook('handle_response', $response);
+				self::$slim->applyHook('handle_response', $data);
 			});
 		}
 
-		// Handle Response 
-		$app->hook('handle_response', function($data) use($app) {		 
-			
-			// Send response
-			$app->response()->body(json_encode($data)); 
-		});
-
-		// Error Handling 
-		$app->error(function (\Exception $e) use ($app) {
-
-		});
-
-		// Run SLIM app 
-		$app->run();
-	}
-
-	private static function __queryDb()
-	{
-		// Map short references to full query argument key
-		$params_map = array(
-			'type'           => 'post_type',
-			'status'         => 'post_status',
-			'parent'         => 'post_parent',
-			'mime_type'      => 'post_mime_type',
-			'max_results'    => 'posts_per_page',
-			'sort_by'        => 'orderby',
-			'sort_direction' => 'order',
-			'page'           => 'paged',
-			'include'        => 'post__in',
-			'exclude'        => 'post__not_in'
-		);
-
-		$raw_params      = $_GET;
-		$filtered_params = array(
-
-			'tax_query' => array(
-
-				'relation' => isset($raw_params['tax_relation']) ? $raw_params['tax_relation'] : 'AND'
-			),
-
-			'meta_query' => array(
-
-				'relation' => isset($raw_params['meta_relation']) ? $raw_params['meta_relation'] : 'AND'
-			)
-		);
-
-		foreach ($raw_params as $key => $value) {
-
-			// Check for tax query params
-			if (preg_match('/^tax\:/', $key)) {
-
-				$data_string = str_replace('tax:', '', $key);
-
-				if ($data_string) {
-					
-					$data = null;
-					
-					if (Bebop::util('isJson', $data_string)) {
-						
-						$data = $data_string ? json_decode($data_string, true) : null;
-						
-					} else {
-
-						$data = array('taxonomy' => $data_string);
-					}
-
-					if ($data) {
-
-						if (!isset($data['operator'])) $data['operator'] = 'IN';
-						if (!isset($data['field'])) $data['field'] = 'slug';
-
-						$data['terms'] = array();
-
-						$values = explode(',', $value);
-
-						foreach ($values as $value) {
-							$data['terms'][] = $value;
-						}
-
-						$filtered_params['tax_query'][] = $data;
-					}
-				}
-
-			// Check for meta query params
-			} elseif (preg_match('/^meta\:/', $key)) {
-
-				$data_string = str_replace('meta:', '', $key);
-
-				if ($data_string) {
-					
-					$data = null;
-					
-					if (Bebop::util('isJson', $data_string)) {
-						
-						$data = $data_string ? json_decode($data_string, true) : null;
-						
-					} else {
-
-						$data = array('key' => $data_string);
-					}
-
-					if ($data) {
-
-						if (!isset($data['compare'])) $data['compare'] = '=';
-						if (!isset($data['type'])) $data['type'] = 'CHAR';
-		
-						$data['value'] = $value;
-
-						$filtered_params['meta_query'][] = $data;
-					}
-				}
-
-			} else {
-
-				// Check if we should map a query parameter to a built-in query parameter
-				if (array_key_exists($key, $params_map)) $key = $params_map[$key];
-
-				// Make sure comma delimited values are converted to arrays
-				// on parameters that require or admit arrays as the value
-				$parameters_requiring_arrays = array(
-					'author__in',
-					'author__not_in',
-					'category__and',
-					'category__in',
-					'category__not_in',
-					'tag__and',
-					'tag__in',
-					'tag__not_in',
-					'tag_slug__and',
-					'tag_slug__in',
-					'post_parent__in',
-					'post_parent__not_in',
-					'post__in',
-					'post__not_in',
-				);
-
-				$parameters_admitting_arrays = array(
-					'post_type',
-					'post_status'
-				);
-
-				if (in_array($key, $parameters_requiring_arrays)) {
-					
-					$value = explode(',', $value);
-				}
-
-				if (in_array($key, $parameters_admitting_arrays)) {
-					
-					$value = explode(',', $value);
-
-					if (count($value) == 1) $value = $value[0];
-				}
-
-				$filtered_params[$key] = $value;
-			}
-		}
-
-		return new \WP_Query($filtered_params);
-	}
-
-	public static function __getPaginationMeta(\WP_Query $query, $resource_name)
-	{
-		$meta  = array();
-		$posts = $query->posts;
-
-		$meta['items_total']    = (int) $query->found_posts;
-		$meta['items_returned'] = (int) $query->post_count;
-		$meta['total_pages']    = (int) $query->max_num_pages;
-		$meta['current_page']   = (int) max(1, $query->query_vars['paged']);
-		$meta['has_more']       = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? false : true;
-
-		$params = $_GET;
-
-		// Remove post_type parameter when not querying the /posts resource
-		if ($resource_name != 'posts' && isset($params['post_type'])) {
-
-			unset($params['post_type']);
-		} 
-
-		$meta['previous_page'] = $meta['current_page'] == 1 ? null : self::__buildPreviousPageUrl($params);
-		$meta['next_page']     = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? null : self::__buildNextPageUrl($params);
-
-		return $meta;
-	}
-
-	private static function __buildPreviousPageUrl(array $params = array())
-	{
-		$params['page'] = isset($params['page']) ? $params['page'] - 1 : 1; 
-
-		return '?'. self::__buildQuery($params);
-	}
-
-	private static function __buildNextPageUrl(array $params = array())
-	{
-		$params['page'] = isset($params['page']) ? $params['page'] + 1 : 2;
-
-		return '?'. self::__buildQuery($params);
-	}
-
-	private static function __buildQuery(array $params = array())
-	{
-		array_walk($params, function(&$value, $key) {
-			$value = urldecode($value);
-		});
-
-		return http_build_query($params);
+		self::$slim->run();
 	}
 }

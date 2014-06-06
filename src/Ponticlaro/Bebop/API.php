@@ -3,7 +3,8 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\API\Router as ApiRouter;
+use Ponticlaro\Bebop\API\Client;
+use Ponticlaro\Bebop\API\Router;
 use Ponticlaro\Bebop\Http\Client as HttpClient;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
@@ -37,6 +38,28 @@ class API extends SingletonAbstract {
 	}
 
 	/**
+	 * Returns Router instance
+	 *
+	 * @return  Ponticlaro\Bebop\API\Router API Router
+	 */
+	public static function Router()
+	{
+		return Router::getInstance();
+	}
+
+	/**
+	 * Returns Routes Manager instance
+	 *
+	 * @return  Ponticlaro\Bebop\API\Routes API Routes Manager
+	 */
+	public static function Routes()
+	{
+		$router = Router::getInstance();
+
+		return $router->Routes();
+	}
+
+	/**
 	 * Register API stuff on the init hook
 	 * 
 	 * @return void
@@ -47,7 +70,7 @@ class API extends SingletonAbstract {
 	}
 
 	/**
-	 * Adds custom rewrite rules
+	 * Adds custom rewrite rules for API
 	 * 
 	 * @param  array $wp_rules Array of rewrite rules
 	 * @return array           Modified array of rewrite rules
@@ -62,7 +85,7 @@ class API extends SingletonAbstract {
 	}
 
 	/**
-	 * Adds template redirections
+	 * Adds template redirections to run the router
 	 * 
 	 * @return void
 	 */
@@ -72,7 +95,8 @@ class API extends SingletonAbstract {
 
 		if($wp_query->get('bebop_api')) {
 			
-			new ApiRouter;
+			$router = self::Router();
+			$router->run();
 			exit;
 		}
 	}

@@ -247,6 +247,16 @@ abstract class CollectionAbstract implements CollectionInterface {
 	}
 
 	/**
+	 * Returns all data
+	 * 
+	 * @return array All data currently stored
+	 */
+	public function getAll()
+	{
+		return $this->data;
+	}
+
+	/**
 	 * Removes one key or mroe key
 	 * 
 	 * @param    string|array   $key Key or keys to be removed
