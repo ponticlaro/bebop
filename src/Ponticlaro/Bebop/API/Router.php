@@ -38,10 +38,6 @@ class Router extends SingletonAbstract {
 
 		// Set Response content-type header
 		self::$slim->response()->header('Content-Type', 'application/json');
-
-		// Set all default routes on instantiation
-		// so that users can modify then before running the router
-		self::setDefaultRoutes();
 	}
 
 	/**
@@ -175,7 +171,7 @@ class Router extends SingletonAbstract {
 			$resource_name = Bebop::util('slugify', $post_type->labels->name);
 
 			// Add post resource
-			self::Routes()->set('GET', "$resource_name(/)(:id)(/)", function($id = null) use($post_type, $resource_name) {
+			self::Routes()->set('GET', "$resource_name(/)(:id)", function($id = null) use($post_type, $resource_name) {
 
 				if (is_numeric($id)) {
 
@@ -255,6 +251,10 @@ class Router extends SingletonAbstract {
 		self::handleNotFound();
 		self::handleErrors();
 		self::handleResponse();
+
+		// Set all default routes on instantiation
+		// so that users can modify then before running the router
+		self::setDefaultRoutes();
 
 		foreach (Routes::getAll() as $route) {
 
