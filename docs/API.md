@@ -28,16 +28,16 @@ You just need to define these for the route:
 - **$method**: GET, POST, PUT, PATCH, HEAD, OPTIONS, etc...
 - **$path**: URL path. Will be automatically prefixed with `/_bebop/api/`
 - **$function**: The function that will handle the route. All route parameters will be correctly passed to this function.  
-
-    $routes = \Ponticlaro\Bebop::API()->Routes();
+```php
+$routes = \Ponticlaro\Bebop::API()->Routes();
     
-    $routes->set('get', 'pages/:id/child-pages', function($id) {
+$routes->set('get', 'pages/:id/child-pages', function($id) {
         
-        // Your code goes here.
+    // Your code goes here.
     
-        // You must return the raw response
-        return $response;
-    });
+    return $response;
+});
+```
 
 ## Resources
 ### Status Resources
