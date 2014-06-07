@@ -10,17 +10,23 @@ The URL for all resources will be prefixed with `/_bebop/api/`.
 ### Getting the API Object
 The API object is a singleton with several components that allow API customization.  
 
-    $api = \Ponticlaro\Bebop::API();
+```php
+$api = \Ponticlaro\Bebop::API();
+```
 
 ### Getting the Router Object
 The Router object is a singleton that handles all API requests, responses, authentication, error handling, etc...
 
-    $router = \Ponticlaro\Bebop::API()->Router();
+```php
+$router = \Ponticlaro\Bebop::API()->Router();
+```
 
 ### Getting the Routes Object
 The Routes object is a singleton that is used to manage routes.
 
-    $routes = \Ponticlaro\Bebop::API()->Routes();
+```php
+$routes = \Ponticlaro\Bebop::API()->Routes();
+```
 
 ### Adding/Replacing resources
 You can either add or replace an existing route by using the `Routes` object.  
@@ -94,11 +100,13 @@ If you need to use the [`tax_query`](http://codex.wordpress.org/Class_Reference/
 
 After the `tax:` segment, you need to add a JSON object like:
 
-	{
-        "taxonomy": "year",
-        "field": "slug",
-        "operator": "IN"
-	}
+```json
+{
+    "taxonomy": "year",
+    "field": "slug",
+    "operator": "IN"
+}
+```
 
 #### Meta Queries
 ##### Structure
@@ -121,28 +129,32 @@ If you need to use the [`meta_query`](http://codex.wordpress.org/Class_Reference
 
 After the `meta:` segment, you need to add a JSON object like:
 
-	{
-        "key": "latitude",
-        "compare": "between",
-        "type": "numeric"
-	}
+```json
+{
+    "key": "latitude",
+    "compare": "between",
+    "type": "numeric"
+}
+```
 
 #### Response Structure
 All resources that are not for a specific object ID, will return the following structure.
 
-	{
-        "meta": {
-    		"items_total": 20,
-    		"items_returned": 10,
-    		"total_pages": 2,
-    		"current_page": 1,
-    		"has_more": true,
-    		"previous_page": null,
-    		"next_page": "?page=2"
-    	},
-    	"items": [
-    		// Array or objects
-    	]
-	}
+```json
+{
+    "meta": {
+    	"items_total": 20,
+    	"items_returned": 10,
+    	"total_pages": 2,
+    	"current_page": 1,
+    	"has_more": true,
+    	"previous_page": null,
+    	"next_page": "?page=2"
+    },
+    "items": [
+    	// Array or objects
+    ]
+}
+```
 	
 ### Querying Meta
