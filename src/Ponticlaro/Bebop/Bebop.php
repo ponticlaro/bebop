@@ -2,6 +2,7 @@
 
 namespace Ponticlaro;
 
+use Ponticlaro\Bebop\DB\ObjectMeta;
 use Ponticlaro\Bebop\Common\Collection;
 use Ponticlaro\Bebop\Helpers\Factory;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
@@ -109,6 +110,21 @@ class Bebop extends SingletonAbstract
 	public static function Paths()
 	{
 		return Bebop\Helpers\PathManager::getInstance();
+	}
+
+	public static function UserMeta($id)
+	{	
+		return new ObjectMeta('user', $id);
+	}
+
+	public static function PostMeta($id)
+	{	
+		return new ObjectMeta('post', $id);
+	}
+
+	public static function CommentMeta($id)
+	{	
+		return new ObjectMeta('comment', $id);
 	}
 
 	/**

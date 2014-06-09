@@ -3,9 +3,11 @@
 namespace Ponticlaro\Bebop\API;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\API\Exceptions\DefaultException AS ApiException;
 use Ponticlaro\Bebop\DB;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Resources\Models\Attachment;
+use Respect\Validation\Validator as v;
 
 class Router extends SingletonAbstract {
 
@@ -22,6 +24,13 @@ class Router extends SingletonAbstract {
 	protected static $slim;
 
 	/**
+	 * Parsed request body
+	 * 
+	 * @var array
+	 */
+	
+	protected static $request_body;
+	/**
 	 * List of routes
 	 * 
 	 * @var Ponticlaro\Bebop\Common\Collection;
@@ -34,7 +43,9 @@ class Router extends SingletonAbstract {
 	protected function __construct()
 	{
 		// Instantiate Slim
-		self::$slim = new \Slim\Slim;
+		self::$slim = new \Slim\Slim(array(
+			'debug' => false
+		));
 
 		// Set Response content-type header
 		self::$slim->response()->header('Content-Type', 'application/json');
@@ -65,9 +76,35 @@ class Router extends SingletonAbstract {
 	 */
 	public static function preFlightCheck()
 	{
-		self::$slim->hook('slim.before', function($data) {		 
+		self::$slim->hook('slim.before', function() {		 
 			
-		}); 
+			$request      = self::$slim->request();
+			$method       = $request->getMethod();
+			$resourceUri  = $request->getResourceUri();
+			$content_type = $request->headers->get('CONTENT_TYPE');
+			$request_body = $request->getBody();
+
+			if (in_array($method, array('POST', 'PUT', 'PATCH'))) {
+				
+				if ($request_body) {
+					
+					// Throw error if content-type is not 'application/json'
+					if (!$content_type || $content_type != 'application/json')
+						throw new \UnexpectedValueException("You need to send the Content-type header with 'application/json as its value'", 1);
+					
+					// Validate request body as JSON string
+					if (!Bebop::util('isJson', $request_body))
+						throw new ApiException("Request body must be a valid JSON string", 400);
+
+					// Get Raw body as $input
+					$input = json_decode($request_body, true);
+
+					// Check if using json_decode($request_body, true) returns array
+					if (!is_array($input) && !is_object($input))
+						throw new ApiException("Request body must be either a JSON object or array", 400);
+				}
+			}
+		});
 	}
 
 	/**
@@ -101,6 +138,79 @@ class Router extends SingletonAbstract {
 	{
 		self::$slim->error(function (\Exception $e) {
 
+			if (is_a($e, '\Respect\Validation\Exceptions\ValidationException')) {
+
+				$response = array(
+					'errors' => array(
+						array(
+							'code'    => 400,
+					        'message' => $e->getFullMessage()
+				        )
+				    )
+				);
+
+				self::$slim->response()->body(json_encode($response));
+				self::$slim->response()->status(400);
+
+			} elseif(is_a($e, '\UnexpectedValueException')) {
+
+				$response = array(
+					'errors' => array(
+						array(
+							'code'    => $e->getCode(),
+					        'message' => $e->getMessage()
+				        )
+				    )
+				);
+
+				self::$slim->response()->body(json_encode($response));
+				self::$slim->response()->status($e->getCode());
+
+
+			} elseif (is_a($e, '\InvalidArgumentException')) {
+
+				$response = array(
+					'errors' => array(
+						array(
+							'code'    => 400,
+					        'message' => $e->getMessage()
+				        )
+				    )
+				);
+
+				self::$slim->response()->body(json_encode($response));
+				self::$slim->response()->status(400);
+
+			} elseif (is_a($e, '\Ponticlaro\Bebop\API\Exceptions\DefaultException')) {
+
+				$response = array(
+					'errors' => array(
+						array(
+							'code'    => $e->getHttpStatus(),
+					        'message' => $e->getMessage()
+				        )
+				    )
+				);
+
+				self::$slim->response()->body(json_encode($response));
+				self::$slim->response()->status($e->getHttpStatus());
+
+			} else {
+
+		        // Catch everything here
+				$response = array(
+					'errors' => array(
+						array(
+							'code'    => 500,
+					        'message' => $e->getMessage()
+					    )
+				    )
+				);
+
+				self::$slim->response()->body(json_encode($response));
+				self::$slim->response()->status(500);
+			}
+			
 		});
 	}
 
@@ -216,23 +326,76 @@ class Router extends SingletonAbstract {
 				return $response;
 			});
 			
-			// Add meta data resource
+			////////////////////////////
+			// Add meta data resource //
+			////////////////////////////
+
+			// GET
 			self::Routes()->set('GET', "$resource_name/:id/meta/:key(/)", function($id, $key) use($post_type, $resource_name) {
 
-				// Get meta data
-				$data = get_post_meta($id, $key, false);
+				// Throw error if post do not exist
+				if (!get_post($id) instanceof \WP_Post)
+					throw new ApiException("Target entry do not exist", 404);
 
-				// Decode JSON strings
-				foreach ($data as $index => $entry) {
-						
-					if (Bebop::util('isJson', $entry)) $data[$index] = json_decode($entry);
-				}
+				// Get meta data
+				$response = Bebop::PostMeta($id)->get($key);
 
 				// Enable developers to modify response
-				$response = apply_filters('bebop:api:meta:response', $data);
+				$response = apply_filters('bebop:api:postmeta:response', $response, $key, $id);
 
 				// Return response
 				return $response;
+			});
+
+			// POST
+			self::Routes()->set('POST', "$resource_name/:id/meta/:key(/:storage_method)", function($id, $key, $storage_method = 'json') use($post_type, $resource_name) {
+
+				// Check if current user can edit the target post
+				if (!current_user_can('edit_post', $id))
+					throw new ApiException("You cannot edit the target entry", 403);
+					
+				// Get request body
+				$data = json_decode(self::$slim->request()->getBody(), true);
+
+				// Throw error if payload is null
+				if (is_null($data))
+					throw new ApiException("You cannot send an empty request body", 400);
+
+				// Check storage type
+				if (!in_array($storage_method, array('json', 'serialize')))
+					throw new ApiException("Storage method needs to be either 'json' or 'serialize'", 400);
+
+				// Throw error if post do not exist
+				if (!get_post($id) instanceof \WP_Post)
+					throw new ApiException("Target entry do not exist", 404);
+
+				// Instantiate PostMeta object
+				$post_meta = Bebop::PostMeta($id);
+
+				// Loop through all data
+				if (empty($data)) {
+					
+					// Delete all entries
+					$post_meta->delete($key);
+				}
+
+				else {
+
+					// Delete all entries
+					$post_meta->delete($key);
+
+					foreach ($data as $value) {
+						
+						// Encode value as JSON if that is the desired method
+						if ($storage_method == 'json' && (is_object($value) || is_array($value))) $value = json_encode($value);
+
+						// Add single entry with same meta_key
+						$post_meta->add($key, $value);
+					}
+				}
+
+				// Return response
+				return $post_meta->get($key);
 			});
 		}
 	}
@@ -247,19 +410,20 @@ class Router extends SingletonAbstract {
 		// Remove WordPress Content-Type header
 		header_remove('Content-Type');
 
+		self::handleErrors();
 		self::preFlightCheck();
 		self::handleNotFound();
-		self::handleErrors();
 		self::handleResponse();
 
 		// Set all default routes on instantiation
 		// so that users can modify then before running the router
 		self::setDefaultRoutes();
 
+		// Loop through all defined routes
 		foreach (Routes::getAll() as $route) {
 
 			self::$slim->{$route->getMethod()} (self::BASE_URL . rtrim(ltrim($route->getPath(), '/'), '/') .'/', function () use ($route) {
-				
+
 				// Get data from route function
 				$data = call_user_func_array($route->getFunction(), func_get_args());
 

@@ -12,7 +12,9 @@ class Route {
 
 	protected $fn;
 
-	public function __construct($method, $path, $fn)
+	protected $public;
+
+	public function __construct($method, $path, $fn, $public = false)
 	{
 		if (!is_string($method) || !is_string($path)) 
 			throw new \UnexpectedValueException('Both $method and $paht need to be a string');

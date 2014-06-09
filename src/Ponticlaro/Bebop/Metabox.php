@@ -160,9 +160,11 @@ class Metabox extends TrackableObjectAbstract
 
 			if($meta_fields) {
 
+				$meta = Bebop::PostMeta($entry->ID);
+
 				foreach ($meta_fields as $meta_field) {
 
-					$this->__data->set($meta_field, get_post_meta($entry->ID, $meta_field));
+					$this->__data->set($meta_field, $meta->get($meta_field));
 				}
 			}
 
