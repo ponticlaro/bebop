@@ -331,7 +331,7 @@ class Router extends SingletonAbstract {
 			////////////////////////////
 
 			// GET
-			self::Routes()->set('GET', "$resource_name/:id/meta/:key(/)", function($id, $key) use($post_type, $resource_name) {
+			self::Routes()->set('GET', "$resource_name/:id/meta/:key", function($id, $key) use($post_type, $resource_name) {
 
 				// Throw error if post do not exist
 				if (!get_post($id) instanceof \WP_Post)
@@ -339,6 +339,9 @@ class Router extends SingletonAbstract {
 
 				// Get meta data
 				$response = Bebop::PostMeta($id)->get($key);
+
+				// Enable developers to modify response
+				$response = apply_filters("bebop:api:postmeta:$key:response", $response, $id);
 
 				// Enable developers to modify response
 				$response = apply_filters('bebop:api:postmeta:response', $response, $key, $id);
