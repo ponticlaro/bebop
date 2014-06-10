@@ -4,7 +4,7 @@ namespace Ponticlaro\Bebop\API;
 
 use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\API\Exceptions\DefaultException AS ApiException;
-use Ponticlaro\Bebop\DB;
+use Ponticlaro\Bebop\Db;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Resources\Models\Attachment;
 use Respect\Validation\Validator as v;
@@ -80,7 +80,7 @@ class Router extends SingletonAbstract {
 			
 			$request      = self::$slim->request();
 			$method       = $request->getMethod();
-			$resourceUri  = $request->getResourceUri();
+			$resource_uri = $request->getResourceUri();
 			$content_type = $request->headers->get('CONTENT_TYPE');
 			$request_body = $request->getBody();
 
@@ -316,7 +316,7 @@ class Router extends SingletonAbstract {
 						}
 					}
 
-					$response = DB::query('posts', $_GET, array('with_meta' => true));
+					$response = Db::queryPosts($_GET, array('with_meta' => true));
 				}
 
 				// Enable developers to modify response for target resource
@@ -326,35 +326,36 @@ class Router extends SingletonAbstract {
 				return $response;
 			});
 			
-			////////////////////////////
-			// Add meta data resource //
-			////////////////////////////
-
-			// GET
-			self::Routes()->set('GET', "$resource_name/:id/meta/:key", function($id, $key) use($post_type, $resource_name) {
+			/////////////////////////////////////
+			// Get all or individual post meta //
+			/////////////////////////////////////
+			self::Routes()->set('GET', "$resource_name/:post_id/meta/:meta_key(/:meta_id)", function($post_id, $meta_key, $meta_id = null) use($post_type, $resource_name) {
 
 				// Throw error if post do not exist
-				if (!get_post($id) instanceof \WP_Post)
+				if (!get_post($post_id) instanceof \WP_Post)
 					throw new ApiException("Target entry do not exist", 404);
 
 				// Get meta data
-				$response = Bebop::PostMeta($id)->get($key);
+				$post_meta = Bebop::PostMeta($post_id);
+				$response  = $meta_id ? $post_meta->get($meta_key, $meta_id) : $post_meta->getAll($meta_key);
 
 				// Enable developers to modify response
-				$response = apply_filters("bebop:api:postmeta:$key:response", $response, $id);
+				$response = apply_filters("bebop:api:postmeta:$meta_key:response", $response, $post_id);
 
 				// Enable developers to modify response
-				$response = apply_filters('bebop:api:postmeta:response', $response, $key, $id);
+				$response = apply_filters('bebop:api:postmeta:response', $response, $meta_key, $post_id);
 
 				// Return response
 				return $response;
 			});
 
-			// POST
-			self::Routes()->set('POST', "$resource_name/:id/meta/:key(/:storage_method)", function($id, $key, $storage_method = 'json') use($post_type, $resource_name) {
+			/////////////////////////////
+			// Create single post meta //
+			/////////////////////////////
+			self::Routes()->set('POST', "$resource_name/:post_id/meta/:meta_key", function($post_id, $meta_key) {
 
 				// Check if current user can edit the target post
-				if (!current_user_can('edit_post', $id))
+				if (!current_user_can('edit_post', $post_id))
 					throw new ApiException("You cannot edit the target entry", 403);
 					
 				// Get request body
@@ -364,41 +365,93 @@ class Router extends SingletonAbstract {
 				if (is_null($data))
 					throw new ApiException("You cannot send an empty request body", 400);
 
+				// Defined storage method
+				$storage_method = isset($_GET['storage_method']) ? $_GET['storage_method'] : 'json';
+
 				// Check storage type
 				if (!in_array($storage_method, array('json', 'serialize')))
 					throw new ApiException("Storage method needs to be either 'json' or 'serialize'", 400);
 
 				// Throw error if post do not exist
-				if (!get_post($id) instanceof \WP_Post)
+				if (!get_post($post_id) instanceof \WP_Post)
 					throw new ApiException("Target entry do not exist", 404);
 
 				// Instantiate PostMeta object
-				$post_meta = Bebop::PostMeta($id);
+				$post_meta = Bebop::PostMeta($post_id);
 
-				// Loop through all data
-				if (empty($data)) {
-					
-					// Delete all entries
-					$post_meta->delete($key);
-				}
+				// Add new meta row
+				$new_item = $post_meta->add($meta_key, $data, $storage_method);
 
-				else {
-
-					// Delete all entries
-					$post_meta->delete($key);
-
-					foreach ($data as $value) {
-						
-						// Encode value as JSON if that is the desired method
-						if ($storage_method == 'json' && (is_object($value) || is_array($value))) $value = json_encode($value);
-
-						// Add single entry with same meta_key
-						$post_meta->add($key, $value);
-					}
-				}
+				// Throw error if it was not able to create new postmeta item
+				if (!$new_item)
+					throw new ApiException("Failed to create new postmeta item", 500);
 
 				// Return response
-				return $post_meta->get($key);
+				return $new_item;
+			});
+			
+			/////////////////////////////
+			// Update single post meta //
+			/////////////////////////////
+			self::Routes()->set('PUT', "$resource_name/:post_id/meta/:meta_key/:meta_id", function($post_id, $meta_key, $meta_id) {
+
+				// Check if current user can edit the target post
+				if (!current_user_can('edit_post', $post_id))
+					throw new ApiException("You cannot edit the target entry", 403);
+
+				// Get request body
+				$data = json_decode(self::$slim->request()->getBody(), true);
+
+				// Throw error if payload is null
+				if (is_null($data))
+					throw new ApiException("You cannot send an empty request body", 400);
+
+				// Defined storage method
+				$storage_method = isset($_GET['storage_method']) ? $_GET['storage_method'] : 'json';
+
+				// Check storage type
+				if (!in_array($storage_method, array('json', 'serialize')))
+					throw new ApiException("Storage method needs to be either 'json' or 'serialize'", 400);
+
+				// Throw error if post do not exist
+				if (!get_post($post_id) instanceof \WP_Post)
+					throw new ApiException("Target entry do not exist", 404);
+
+				// Instantiate PostMeta object
+				$post_meta = Bebop::PostMeta($post_id);
+
+				// Update Meta
+				$updated_item = $post_meta->update($meta_key, $meta_id, $data, $storage_method);
+
+				// Throw error if it was not able to update the target postmeta item
+				if (!$updated_item)
+					throw new ApiException("Failed to update postmeta item", 500);
+
+				// Return updated item
+				return $updated_item;
+			});
+
+			/////////////////////////////
+			// Delete single post meta //
+			/////////////////////////////
+			self::Routes()->set('DELETE', "$resource_name/:post_id/meta/:meta_key/:meta_id", function($post_id, $meta_key, $meta_id) use($post_type, $resource_name) {
+
+				// Check if current user can edit the target post
+				if (!current_user_can('edit_post', $post_id))
+					throw new ApiException("You cannot edit the target entry", 403);
+
+				// Throw error if post do not exist
+				if (!get_post($post_id) instanceof \WP_Post)
+					throw new ApiException("Target entry do not exist", 404);
+
+				// Instantiate PostMeta object
+				$post_meta = Bebop::PostMeta($post_id);
+
+				// Delete post meta
+				$remaining_items = $post_meta->delete($meta_key, $meta_id);
+
+				// Return remaining items
+				return $remaining_items;
 			});
 		}
 	}

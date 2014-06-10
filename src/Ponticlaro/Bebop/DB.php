@@ -4,20 +4,55 @@ namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
 
-class DB {
+class Db {
 
-	public static function query($resource, array $args = array(), array $options = array())
+	protected static $pdo;
+
+	public static function getConnection()
 	{
-		switch ($resource) {
+		if (is_null(self::$pdo)) self::$pdo = self::getPDO();
 
-			case 'posts':
-
-				return self::__queryPosts($args, $options);
-				break;
-		}
+		return self::$pdo;
 	}
 
-	protected static function __queryPosts(array $params = array(), array $options = array())
+	protected static function getPDO()
+	{
+		// Get connection details
+		$dsn      = 'mysql:dbname=' . DB_NAME . ";host=" . DB_HOST;
+		$attempts = 10;
+		$pdo      = null;
+
+		while ($attempts && !$pdo instanceof \PDO) {
+
+			try {
+
+				$attempts--;
+
+				// Connection attempt
+				$options = array(
+					\PDO::ATTR_PERSISTENT => true
+				);
+
+				$pdo = new \PDO($dsn, DB_USER, DB_PASSWORD, $options);
+                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+				// A working connection has been obtained, terminate the loop
+				$attempts = 0;
+
+			} catch (\PDOException $e) {
+
+                // Throw exception if there are no more retries
+				if (!$attempts) throw $e;
+
+				// Wait for half a second before trying again
+				usleep(500000);
+			}
+		}
+
+		return $pdo;
+	}
+
+	protected static function queryPosts(array $params = array(), array $options = array())
 	{
 		// Set default options
 		$default_options = array(
