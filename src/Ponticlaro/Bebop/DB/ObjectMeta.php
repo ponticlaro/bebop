@@ -2,16 +2,11 @@
 
 namespace Ponticlaro\Bebop\DB;
 
-use Ponticlaro\Bebop\Utils;
+use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\Db;
+use Ponticlaro\Bebop\Db\SqlProjection;
 
 class ObjectMeta {
-
-    /**
-     * DB Model for meta data entries
-     * 
-     */
-    const MODEL = '\Ponticlaro\Bebop\Resources\Models\ObjectMeta';
 
     /**
      * Valid object types with meta
@@ -49,12 +44,26 @@ class ObjectMeta {
     protected $id_column;
 
     /**
+     * Options list
+     * 
+     * @var \Ponticlaro\Bebop\Common\Collection
+     */
+    protected $options;
+
+    /**
+     * Meta columns projection
+     * 
+     * @var string
+     */
+    protected $projection;
+
+    /**
      * Creates new instance of the ObjectMeta class
      * 
      * @param string $object_type Object type: post, user or comment
      * @param int    $object_id   Object ID
      */
-    public function __construct($object_type, $object_id)
+    public function __construct($object_type, $object_id, array $options = array())
     {
         // Validate object type
         if (!is_string($object_type) || !in_array($object_type, self::$objects_with_meta))
@@ -67,10 +76,27 @@ class ObjectMeta {
         global $wpdb;
 
         // Sotre target object details
-        $this->object_type = $object_type;
-        $this->object_id   = (int) $object_id;
-        $this->table       = $wpdb->prefix . $object_type .'meta';
-        $this->id_column   = $object_type .'_id';
+        $this->object_type       = $object_type;
+        $this->object_id         = (int) $object_id;
+        $this->table             = $wpdb->prefix . $object_type .'meta';
+        $this->id_column         = $object_type .'_id';
+        
+        // Default options
+        $default_options = array(
+            'projection' => null
+        );
+
+        // Merge default options with user input
+        $options = array_merge($default_options, $options);
+
+        // Set options
+        $this->options = Bebop::Collection($options); 
+
+        // Handle projection
+        if ($this->options->get('projection') instanceof SqlProjection) {
+            
+            $this->projection = $this->options->get('projection');
+        }
     }
 
     /**
@@ -86,12 +112,20 @@ class ObjectMeta {
         // Get DB connection
         $db = Db::getConnection();
 
+        // Set default parameters
+        $fields = 'meta_value';
+        $class  = null;
+
+        // Determine which fields to get
+        if ($this->projection) {
+           
+            $fields = $this->projection->getSql();
+            $class  = $this->projection->getClass();
+        }
+
         // Select SQL
         $sql = "SELECT
-                    meta_id AS __id, 
-                    $this->id_column AS __$this->id_column, 
-                    meta_key AS __key, 
-                    meta_value AS value
+                    $fields
                 FROM
                     $this->table
                 WHERE
@@ -109,7 +143,7 @@ class ObjectMeta {
         // Execute query
         $stmt    = $db->prepare($sql);
         $success = $stmt->execute($sql_replacements);
-        $items   = $stmt->fetchAll(\PDO::FETCH_CLASS, self::MODEL);
+        $items   = $stmt->fetchAll($class ? \PDO::FETCH_CLASS : \PDO::FETCH_COLUMN, $class);
 
         // Return meta items
         return $items;
@@ -129,12 +163,20 @@ class ObjectMeta {
         // Get DB connection
         $db = Db::getConnection();
 
+        // Set default parameters
+        $fields = 'meta_value';
+        $class  = null;
+
+        // Determine which fields to get
+        if ($this->projection) {
+           
+            $fields = $this->projection->getSql();
+            $class  = $this->projection->getClass();
+        }
+
         // Set SQL
         $sql = "SELECT
-                    meta_id AS __id, 
-                    $this->id_column AS __$this->id_column, 
-                    meta_key AS __key, 
-                    meta_value AS value
+                    $fields
                 FROM
                     $this->table
                 WHERE
@@ -156,12 +198,12 @@ class ObjectMeta {
 
         // Execute query
         $stmt    = $db->prepare($sql);
-        $stmt->setFetchMode(\PDO::FETCH_CLASS, self::MODEL);
+        $stmt->setFetchMode($class ? \PDO::FETCH_CLASS : \PDO::FETCH_COLUMN, $class);
         $success = $stmt->execute($sql_replacements);
         $item    = $stmt->fetch();
 
         // Return meta item (or null)
-        return is_a($item, self::MODEL) ? $item : null;
+        return $item ?: null;
     }
 
     /**
@@ -245,12 +287,71 @@ class ObjectMeta {
     }
 
     /**
+     * Replaces all entries for the target meta_key
+     * 
+     * @param  string $meta_key       Target meta key
+     * @param  string $storage_method Store arrays or objects either as JSON or serialized strings
+     * @return array                  List of added entries
+     */
+    public function replace($meta_key, array $meta_values = array(), $storage_method = 'json')
+    {
+        if (!is_string($meta_key) || !$meta_values || !is_string($storage_method)) return null;
+
+        // Get DB connection
+        $db = Db::getConnection();
+        $db->beginTransaction();
+
+        // Delete all entries
+        self::deleteAll($meta_key);
+
+        // Set initial SQL
+        $sql = "INSERT INTO $this->table ($this->id_column, meta_key, meta_value) VALUES";
+
+        // Set SQL replacements
+        $sql_replacements = array();
+
+        // Loop through meta values
+        $counter = 0;
+
+        foreach ($meta_values as $meta_value) {
+            
+            $counter++;
+
+            // Prepend comma if this is not the first value
+            if ($counter !== 1) $sql .= ",";
+
+            // Add SQL placeholders for this meta value
+            $sql .= " (?, ?, ?)";
+
+            // Add SQL replacements for this meta value
+            $sql_replacements[] = $this->object_id;
+            $sql_replacements[] = $meta_key;
+            $sql_replacements[] = self::__applyStorageMethod($meta_value, $storage_method);
+        }
+
+        // Execute query
+        $stmt    = $db->prepare($sql);
+        $success = $stmt->execute($sql_replacements);
+
+        // Rollback on failure
+        if (!$success) {
+
+            $db->rollBack();
+            throw new \Exception("Failed to replace post meta for object $this->object_id");
+        }
+
+        // Commit transaction
+        $db->commit();
+
+        // Return all items
+        return self::getAll($meta_key);
+    }
+
+    /**
      * Used to delete a single meta value on the target meta_key
      * 
      * @param  string $meta_key       Target meta key
      * @param  int    $meta_id        Target meta id
-     * @param  mixed  $meta_value     Value to be store in database
-     * @param  string $storage_method Store arrays or objects either as JSON or serialized strings
      * @return array                  Remaining items for target meta key
      */
     public function delete($meta_key, $meta_id)
@@ -276,6 +377,42 @@ class ObjectMeta {
             $this->object_id,
             $meta_key,
             $meta_id
+        );
+
+        // Execute query
+        $stmt    = $db->prepare($sql);
+        $success = $stmt->execute($sql_replacements);
+
+        // Return existing entries
+        return self::getAll($meta_key);
+    }
+
+    /**
+     * Used to delete a single meta value on the target meta_key
+     * 
+     * @param  string $meta_key Target meta key
+     * @return array            Remaining items for target meta key
+     */
+    public function deleteAll($meta_key)
+    {
+        if (!is_string($meta_key)) return null;
+
+        // Get DB connection
+        $db = Db::getConnection();
+
+        // Set SQL
+        $sql = "DELETE FROM
+                    $this->table
+                WHERE
+                    $this->id_column = ?
+                AND
+                    meta_key = ?
+                ";
+
+        // Set SQL replacements
+        $sql_replacements = array(
+            $this->object_id,
+            $meta_key
         );
 
         // Execute query

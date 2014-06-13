@@ -5,6 +5,7 @@ namespace Ponticlaro\Bebop\API;
 use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\API\Exceptions\DefaultException AS ApiException;
 use Ponticlaro\Bebop\Db;
+use Ponticlaro\Bebop\Db\SqlProjection;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Resources\Models\Attachment;
 use Respect\Validation\Validator as v;
@@ -38,6 +39,13 @@ class Router extends SingletonAbstract {
     protected static $routes;
 
     /**
+     * Projection for post meta columns
+     * 
+     * @var \Ponticlaro\Bebop\Db\SqlProjection
+     */
+    protected static $postmeta_projection;
+
+    /**
      * Instantiates Router
      */
     protected function __construct()
@@ -49,6 +57,16 @@ class Router extends SingletonAbstract {
 
         // Set Response content-type header
         self::$slim->response()->header('Content-Type', 'application/json');
+
+        // Set post meta projection
+        $post_projection = new SqlProjection();
+        $post_projection->addColumn('meta_id', '__id')
+                        ->addColumn('post_id', '__post_id')
+                        ->addColumn('meta_key', '__key')
+                        ->addColumn('meta_value', 'value')
+                        ->setClass('\Ponticlaro\Bebop\Resources\Models\ObjectMeta');
+
+        self::$postmeta_projection = $post_projection;
     }
 
     /**
@@ -336,7 +354,10 @@ class Router extends SingletonAbstract {
                     throw new ApiException("Target entry do not exist", 404);
 
                 // Get meta data
-                $post_meta = Bebop::PostMeta($post_id);
+                $post_meta = Bebop::PostMeta($post_id, array(
+                    'projection' => self::$postmeta_projection
+                ));
+
                 $response  = $meta_id ? $post_meta->get($meta_key, $meta_id) : $post_meta->getAll($meta_key);
 
                 // Enable developers to modify response
@@ -377,7 +398,9 @@ class Router extends SingletonAbstract {
                     throw new ApiException("Target entry do not exist", 404);
 
                 // Instantiate PostMeta object
-                $post_meta = Bebop::PostMeta($post_id);
+                $post_meta = Bebop::PostMeta($post_id, array(
+                    'projection' => self::$postmeta_projection
+                ));
 
                 // Add new meta row
                 $new_item = $post_meta->add($meta_key, $data, $storage_method);
@@ -418,7 +441,9 @@ class Router extends SingletonAbstract {
                     throw new ApiException("Target entry do not exist", 404);
 
                 // Instantiate PostMeta object
-                $post_meta = Bebop::PostMeta($post_id);
+                $post_meta = Bebop::PostMeta($post_id, array(
+                    'projection' => self::$postmeta_projection
+                ));
 
                 // Update Meta
                 $updated_item = $post_meta->update($meta_key, $meta_id, $data, $storage_method);
@@ -445,7 +470,9 @@ class Router extends SingletonAbstract {
                     throw new ApiException("Target entry do not exist", 404);
 
                 // Instantiate PostMeta object
-                $post_meta = Bebop::PostMeta($post_id);
+                $post_meta = Bebop::PostMeta($post_id, array(
+                    'projection' => self::$postmeta_projection
+                ));
 
                 // Delete post meta
                 $remaining_items = $post_meta->delete($meta_key, $meta_id);

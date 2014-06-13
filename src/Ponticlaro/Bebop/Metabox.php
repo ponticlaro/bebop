@@ -164,7 +164,7 @@ class Metabox extends TrackableObjectAbstract
 
 				foreach ($meta_fields as $meta_field) {
 
-					$this->__data->set($meta_field, $meta->get($meta_field));
+					$this->__data->set($meta_field, $meta->getAll($meta_field));
 				}
 			}
 

@@ -61,7 +61,7 @@ class ObjectMeta {
 		}
 
 		// Try to unserialize
-		else {
+		elseif(unserialize($this->value)) {
 
 			$this->value = unserialize($this->value);
 		}
