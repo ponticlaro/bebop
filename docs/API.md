@@ -45,116 +45,15 @@ $routes->set('get', 'pages/:id/child-pages', function($id) {
 });
 ```
 
-## Resources
+## Available Resources
 ### Status Resources
-#### GET /_bebop/api/
-This should be used to check if the API is working properly.  
-It will return an array with a single item: **Hello World**.  
+Read [this](docs/API/STATUS_RESOURCES.md) documentation file
 
-#### GET /_bebop/api/_resources
-This resource will return a list of registered post types and correspondent base resource.  
-**Note:** You need to be logged into WordPress as and administrator to be able to access this resource.  
+### Post Type Resources
+Read [this](docs/API/POST_TYPE_RESOURCES.md) documentation file
 
-### Default Resources
-Bebop will create the following endpoints for each registered post type:
-- GET /_bebop/api/**{ post_type }**/
-- GET /_bebop/api/**{ post_type }**/:id/
-- GET /_bebop/api/**{ post_type }**/:id/meta/:key/
+### Post Meta Resources
+Read [this](docs/API/POST_META_RESOURCES.md) documentation file
 
-## Querying
-### Querying Posts Types
-#### Available query parameters
-As query parameters you can use all parameters you would use for a new instance of [`WP_Query`](http://codex.wordpress.org/Class_Reference/WP_Query#Parameters).  
-
-Here is a list of the most relevant parameters:
-  
-- `page`
-- `max_results` or `posts_per_page`
-- `post_type` or `type`
-- `post_status` or `status`
-- `post_mime_type` or `mime_type`
-- `post_parent` or `parent`
-- `orderby` or `sort_by`
-- `order` or `sort_direction`
-
-##### Pagination
-- Use the `page` parameter as it is mapped to the internal `paged` argument for `WP_Query`.
-- Check the `meta['has_more']` parameter to know if you have more pages.
-
-##### Tax queries
-If you need to use the [`tax_query`](http://codex.wordpress.org/Class_Reference/WP_Query#Taxonomy_Parameters) argument for `WP_Query` you need to use one of the following structures to build a query parameter:
-- tax:{{taxonomy_slug}}={{term(s)}}
-- tax:{{tax_query_json}}={{term(s)}}
-
-###### Notes:
-- You can specify the relation of tax queries with `tax_relation` query parameter.   
-- You can specify comma separated values.
-
-###### Simple query with `IN` as compare operator:
-
-	meta:manufacturer=ford
-
-###### Complex query with multiple values: 
-
-	tax:{"taxonomy":"year","field":"slug","operator":"IN"}=2012,2013,2014
-
-After the `tax:` segment, you need to add a JSON object like:
-
-```json
-{
-    "taxonomy": "year",
-    "field": "slug",
-    "operator": "IN"
-}
-```
-
-#### Meta Queries
-##### Structure
-If you need to use the [`meta_query`](http://codex.wordpress.org/Class_Reference/WP_Query#Custom_Field_Parameters) argument for `WP_Query` you need to use one of the following structures to build a query parameter:
-- meta:{{meta_key}}={{meta_value(s)}}
-- meta:{{meta_query_json}}={{meta_value(s)}}
-
-##### Notes:
-- You can specify the relation of meta queries with `meta_relation` query parameter.  
-- You can specify comma separated values.
-
-##### Examples
-###### Simple query with `=` as compare operator:
-
-	meta:download_enabled=1
-
-###### Complex query with multiple values: 
-
-	meta:{"key":"latitude","compare":"between","type":"numeric"}=35,45
-
-After the `meta:` segment, you need to add a JSON object like:
-
-```json
-{
-    "key": "latitude",
-    "compare": "between",
-    "type": "numeric"
-}
-```
-
-#### Response Structure
-All resources that are not for a specific object ID, will return the following structure.
-
-```json
-{
-    "meta": {
-    	"items_total": 20,
-    	"items_returned": 10,
-    	"total_pages": 2,
-    	"current_page": 1,
-    	"has_more": true,
-    	"previous_page": null,
-    	"next_page": "?page=2"
-    },
-    "items": [
-    	// Array or objects
-    ]
-}
-```
-	
-### Querying Meta
+### Options Resources
+*Not implemented*
