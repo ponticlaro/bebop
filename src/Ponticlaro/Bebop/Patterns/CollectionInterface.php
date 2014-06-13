@@ -11,6 +11,7 @@ interface CollectionInterface {
 	public function push($values, $key = null);
 	public function pop($value, $key = null);
 	public function get($key = null);
+	public function getAll();
 	public function remove($key);
     public function clear();
 	public function getKeys($with_value = false);
