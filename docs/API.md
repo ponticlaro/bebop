@@ -47,13 +47,13 @@ $routes->set('get', 'pages/:id/child-pages', function($id) {
 
 ## Available Resources
 ### Status Resources
-Read [this](docs/API/STATUS_RESOURCES.md) documentation file
+Read [this](API/STATUS_RESOURCES.md) documentation file
 
 ### Post Type Resources
-Read [this](docs/API/POST_TYPE_RESOURCES.md) documentation file
+Read [this](API/POST_TYPE_RESOURCES.md) documentation file
 
 ### Post Meta Resources
-Read [this](docs/API/POST_META_RESOURCES.md) documentation file
+Read [this](API/POST_META_RESOURCES.md) documentation file
 
 ### Options Resources
 *Not implemented*
