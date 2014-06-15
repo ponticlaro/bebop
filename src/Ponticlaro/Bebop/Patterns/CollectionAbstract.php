@@ -77,16 +77,17 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 */
 	public function unshift($values, $key = null)
 	{
-		if(is_string($values)) $this->__unshiftItem($values);
-
-		if(is_array($values)) {
+		if (is_array($values)) {
 
 			foreach ($values as $key => $value) {
 
 				$this->__unshiftItem($value, $key);
-
 			}
+		}
 
+		else {
+
+			$this->__unshiftItem($values, $key);
 		}
 
 		return $this;
@@ -101,7 +102,7 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 */
 	private function __unshiftItem($value, $key = null)
 	{
-		if($key) {
+		if ($key) {
 
 			if (!array_key_exists($key, $this->data)) {
 
@@ -109,18 +110,16 @@ abstract class CollectionAbstract implements CollectionInterface {
 
 	        } elseif (is_array($this->data[$key])) {
 
-	            array_unshift($this->data[$key][] = $value);
+	            array_unshift($this->data[$key], $value);
 
 	        } else {
 
-	            $this->data[$key] = array($this->data[$key], $value);
-
+	            $this->data[$key] = array($value);
 	        }
 
 		} else {
 
 			 array_unshift($this->data, $value);
-
 		}
 	}
 
