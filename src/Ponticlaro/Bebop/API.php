@@ -35,6 +35,12 @@ class API extends SingletonAbstract {
 		// Instantiate HTTP Client for the Bebop API
 		$url          = Bebop::getUrl('home') .'/'. self::API_PREFIX;
 		$this->client = new HttpClient($url);
+
+		// Initialize Router
+		$router = self::Router();
+
+		// Set default routes after registering custom post types 
+		add_action('init', array($router, 'setDefaultRoutes'), 2);
 	}
 
 	/**
