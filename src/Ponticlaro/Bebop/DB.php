@@ -52,7 +52,7 @@ class Db {
 		return $pdo;
 	}
 
-	protected static function queryPosts(array $params = array(), array $options = array())
+	public static function queryPosts(array $params = array(), array $options = array())
 	{
 		// Set default options
 		$default_options = array(
