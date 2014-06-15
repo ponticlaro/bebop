@@ -159,7 +159,7 @@ class PostType extends TrackableObjectAbstract
 
 	public function register()
 	{
-		add_action("init", array($this, '__innerRegister'), 9999999);
+		add_action("init", array($this, '__innerRegister'), 1);
 
 		return $this;
 	}
