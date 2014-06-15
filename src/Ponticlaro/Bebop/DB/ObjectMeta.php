@@ -257,6 +257,9 @@ class ObjectMeta {
         // Get DB connection
         $db = Db::getConnection();
 
+        // Start transaction
+        $db->beginTransaction();
+
         // Update SQL
         $sql = "UPDATE
                     $this->table
@@ -282,6 +285,9 @@ class ObjectMeta {
         $stmt    = $db->prepare($sql);
         $success = $stmt->execute($sql_replacements);
 
+        // Commit transaction
+        $db->commit();
+
         // Return updated entry (or null)
         return self::get($meta_key, $meta_id);
     }
@@ -299,6 +305,8 @@ class ObjectMeta {
 
         // Get DB connection
         $db = Db::getConnection();
+
+        // Start transaction
         $db->beginTransaction();
 
         // Delete all entries
