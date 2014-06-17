@@ -36,8 +36,18 @@ You just need to define these for the route:
 - **$function**: The function that will handle the route. All route parameters will be correctly passed to this function.  
 ```php
 $routes = \Ponticlaro\Bebop::API()->Routes();
+
+// Add a resource to the top of the list
+// You can use 'prepend' instead of 'add'
+$routes->add('get', 'pages/:id/child-pages', function($id) {
+        
+    // Your code goes here.
     
-$routes->set('get', 'pages/:id/child-pages', function($id) {
+    return $response;
+});
+
+// Add a resource to the bottom of the list
+$routes->append('get', 'pages/:id/child-pages', function($id) {
         
     // Your code goes here.
     
