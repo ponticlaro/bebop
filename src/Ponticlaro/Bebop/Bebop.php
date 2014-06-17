@@ -38,6 +38,9 @@ class Bebop extends SingletonAbstract
         // Instantiate Paths Manager
         self::Paths();
 
+        // Instantiate Scripts Manager
+        Bebop\Scripts::getInstance();
+
         // Instantiate UI
         if (is_admin()) self::UI();
         
@@ -110,6 +113,16 @@ class Bebop extends SingletonAbstract
     public static function Paths()
     {
         return Bebop\Helpers\PathManager::getInstance();
+    }
+
+    /**
+     * Returns the PathManager instance
+     */
+    public static function Scripts($hook_id = null)
+    {
+        $scripts = Bebop\Scripts::getInstance();
+
+        return $hook_id ? $scripts->getHook($hook_id) : $scripts;
     }
 
     /**

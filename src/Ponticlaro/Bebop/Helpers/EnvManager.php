@@ -124,7 +124,7 @@ class EnvManager extends SingletonAbstract {
 			if ($env->isCurrent()) return $env;
 		}
 
-		return null;
+		return self::$__environments->get('development');
 	}
 
 	/**
@@ -136,6 +136,6 @@ class EnvManager extends SingletonAbstract {
 	{
 		$current_env = $this->getCurrent();
 
-		return $current_env instanceof \Ponticlaro\Bebop\Helpers\Env ? $current_env->getKey() : null;
+		return $current_env instanceof \Ponticlaro\Bebop\Helpers\Env ? $current_env->getKey() : 'development';
 	}
 }
