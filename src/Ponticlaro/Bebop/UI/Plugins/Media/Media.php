@@ -30,7 +30,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		if ($args) call_user_func_array(array($this, '__createInstance'), $args);
 	}
 
-	private function __createInstance($key, $data = array(), array $config = array())
+	private function __createInstance($key, $data = null, array $config = array())
 	{	
 		$this->__enqueueScripts();
 
@@ -163,6 +163,28 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			</div>
 		</script>
 	<?php }
+
+	public function setApiResource()
+	{
+		// Get args
+		$args = func_get_args();
+
+		// Get route ID and remove it from args
+		$route_id = isset($args[0]) ? $args[0] : null;
+		unset($args[0]);
+
+		if ($route_id) {
+
+			$route = Bebop::API()->Routes()->get($route_id);
+
+			if (!$route instanceof \Ponticlaro\Bebop\API\Route)
+				 throw new \UnexpectedValueException("Route '$route_id' do not exist");
+
+			$api_endpoint = call_user_method_array('parsePath', $route, $args);
+    	}
+
+    	return $this;
+	}
 
 	private function __enqueueScripts()
 	{
