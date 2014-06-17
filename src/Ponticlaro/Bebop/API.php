@@ -10,7 +10,11 @@ use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
 class API extends SingletonAbstract {
 
-	const API_PREFIX = '_bebop-api';
+	/**
+	 * API base URL
+	 * 
+	 */
+	private static $base_url;
 
 	/**
 	 * API HTTP client
@@ -23,6 +27,9 @@ class API extends SingletonAbstract {
 	 */
 	protected function __construct()
 	{
+		// Set API base URL
+		self::$base_url = '_bebop/api/';
+
 		// Register stuff on the init hook
 		add_action('init', array($this, 'initRegister'), 1);
 
@@ -33,7 +40,7 @@ class API extends SingletonAbstract {
 		add_action('template_redirect', array($this, 'templateRedirects'));
 
 		// Instantiate HTTP Client for the Bebop API
-		$url          = Bebop::getUrl('home') .'/'. self::API_PREFIX;
+		$url          = Bebop::getUrl('home') .'/'. self::$base_url;
 		$this->client = new HttpClient($url);
 
 		// Initialize Router
@@ -84,7 +91,7 @@ class API extends SingletonAbstract {
 	public function rewriteRules($wp_rules) 
 	{
 		$bebop_rules = array(
-			"_bebop/api/?(.*)?$" => 'index.php?bebop_api=1'
+			$this->base_url ."?(.*)?$" => 'index.php?bebop_api=1'
 		);
 
 		return array_merge($bebop_rules, $wp_rules);
@@ -105,6 +112,28 @@ class API extends SingletonAbstract {
 			$router->run();
 			exit;
 		}
+	}
+
+	/**
+	 * Sets API URL prefix
+	 * 
+	 */
+	public static function setBaseUrl($url)
+	{
+		if (is_string($url))
+			self::$base_url = ltrim(rtrim($url ,'/'), '/') .'/';
+
+		return $this;
+	}
+
+	/**
+	 * Returns API URL prefix
+	 * 
+	 * @return string
+	 */
+	public static function getBaseUrl()
+	{
+		return Bebop::getUrl('home') .'/'. self::$base_url;
 	}
 
 	/**

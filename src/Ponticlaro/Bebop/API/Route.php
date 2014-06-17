@@ -3,6 +3,7 @@
 namespace Ponticlaro\Bebop\API;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\API;
 
 class Route {
 
@@ -97,5 +98,51 @@ class Route {
     public function getFunction()
     {
         return $this->fn;
+    }
+
+    /**
+     * Returns parsed path using provided arguments to replace placeholders
+     * 
+     * @return string Full URL for the API endpoint
+     */
+    public function parsePath()
+    {
+        // Get function arguments
+        $args = func_get_args();
+
+        // Get relative path
+        $path = $this->getPath();
+        
+        // Get placeholders in route path
+        preg_match_all('/:[A-Za-z_-]+/', $path, $placeholders);
+
+        // Replace argument placeholders in route path
+        if ($placeholders) {
+            
+            foreach ($placeholders[0] as $index => $placeholder) {
+                
+                $value = isset($args[$index]) ? $args[$index] : '';
+                $path  = str_replace($placeholder, $value, $path);
+            }
+        }
+
+        // Find optional sections
+        preg_match_all('/\([^\)]+\)/', $path, $optional_sections);
+
+        // Remove empty optional sections
+        if ($optional_sections) {
+            
+            foreach ($optional_sections[0] as $index => $raw_section) {
+
+                $section = str_replace(array('/', ' '), '', $raw_section);
+
+                // Remove optional section if empty
+                if ($section === '()')
+                    $path = str_replace($raw_section, '', $path);
+            }
+        }
+
+        // Return full URL with trailing slash
+        return API::getBaseUrl() .'/'. rtrim($path, '/') .'/';
     }
 }
