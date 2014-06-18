@@ -10,19 +10,19 @@ class CssScript extends \Ponticlaro\Bebop\Patterns\Script {
      * Instantiates a new script object 
      * 
      * @param string  $id           Script ID
-     * @param string  $file_path    Script file path
+     * @param string  $path         Script path
      * @param array   $dependencies Script dependencies
      * @param string  $version      Script version
      * @param string  $media        String specifying the media for which this stylesheet has been defined
      */
-    public function __construct($id, $file_path, array $dependencies = array(), $version = null, $media = 'all')
+    public function __construct($id, $path, array $dependencies = array(), $version = null, $media = 'all')
     {
         parent::__construct();
 
         // Create config collection
         $this->config = Bebop::Collection(array(
             'id'           => $id,
-            'file_path'    => ltrim($file_path, '/'),
+            'path'         => ltrim($path, '/'),
             'media'        => $media,
             'dependencies' => $dependencies,
             'base_url'     => null

@@ -63,12 +63,12 @@ abstract class Script implements ScriptInterface {
     /**
      * Sets file path
      * 
-     * @param string $file_path Path relative to the theme location
+     * @param string $path Path relative to the theme location
      */
-    public function setFilePath($file_path)
+    public function setPath($path)
     {
-        if (is_string($file_path))
-            $this->config->set('file_path', ltrim($file_path, '/'));
+        if (is_string($path))
+            $this->config->set('path', ltrim($path, '/'));
 
         return $this;
     }
@@ -78,9 +78,9 @@ abstract class Script implements ScriptInterface {
      * 
      * @return string
      */
-    public function getFilePath()
+    public function getPath()
     {
-        return $this->config->get('file_path');
+        return $this->config->get('path');
     }
 
     /**
@@ -112,7 +112,7 @@ abstract class Script implements ScriptInterface {
      */
     public function getAbsoluteUrl()
     {
-        return $this->getBaseUrl() .'/'. $this->getFilePath();
+        return $this->getBaseUrl() .'/'. $this->getPath();
     }
 
     /**
@@ -136,7 +136,7 @@ abstract class Script implements ScriptInterface {
     public function getVersion()
     {
         $version = $this->config->get('version');
-        $path    = Bebop::getPath('theme') .'/'. $this->getFilePath();
+        $path    = Bebop::getPath('theme') .'/'. $this->getPath();
 
         if (!$version && is_readable($path)) $version = filemtime($path);
 

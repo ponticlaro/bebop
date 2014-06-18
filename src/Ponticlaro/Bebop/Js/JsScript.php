@@ -10,19 +10,19 @@ class JsScript extends \Ponticlaro\Bebop\Patterns\Script {
      * Instantiates a new script object 
      * 
      * @param string  $id           Script ID
-     * @param string  $file_path    Script file path
+     * @param string  $path         Script path
      * @param array   $dependencies Script dependencies
      * @param string  $version      Script version
      * @param boolean $in_footer    If script should be loaded in the wp_footer hook
      */
-    public function __construct($id, $file_path, array $dependencies = array(), $version = null, $in_footer = true)
+    public function __construct($id, $path, array $dependencies = array(), $version = null, $in_footer = true)
     {
         parent::__construct();
 
         // Create config collection
         $this->config = Bebop::Collection(array(
             'id'           => $id,
-            'file_path'    => ltrim($file_path, '/'),
+            'path'         => ltrim($path, '/'),
             'in_footer'    => $in_footer,
             'dependencies' => $dependencies,
             'base_url'     => null

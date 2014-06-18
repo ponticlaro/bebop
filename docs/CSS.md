@@ -73,7 +73,7 @@ $app = Bebop::CSS('front')->getFile('main');
 
 $app->onEnv('production', function($file) {
     
-    $file->setFilePath('assets/js/app.min.js')
+    $file->setPath('assets/js/app.min.js')
          ->setDependencies(['jquery']);
 });
 ```

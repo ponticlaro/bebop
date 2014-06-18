@@ -264,7 +264,7 @@ class ScriptsHook {
             if ($this->scripts->hasKey($script_id)) {
                 
                 $script_obj = $this->scripts->get($script_id);
-                $script_obj->deenqueue();
+                $script_obj->dequeue();
             }
         }
 
@@ -284,7 +284,7 @@ class ScriptsHook {
                 $base_url   = $this->getBaseUrl();
                 $script_obj = $this->scripts->get($script_id);
 
-                if ($base_url) $script_obj->setBaseUrl($base_url);
+                if ($base_url && !$script_obj->getBaseUrl()) $script_obj->setBaseUrl($base_url);
 
                 $script_obj->register();
             }
