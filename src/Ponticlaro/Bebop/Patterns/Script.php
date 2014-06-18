@@ -102,7 +102,15 @@ abstract class Script implements ScriptInterface {
      */
     public function getBaseUrl()
     {
-        return $this->config->get('base_url') ?: Bebop::getUrl('theme');
+        $path = $this->config->get('path');
+
+        // Return empty string if path is an absolute URL
+        if (strpos($path, 'http://') == 0 || strpos($path, 'https://') == 0 || strpos($path, '//') == 0) {
+            
+            return '';
+        }
+
+        return $this->config->get('base_url') ? $this->config->get('base_url') .'/' : Bebop::getUrl('theme') .'/';
     }
 
     /**
@@ -112,7 +120,7 @@ abstract class Script implements ScriptInterface {
      */
     public function getAbsoluteUrl()
     {
-        return $this->getBaseUrl() .'/'. $this->getPath();
+        return $this->getBaseUrl() . $this->getPath();
     }
 
     /**
