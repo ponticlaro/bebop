@@ -105,7 +105,7 @@ abstract class Script implements ScriptInterface {
         $path = $this->config->get('path');
 
         // Return empty string if path is an absolute URL
-        if (strpos($path, 'http://') == 0 || strpos($path, 'https://') == 0 || strpos($path, '//') == 0) {
+        if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0 || strpos($path, '//') === 0) {
             
             return '';
         }
