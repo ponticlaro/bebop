@@ -25,4 +25,31 @@ class CssScriptsHook extends \Ponticlaro\Bebop\Patterns\ScriptsHook {
 
         return $this;
     }
+
+    /**
+     * Executes script actions using only script ID
+     * 
+     */
+    protected function scriptAction($action, $file_id)
+    {
+        switch ($action) {
+
+            case 'deregister':
+                
+                wp_deregister_style($file_id);
+                break;
+            
+            case 'dequeue':
+                
+                wp_dequeue_style($file_id);
+                break;
+
+            case 'enqueue':
+                
+                wp_enqueue_style($file_id);
+                break;
+        }
+
+        return $this;
+    }
 }

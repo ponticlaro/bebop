@@ -248,6 +248,11 @@ class ScriptsHook {
                 $script_obj = $this->scripts->get($script_id);
                 $script_obj->deregister();
             }
+
+            else {
+
+                $this->scriptAction('deregister', $script_id);
+            }
         }
 
         return $this;
@@ -265,6 +270,11 @@ class ScriptsHook {
                 
                 $script_obj = $this->scripts->get($script_id);
                 $script_obj->dequeue();
+            }
+
+            else {
+
+                $this->scriptAction('dequeue', $script_id);
             }
         }
 
@@ -306,8 +316,21 @@ class ScriptsHook {
                 $script_obj = $this->scripts->get($script_id);
                 $script_obj->enqueue();
             }
+
+            else {
+
+                $this->scriptAction('enqueue', $script_id);
+            }
         }
 
+        return $this;
+    }
+
+    /**
+     * Executes default scripts actions using only the script ID
+     */
+    protected function scriptAction($action, $script_id)
+    {
         return $this;
     }
 
