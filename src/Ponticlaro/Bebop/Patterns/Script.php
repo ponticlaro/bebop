@@ -173,8 +173,22 @@ abstract class Script implements ScriptInterface {
      */
     public function onEnv($env, $fn)
     {
-        if (is_string($env) && is_callable($fn)) $this->env_configs->set($env, $fn);
+        if (is_callable($fn)) {
 
+            if (is_string($env)) {
+               
+                $this->env_configs->set($env, $fn);
+            }
+
+            elseif (is_array($env)) {
+                
+                foreach ($env as $env_key) {
+                   
+                    $this->env_configs->set($env_key, $fn);
+                }
+            }
+        }
+        
         return $this;
     }
 

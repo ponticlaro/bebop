@@ -151,37 +151,46 @@ class ScriptsHook {
     }
 
     /**
-     * Enqueues a single script
+     * Enqueues scripts
+     * You can pass as many file IDs as individual parameters as you need
      * 
-     * @param string $id Script ID
      */
-    public function enqueue($id)
+    public function enqueue()
     {
-        $this->enqueue_list->push($id);
+        foreach (func_get_args() as $file_id) {
+            
+            if (is_string($file_id)) $this->enqueue_list->push($file_id);
+        }
 
         return $this;
     }
 
     /**
-     * Deregisters a single script
+     * Deregisters scripts
+     * You can pass as many file IDs as individual parameters as you need
      * 
-     * @param string $id Script ID
      */
-    public function deregister($id)
+    public function deregister()
     {
-        $this->deregister_list->push($id);
+        foreach (func_get_args() as $file_id) {
+            
+            if (is_string($file_id)) $this->deregister_list->push($file_id);
+        }
 
         return $this;
     }
 
     /**
-     * Dequeues a single script
+     * Dequeues scripts
+     * You can pass as many file IDs as individual parameters as you need
      * 
-     * @param string $id Script ID
      */
-    public function dequeue($id)
+    public function dequeue()
     {
-        $this->dequeue_list->push($id);
+        foreach (func_get_args() as $file_id) {
+            
+            if (is_string($file_id)) $this->dequeue_list->push($file_id);
+        }
 
         return $this;
     }
@@ -192,9 +201,23 @@ class ScriptsHook {
      * @param string $env Target environment ID
      * @param string $fn  Function to execute
      */
-    public function onEnv($env, $fn)
+    public function onEnv($envs, $fn)
     {
-        if (is_string($env) && is_callable($fn)) $this->env_configs->set($env, $fn);
+        if (is_callable($fn)) {
+
+            if (is_string($envs)) {
+               
+                $this->env_configs->set($envs, $fn);
+            }
+
+            elseif (is_array($envs)) {
+                
+                foreach ($envs as $env) {
+                   
+                    $this->env_configs->set($env, $fn);
+                }
+            }
+        }
 
         return $this;
     }

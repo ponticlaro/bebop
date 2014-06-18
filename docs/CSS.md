@@ -2,13 +2,13 @@ CSS Registration
 ---
 This file explains in detail the available tools to manage registration and enqueuing of CSS files.
 
-## Getting the scripts manager
+## Getting the CSS manager
 
 ```php
 $css_manager = Bebop::CSS();
 ```
 
-## Default script registration hooks
+## Default CSS registration hooks
 Bebop automatically sets 3 registration hooks:
 - **front**: Used to register and enqueue scripts on the front-end
 - **back** Used to register and enqueue scripts on the back-end
@@ -27,24 +27,24 @@ You can add new registration hooks and use them the same way as the default ones
 Bebop::CSS()->addHook('admin/head', 'admin_head ');
 ```
 
-## Script registration, deregistration, enqueuing and dequeuing
+## CSS registration, deregistration, enqueuing and dequeuing
 
-### Script Registration
+### CSS Registration
 ```php
 Bebop::CSS('front')->register($id, $file_path, $dependencies, $version, $media);
 ```
 
-### Script Deregistration
+### CSS Deregistration
 ```php
-Bebop::CSS('front')->deregister('jquery-ui');
+Bebop::CSS('front')->deregister('jquery-ui', 'thickbox');
 ```
 
-### Script Enqueuing
+### CSS Enqueuing
 ```php
-Bebop::CSS('front')->enqueue('main');
+Bebop::CSS('front')->enqueue('main', 'fontcustom');
 ```
 
-### Script Dequeuing
+### CSS Dequeuing
 ```php
 Bebop::CSS('front')->dequeue('jquery-ui');
 ```

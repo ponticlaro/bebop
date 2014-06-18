@@ -2,13 +2,13 @@ Javascript Registration
 ---
 This file explains in detail the available tools to manage registration and enqueuing of Javascript files.
 
-## Getting the scripts manager
+## Getting the JS manager
 
 ```php
 $js_manager = Bebop::JS();
 ```
 
-## Default script registration hooks
+## Default JS registration hooks
 Bebop automatically sets 3 registration hooks:
 - **front**: Used to register and enqueue scripts on the front-end
 - **back** Used to register and enqueue scripts on the back-end
@@ -27,26 +27,26 @@ You can add new registration hooks and use them the same way as the default ones
 Bebop::JS()->addHook('admin/head', 'admin_head ');
 ```
 
-## Script registration, deregistration, enqueuing and dequeuing
+## JS registration, deregistration, enqueuing and dequeuing
 
-### Script Registration
+### JS Registration
 ```php
 Bebop::JS('front')->register($id, $file_path, $dependencies, $version, $in_footer);
 ```
 
-### Script Deregistration
+### JS Deregistration
 ```php
-Bebop::JS('front')->deregister('jquery');
+Bebop::JS('front')->deregister('jquery', 'backbone');
 ```
 
-### Script Enqueuing
+### JS Enqueuing
 ```php
-Bebop::JS('front')->enqueue('app');
+Bebop::JS('front')->enqueue('app', 'google-api');
 ```
 
-### Script Dequeuing
+### JS Dequeuing
 ```php
-Bebop::JS('front')->dequeue('jquery-ui');
+Bebop::JS('front')->dequeue('jquery-ui', 'underscore');
 ```
 
 ## Modifying registration hook on specific environments
