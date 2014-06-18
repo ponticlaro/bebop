@@ -1,9 +1,9 @@
 <?php
 
-namespace Ponticlaro\Bebop\Scripts;
+namespace Ponticlaro\Bebop\Patterns;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\Scripts\Script;
+use Ponticlaro\Bebop\Patterns\Script;
 
 class ScriptsHook {
 
@@ -140,18 +140,12 @@ class ScriptsHook {
 	/**
 	 * Registers a single script
 	 * 
-	 * @param string  $id           Script ID
-	 * @param string  $file_path    Script file path
-	 * @param array   $dependencies Script dependencies
-	 * @param string  $version      Script version
-	 * @param boolean $in_footer    If script should be loaded in the wp_footer hook
+	 * @param string $id Script ID
 	 */
-	public function register($id, $file_path, array $dependencies = array(), $version = null, $in_footer = true)
+	public function register(Script $script)
 	{
-		$script = new Script($id, $file_path, $dependencies, $version, $in_footer);
-
-		$this->scripts->set($id, $script);
-		$this->register_list->push($id);
+		$this->scripts->set($script->getid(), $script);
+		$this->register_list->push($script->getid());
 
 		return $this;
 	}
