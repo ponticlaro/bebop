@@ -2,33 +2,19 @@ Bebop
 ==================
 
 ## Boot Bebop
-This is needed to generate defaults and initialize several useful objects.  
+You should call `Bebop::boot()` before using any of its features. This is needed to generate defaults and initialize several useful objects.  
 ```php
 use Ponticlaro\Bebop;
     
 Bebop::boot();
 ```
 
-## Environment Manager
-Check [this](docs/ENVIRONMENT_MANAGER.md) documentation file.
-
-## Paths & URLs
-Check [this](docs/PATHS_AND_URLS.md) documentation file.
-
-## CSS Registration
-Check [this](docs/CSS.md) documentation file.
-
-## JS Registration
-Check [this](docs/JS.md) documentation file.
-
-## RESTful API
-Check [this](docs/API.md) documentation file.
-
-## HTTP Client
-Check [this](docs/HTTP_CLIENT.md) documentation file.
-
-## Administration Menus API
-Check [this](docs/ADMINISTRATION_MENUS.md) documentation file.
-
-## Options API
-Check [this](docs/OPTIONS.md) documentation file.
+## Features
+- [Environment Manager](docs/ENVIRONMENT_MANAGER.md)
+- [Paths & URLs](docs/PATHS_AND_URLS.md)
+- [CSS Registration](docs/CSS.md)
+- [JS Registration](docs/JS.md)
+- [RESTful API](docs/API.md)
+- [HTTP Client](docs/HTTP_CLIENT.md)
+- [Administration Menus API](docs/ADMINISTRATION_MENUS.md)
+- [Options API](docs/OPTIONS.md)
