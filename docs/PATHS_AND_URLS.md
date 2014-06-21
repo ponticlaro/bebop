@@ -49,6 +49,7 @@ Bebop::setPath(array(
     'theme/images' => Bebop::getPath('theme', 'assets/i'),
     'favicon'      => Bebop::getPath('theme', 'favicon.ico')
 ));
+```
 
 ### Paths shortcode
 Bebop generates a shortcode to use these paths on the built-in editor.  
@@ -105,6 +106,7 @@ Bebop::setUrl(array(
     'theme/images' => Bebop::getUrl('theme', 'assets/i'),
     'favicon'      => Bebop::getUrl('theme', 'favicon.ico')
 ));
+```
 
 ### URLs shortcode
 Bebop generates a shortcode to use these URLs on the built-in editor.    

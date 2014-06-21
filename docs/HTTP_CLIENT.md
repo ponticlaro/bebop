@@ -23,6 +23,7 @@ $client->setAuth('Basic '. base64_encode('username:password'));
 ```
 
 ## Making requests
+```php
 $response = $client->get('account');
 $response = $client->post('account');
 $response = $client->put('account');
@@ -30,7 +31,7 @@ $response = $client->patch('account');
 $response = $client->delete('account');
 ```
 ## Responses
-Each request will return an `\Ponticlaro\Bebop\Http\Response` instance.  
+Each request will return a `\Ponticlaro\Bebop\Http\Response` instance.  
 
 ### Get HTTP status code
 ```php
