@@ -29,18 +29,18 @@ $theme_path = Bebop::getPath('theme');
 $template = Bebop::getPath('theme', 'templates/article.mustache');
 ```
 
-## Setting Paths
-### Setting a single path
+### Setting Paths
+#### Setting a single path
 ```php
 Bebop::setPath('favicon', 'favicon.ico'));
 ```
 
-### Setting a single path, based on another existing path
+#### Setting a single path, based on another existing path
 ```php
 Bebop::setPath('favicon', Bebop::getPath('theme', 'favicon.ico'));
 ```
 
-### Setting multiple paths
+#### Setting multiple paths
 ```php
 Bebop::setPath(array(
     'theme/css'    => Bebop::getPath('theme', 'assets/css'),
@@ -51,7 +51,7 @@ Bebop::setPath(array(
 ));
 ```
 
-## Paths shortcode
+### Paths shortcode
 Bebop generates a shortcode to use these paths on the built-in editor.  
 
 ```
@@ -86,18 +86,18 @@ $theme_path = Bebop::getPath('theme');
 $template = Bebop::getPath('theme', 'assets/js/app.min.js);
 ```
 
-## Setting URLs
-### Setting a single URL
+### Setting URLs
+#### Setting a single URL
 ```php
 Bebop::setUrl('favicon', 'favicon.ico'));
 ```
 
-### Setting a single URL, based on another existing URL
+#### Setting a single URL, based on another existing URL
 ```php
 Bebop::setUrl('favicon', Bebop::getUrl('theme', 'favicon.ico'));
 ```
 
-### Setting multiple URLs
+#### Setting multiple URLs
 ```php
 Bebop::setUrl(array(
     'theme/css'    => Bebop::getUrl('theme', 'assets/css'),
@@ -108,7 +108,7 @@ Bebop::setUrl(array(
 ));
 ```
 
-## URLs shortcode
+### URLs shortcode
 Bebop generates a shortcode to use these URLs on the built-in editor.    
 ```
 [bebop url="theme"]
