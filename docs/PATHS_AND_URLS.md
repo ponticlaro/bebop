@@ -51,7 +51,7 @@ Bebop::setPath(array(
 ));
 ```
 
-### Paths shortcode
+## Paths shortcode
 Bebop generates a shortcode to use these paths on the built-in editor.  
 
 ```
@@ -108,7 +108,7 @@ Bebop::setUrl(array(
 ));
 ```
 
-### URLs shortcode
+## URLs shortcode
 Bebop generates a shortcode to use these URLs on the built-in editor.    
 ```
 [bebop url="theme"]

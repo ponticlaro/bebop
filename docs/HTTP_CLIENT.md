@@ -19,6 +19,7 @@ $client = new HttpClient('https://api.base-url.com');
 
 ## Requests
 ### Setting Authorization header
+```php
 $client->setAuth('Basic '. base64_encode('username:password'));
 ```
 
