@@ -18,9 +18,46 @@ $client = new HttpClient('https://api.base-url.com');
 ```
 
 ## Requests
-### Setting Authorization header
+### Default configuration values
+```php
+$default_config = array(
+    'timeout'     => 5,
+    'redirection' => 5,
+    'httpversion' => '1.0',
+    'user-agent'  => 'WordPress/' . $wp_version . '; ' . get_bloginfo('url'),
+    'blocking'    => true,
+    'body'        => null,
+    'compress'    => false,
+    'decompress'  => true,
+    'sslverify'   => true,
+    'stream'      => false,
+    'filename'    => null
+);
+```
+
+### Setting a configuration value
+```php
+$client->set('body', json_encode($data));
+```
+
+### Setting base URL after instantiation
+```php
+$client->setUrl('https://api.base-url.com');
+```
+
+### Setting a header
+```php
+$client->setHeader('Content-type', 'application/json');
+```
+
+### Specific method to set Authorization header
 ```php
 $client->setAuth('Basic '. base64_encode('username:password'));
+```
+
+### Setting a cookie
+```php
+$client->setCookie('app_auth', 'sw23r2r13d1wyuz9n13y487n24ttz36n7');
 ```
 
 ## Making requests
@@ -31,6 +68,7 @@ $response = $client->put('account');
 $response = $client->patch('account');
 $response = $client->delete('account');
 ```
+
 ## Responses
 Each request will return a `\Ponticlaro\Bebop\Http\Response` instance.  
 
