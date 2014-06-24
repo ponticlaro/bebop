@@ -91,7 +91,7 @@ class API extends SingletonAbstract {
 	public function rewriteRules($wp_rules) 
 	{
 		$bebop_rules = array(
-			$this->base_url ."?(.*)?$" => 'index.php?bebop_api=1'
+			self::$base_url ."?(.*)?$" => 'index.php?bebop_api=1'
 		);
 
 		return array_merge($bebop_rules, $wp_rules);
