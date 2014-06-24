@@ -282,7 +282,7 @@ class Bebop extends SingletonAbstract
     public static function inc($path_key, $once = false)
     {
         // Include file
-        self::__includeFile($cached_path, $once);
+        self::__includeFile($path_key, $once);
     }
 
     /**
@@ -456,7 +456,7 @@ class Bebop extends SingletonAbstract
         if (!is_string($path_key)) return;
 
         // Check for path in path collection
-        $path = self::$__paths->get($path_key);
+        $path = self::Paths()->get($path_key);
 
         // Return if $path is not a string or not readable
         if (!$path || !is_string($path) || !is_readable($path)) return;
