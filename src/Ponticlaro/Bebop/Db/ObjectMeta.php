@@ -132,6 +132,8 @@ class ObjectMeta {
                     $this->id_column = ?
                 AND
                     meta_key = ?
+                ORDER BY
+                    meta_id ASC
                 ";
 
         // Set SQL replacements
