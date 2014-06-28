@@ -206,7 +206,14 @@
 
 			 		if ($el.get(0).tagName == 'INPUT') {
 
-			 			value = $el.val();
+			 			if ($el.attr('type') == 'checkbox' && !$el.is(':checked')) {
+
+			 				value = '';
+
+			 			} else {
+
+			 				value = $el.val();
+			 			}
 			 		}
 
 			 		// Set value to empty array in case of a select with multiple values
