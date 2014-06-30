@@ -18,7 +18,7 @@ class Db {
 	protected static function getPDO()
 	{
 		// Get connection details
-		$dsn      = 'mysql:dbname=' . DB_NAME . ";host=" . DB_HOST;
+		$dsn      = 'mysql:dbname=' . DB_NAME . ";host=" . DB_HOST .';charset='. DB_CHARSET;
 		$attempts = 10;
 		$pdo      = null;
 
