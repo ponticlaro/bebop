@@ -32,6 +32,9 @@ class Bebop extends SingletonAbstract
      */
     protected function __construct()
     {   
+        // Instantiate Context Manager
+        self::Context();
+
         // Instantiate URLs Manager
         self::Urls();
 
@@ -89,6 +92,14 @@ class Bebop extends SingletonAbstract
         global $wp_version;
 
         return self::$wp_version;
+    }
+
+    /**
+     * Returns the context manager
+     */
+    public static function Context()
+    {
+        return Bebop\Helpers\ContextManager::getInstance();
     }
 
     /**
