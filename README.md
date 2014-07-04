@@ -9,12 +9,22 @@ use Ponticlaro\Bebop;
 Bebop::boot();
 ```
 
-## Features
+## Custom Features
+- [RESTful API](docs/API.md)
+- Admin UI Widgets
+
+## Utilities
 - [Environment Manager](docs/ENVIRONMENT_MANAGER.md)
-- [Paths & URLs](docs/PATHS_AND_URLS.md)
+- [Context Manager](docs/CONTEXT_MANAGER.md)
+- [Paths Manager](docs/PATHS_MANAGER.md)
+- [URLs Manager](docs/URLS_MANAGER.md)
+
+## WordPress API Wrappers
 - [CSS Registration](docs/CSS.md)
 - [JS Registration](docs/JS.md)
-- [RESTful API](docs/API.md)
+- [Custom Post Types](docs/CUSTOM_POST_TYPES.md)
+- [Custom Taxonomies](docs/CUSTOM_TAXONOMIES.md)
+- [Custom Metaboxes](docs/CUSTOM_METABOXES.md)
+- [Administration Menus](docs/ADMINISTRATION_MENUS.md)
+- [Options](docs/OPTIONS.md)
 - [HTTP Client](docs/HTTP_CLIENT.md)
-- [Administration Menus API](docs/ADMINISTRATION_MENUS.md)
-- [Options API](docs/OPTIONS.md)
