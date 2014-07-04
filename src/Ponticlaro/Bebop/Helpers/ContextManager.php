@@ -37,7 +37,10 @@ class ContextManager extends SingletonAbstract {
 	 */
 	protected static $contexts;
 
-	public function __construct()
+	/**
+	 * Instantiates Context Manager
+	 */
+	protected function __construct()
 	{
 		// Instantiate contexts collection
 		self::$contexts = Bebop::Collection();
@@ -113,13 +116,27 @@ class ContextManager extends SingletonAbstract {
 	}
 
 	/**
-	 * Checks if the target $key is 
-	 * a partial of full match for the current context
+	 * Checks if the target $key is a partial match for the current context
+	 * You can optionally pass a regular expression to find matches
+	 * 
+	 * @param  [type]  $key        Context key or regular expression
+	 * @param  boolean $is_pattern True if the $key should be treated as a regular expression
+	 * @return boolean             True if there is a match, false otherwise
+	 */
+	public static function is($key, $is_pattern = false)
+	{
+		$pattern = $is_pattern ? $key : '/^'. preg_quote($key, '/') .'*/';
+
+		return preg_match($pattern, self::$current) ? true : false;	
+	}
+
+	/**
+	 * Checks if the target $key is an exact match for the current context
 	 * 
 	 * @param  string  $key Context string to check
 	 * @return boolean      True if it partially or fully matches, false otherwhise
 	 */
-	public static function isCurrent($key)
+	public static function equals($key)
 	{
 		return self::$current === $key ? true : false;
 	}
