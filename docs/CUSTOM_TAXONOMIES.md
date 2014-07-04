@@ -26,7 +26,7 @@ $custom_tax_obj = Bebop::Taxonomy(mixed $name, mixed $post_types, array $args = 
 - `$custom_tax_obj`: This is a `Ponticlaro\Bebop\Taxonomy` instance that can be passed when registering taxonomies and metaboxes.
 
 ## Getting the taxonomy object anywhere
-All custom post types are tracked by Bebop, so you can get the object for a taxonomy anywhere you need by using its `ID`. The `ID` of a taxonomy is always the slugified (with underscores) version of the singular name: e.g. **Product Year** will have **product_year** as the `ID`.
+All custom taxonomies are tracked by Bebop, so you can get the object for a taxonomy anywhere you need by using its `ID`. The `ID` of a taxonomy is always the slugified (with underscores) version of the singular name: e.g. **Product Year** will have **product_year** as the `ID`.
 
 ```php
 $custom_tax_obj = Bebop::ObjectTracker()->get('taxonomy', $id);

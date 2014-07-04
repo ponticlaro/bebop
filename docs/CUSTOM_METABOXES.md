@@ -36,7 +36,7 @@ $args = array(
 - `$custom_metabox_obj`: This is a `Ponticlaro\Bebop\Metabox` instance that can be passed when registering taxonomies and metaboxes.
 
 ## Getting the metabox object anywhere
-All custom post types are tracked by Bebop, so you can get the object for a metabox anywhere you need by using its `ID`. The `ID` of a metabox is always the slugified (with underscores) version of the singular name: e.g. **Product Details** will have **product_details** as the `ID`.
+All custom metaboxes are tracked by Bebop, so you can get the object for a metabox anywhere you need by using its `ID`. The `ID` of a metabox is always the slugified (with underscores) version of the singular name: e.g. **Product Details** will have **product_details** as the `ID`.
 
 ```php
 $custom_metabox_obj = Bebop::ObjectTracker()->get('metabox', $id);
