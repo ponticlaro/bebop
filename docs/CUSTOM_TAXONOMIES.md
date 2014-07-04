@@ -10,7 +10,7 @@ $custom_tax_obj = Bebop::Taxonomy(mixed $name, mixed $post_types, array $args = 
 
 ### Registration: arguments
 - `$name`: This can be either a string or an array:
-  - **string**: Should be the singular form of the post type name, including white-spaces and capital letters. Plural form will be automatically assumed to be the singular form plus an *s*  at the end.
+  - **string**: Should be the singular form of the post type name, including white-spaces and capital letters. Plural form will be automatically assumed to be the singular form plus an "**s**" at the end.
   - **array**: Should only contain two elements and both must be strings. The first element is the singular form and the second element is the plural form.
 
 - `$post_types`: can be either:
@@ -23,7 +23,7 @@ $custom_tax_obj = Bebop::Taxonomy(mixed $name, mixed $post_types, array $args = 
 - `$args`: is optional and exactly the same array you can pass as the third argument to `register_taxonomy` and that is documented [here](http://codex.wordpress.org/Function_Reference/register_taxonomy#Arguments).
 
 ### Registration: returned value
-- `$custom_tax_obj`: This is a `Ponticlaro\Bebop\PostType` instance that can be passed when registering taxonomies and metaboxes.
+- `$custom_tax_obj`: This is a `Ponticlaro\Bebop\Taxonomy` instance that can be passed when registering taxonomies and metaboxes.
 
 ## Getting the taxonomy object anywhere
 All custom post types are tracked by Bebop, so you can get the object for a taxonomy anywhere you need by using its `ID`. The `ID` of a taxonomy is always the slugified (with underscores) version of the singular name: e.g. **Product Year** will have **product_year** as the `ID`.

@@ -10,7 +10,7 @@ $custom_post_type_obj = Bebop::PostType(mixed $name, array $args = array());
 
 ### Registration: arguments
 - `$name`: This can be either a string or an array:
-  - **string**: Should be the singular form of the post type name, including white-spaces and capital letters. Plural form will be automatically assumed to be the singular form plus an *s*  at the end.
+  - **string**: Should be the singular form of the post type name, including white-spaces and capital letters. Plural form will be automatically assumed to be the singular form plus an "**s**" at the end.
   - **array**: Should only contain two elements and both must be strings. The first element is the singular form and the second element is the plural form.
 
 - `$args`: is optional and exactly the same array you can pass as the second argument to `register_post_type` and that is documented [here](http://codex.wordpress.org/Function_Reference/register_post_type#Arguments).
