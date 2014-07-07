@@ -5,6 +5,7 @@ namespace Ponticlaro;
 use Ponticlaro\Bebop\DB\ObjectMeta;
 use Ponticlaro\Bebop\Common\Collection;
 use Ponticlaro\Bebop\Helpers\Factory;
+use Ponticlaro\Bebop\Mvc\View;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 use Ponticlaro\Bebop\PostType;
@@ -40,6 +41,9 @@ class Bebop extends SingletonAbstract
 
         // Instantiate Paths Manager
         self::Paths();
+
+        // Set default views directory
+        View::setViewsDir(self::getPath('theme', 'views'));
  
         // Instantiate CSS Manager
         self::CSS();
@@ -112,6 +116,16 @@ class Bebop extends SingletonAbstract
 
         return is_string($key) && $env_manager->exists($key) ? $env_manager->get($key) : $env_manager;
     }
+
+    /**
+     * Returns an Mvc\View object with an already defined template
+     * 
+     * @param string $template Path of the template relative to the views directory, without file extension
+     */
+    public static function View($template)
+    {
+        return (new View)->setTemplate($template);
+    } 
 
     /**
      * Returns the UrlManager instance
