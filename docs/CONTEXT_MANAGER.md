@@ -64,7 +64,7 @@ Each container consist of an `ID` and a function to execute. The function will r
 
 ### Adding new context container to the bottom of the list
 ```php
-\Ponticlaro\Bebop::Context()->prepend('custom', function($wp_query) {
+\Ponticlaro\Bebop::Context()->append('custom', function($wp_query) {
     
     // Your logic to find the current context key
 
