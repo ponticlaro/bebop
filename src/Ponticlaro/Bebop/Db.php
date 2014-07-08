@@ -198,7 +198,7 @@ class Db {
 					$value = explode(',', $value);
 				}
 
-				if (in_array($key, $parameters_admitting_arrays)) {
+				if (in_array($key, $parameters_admitting_arrays) && is_string($value)) {
 					
 					$value = explode(',', $value);
 
