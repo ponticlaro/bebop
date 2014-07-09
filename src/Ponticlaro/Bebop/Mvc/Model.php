@@ -3,8 +3,12 @@
 namespace Ponticlaro\Bebop\Mvc;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Db;
+use Ponticlaro\Bebop\Db\Query;
 
 abstract class Model {
+
+	protected static $instance;
 
 	/**
 	 * Post type name
@@ -35,14 +39,25 @@ abstract class Model {
 	protected static $loadables;
 
 	/**
+	 * Contains the current query instance
+	 * 
+	 * @var Ponticlaro\Bebop\Db\Query
+	 */
+	protected static $query;
+
+	protected static $query_mode = false;
+
+	/**
 	 * Instantiates new model by inheriting all the $post properties
 	 * 
 	 * @param \WP_Post $post
 	 */
-	final public function __construct(\WP_Post $post)
+	final public function __construct($post = null)
 	{
-		foreach ((array) $post as $key => $value) {
-			$this->{$key} = $value;
+		if ($post instanceof \WP_Post) {
+			foreach ((array) $post as $key => $value) {
+				$this->{$key} = $value;
+			}
 		}
 	}
 
@@ -55,6 +70,38 @@ abstract class Model {
 	{
 		if (is_string($type))
 			static::$type = $type;
+	}
+
+    /**
+     * Adds a single function to load optional content or apply optional modifications 
+     * 
+     * @param string   $id Loadable ID
+     * @param callable $fn Loadable function
+     */
+	public static function addLoadable($id, $fn)
+	{
+		if (is_null(static::$loadables)) static::$loadables = Bebop::Collection();
+		
+		static::$loadables->set($id, $fn);
+	}
+
+	/**
+	 * Executes loadables by loadable ID
+	 * 
+	 * @param array $ids List of loadables IDs
+	 */
+	public function load(array $ids = array())
+	{
+		if (!is_null(static::$loadables)) {
+
+			foreach ($ids as $id) {
+				
+				if (static::$loadables->hasKey($id))		
+					call_user_func_array(static::$loadables->get($id), array($this));
+			}
+		}
+
+		return $this;
 	}
 
 	/**
@@ -71,71 +118,34 @@ abstract class Model {
 		return $this;
 	}
 
-	/**
-	 * Queries database for several items
-	 * 
-	 * @param  array $args    The same query args valid for Ponticlaro\Bebop\Db::queryPosts()
-	 * @param  array $options List of options for Ponticlaro\Bebop\Db::queryPosts()
-	 * @return array
-	 */
-	public static function query(array $args = array(), array $options = array())
-	{	
-		$args  = self::__mergeQueryArgs($args);
-		$items = \Ponticlaro\Bebop\Db::queryPosts($args, $options);
+    /**
+     * Adds a function to execute when the target context key is active
+     * 
+     * @param string $context_key Target context key
+     * @param string $fn          Function to execute
+     */
+    public static function onContext($context_keys, $fn)
+    {	
+        if (is_callable($fn)) {
 
-		// Apply model modifications
-		if ($items) {
-			foreach ($items as $key => $item) {
+        	if (is_null(static::$context_mods)) static::$context_mods = Bebop::Collection();
 
-				$items[$key] = static::__applyModelMods($item);
-			}
-		}
+            if (is_string($context_keys)) {
+               
+                static::$context_mods->set($context_keys, $fn);
+            }
 
-		return $items;
-	}
+            elseif (is_array($context_keys)) {
+                
+                foreach ($context_keys as $context_key) {
+                   
+                    static::$context_mods->set($context_key, $fn);
+                }
+            }
+        }
 
-	/**
-	 * Finds a single entry by ID
-	 * 
-	 * @param  int    $id [description]
-	 * @return object     Instance of the child class
-	 */
-	public static function find($id)
-	{
-		if (intval($id) !== 0) {
-
-			$post = get_post($id);
-
-			if ($post instanceof \WP_Post && self::isValidType($post)) {
-
-				return self::__applyModelMods($post);
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Checks if a WP_Post have the correct post type
-	 * 
-	 * @param  \WP_Post $post Post to be checked
-	 * @return boolean        True if it has the correct post type, false otherwise
-	 */
-	public static function isValidType(\WP_Post $post)
-	{
-		return $post->post_type == static::$type ? true : false;
-	} 
-
-	/**
-	 * Merges user args with unmodifiable post type
-	 * 
-	 * @param  array $args Query args
-	 * @return array
-	 */
-	private static function __mergeQueryArgs(array $args = array())
-	{
-		return array_merge($args, array('post_type' => static::$type));
-	}
+        return $this;
+    }
 
 	/**
 	 * Apply all post modifications 
@@ -198,64 +208,128 @@ abstract class Model {
         }
     }
 
-    /**
-     * Adds a single function to load optional content or apply optional modifications 
-     * 
-     * @param string   $id Loadable ID
-     * @param callable $fn Loadable function
-     */
-	public static function addLoadable($id, $fn)
-	{
-		if (is_null(static::$loadables)) static::$loadables = Bebop::Collection();
-		
-		static::$loadables->set($id, $fn);
-	}
-
 	/**
-	 * Executes loadables by loadable ID
+	 * Queries database for several items
 	 * 
-	 * @param array $ids List of loadables IDs
+	 * @param  array $args    The same query args valid for Ponticlaro\Bebop\Db::queryPosts()
+	 * @param  array $options List of options for Ponticlaro\Bebop\Db::queryPosts()
+	 * @return array
 	 */
-	public function load(array $ids = array())
-	{
-		if (!is_null(static::$loadables)) {
+	public static function query(array $args = array(), array $options = array())
+	{	
+		$args  = self::__mergeQueryArgs($args);
+		$items = Db::queryPosts($args, $options);
 
-			foreach ($ids as $id) {
-				
-				if (static::$loadables->hasKey($id))		
-					call_user_func_array(static::$loadables->get($id), array($this));
+		// Apply model modifications
+		if ($items) {
+			foreach ($items as $key => $item) {
+
+				$items[$key] = static::__applyModelMods($item);
 			}
 		}
 
-		return $this;
+		return $items;
 	}
 
-    /**
-     * Adds a function to execute when the target context key is active
-     * 
-     * @param string $context_key Target context key
-     * @param string $fn          Function to execute
-     */
-    public static function onContext($context_keys, $fn)
-    {	
-        if (is_callable($fn)) {
+	/**
+	 * Finds a single entry by ID
+	 * 
+	 * @param  int    $id [description]
+	 * @return object     Instance of the child class
+	 */
+	public static function find($id = null)
+	{
+		if ($id && intval($id) !== 0) {
 
-        	if (is_null(static::$context_mods)) static::$context_mods = Bebop::Collection();
+			$post = get_post($id);
+		}
 
-            if (is_string($context_keys)) {
-               
-                static::$context_mods->set($context_keys, $fn);
-            }
+		elseif(Bebop::Context()->is('single')) {
 
-            elseif (is_array($context_keys)) {
-                
-                foreach ($context_keys as $context_key) {
-                   
-                    static::$context_mods->set($context_key, $fn);
-                }
-            }
-        }
+			global $post;
+		}
 
-        return $this;
-    }
+		if (isset($post) && $post instanceof \WP_Post && self::__isValidType($post)) {
+
+			return self::__applyModelMods($post);
+		}
+
+		return null;
+	}
+
+	public static function __callStatic($name, $args)
+	{
+		if (is_null(static::$instance)) {
+
+			$class          = get_called_class();
+			static::$instance = new $class;
+		}
+
+		if (is_null(static::$query)) {
+
+			static::$query      = new Query;
+			static::$query_mode = true;
+		}
+
+		call_user_method_array($name, static::$query, $args);
+
+		return static::$instance;
+	}
+
+	public function __call($name, $args)
+	{
+		if (static::$query_mode)
+			call_user_method_array($name, static::$query, $args);
+
+		return static::$instance;
+	}
+
+	public function findAll()
+	{	
+		if (is_null(static::$query)) {
+
+			static::$query      = new Query;
+			static::$query_mode = true;
+		}
+		
+		static::$query->type(static::$type);
+
+		$items = static::$query->findAll();
+		$meta  = static::$query->getMeta();
+
+		static::$query      = null;
+		static::$query_mode = false;
+
+		// Apply model modifications
+		if ($items) {
+			foreach ($items as $key => $item) {
+
+				$items[$key] = static::__applyModelMods($item);
+			}
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Checks if a WP_Post have the correct post type
+	 * 
+	 * @param  \WP_Post $post Post to be checked
+	 * @return boolean        True if it has the correct post type, false otherwise
+	 */
+	private static function __isValidType(\WP_Post $post)
+	{
+		return $post->post_type == static::$type ? true : false;
+	} 
+
+	/**
+	 * Merges user args with unmodifiable post type
+	 * 
+	 * @param  array $args Query args
+	 * @return array
+	 */
+	private static function __mergeQueryArgs(array $args = array())
+	{
+		return array_merge($args, array('post_type' => static::$type));
+	}
 }
