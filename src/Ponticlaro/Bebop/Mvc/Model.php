@@ -219,35 +219,48 @@ abstract class Model {
      * @param  midex $ids Single ID or array of IDs
      * @return mixed      Single Object or array of objects
      */
-    public static function find($ids)
+    public static function find($ids = null)
     {
         static::__resetQuery();
         static::$query->postType(static::$type);
 
-        if (is_numeric($ids)) {
+        if (is_null($ids)) {
+            
+            if (Bebop::Context()->is('single')) {
                 
-            $data = static::$query->find($ids);
+                global $post;
 
-            static::__disableQueryMode();
-
-            return $data && $data[0] instanceof \WP_Post ? static::__applyModelMods($data[0]) : null;
+                return static::__applyModelMods($post);
+            }
         }
 
-        elseif (is_array($ids)) {
+        else {
 
-            $data = static::$query->post($ids)->ppp(count($ids))->findAll();
+            if (is_numeric($ids)) {
+                    
+                $data = static::$query->find($ids);
 
-            // Apply model modifications
-            if ($data) {
-                foreach ($data as $key => $item) {
+                static::__disableQueryMode();
 
-                    $data[$key] = static::__applyModelMods($item);
-                }
+                return $data && $data[0] instanceof \WP_Post ? static::__applyModelMods($data[0]) : null;
             }
 
-            static::__disableQueryMode();
-            
-            return $data;
+            elseif (is_array($ids)) {
+
+                $data = static::$query->post($ids)->ppp(count($ids))->findAll();
+
+                // Apply model modifications
+                if ($data) {
+                    foreach ($data as $key => $item) {
+
+                        $data[$key] = static::__applyModelMods($item);
+                    }
+                }
+
+                static::__disableQueryMode();
+                
+                return $data;
+            }
         }
 
         static::__disableQueryMode();
