@@ -167,7 +167,32 @@ class Query {
 		return $args;
 	}
 
-	public function find($args = null)
+	/**
+	 * Finds post by ID
+	 * 
+	 * @param  int $id ID of the target post
+	 * @return WP_Post
+	 */
+	public function find($id)
+	{	
+		if (is_numeric($id)) {
+
+			$arg = new Arg;
+			$arg->setkey('p')->setValue($id);
+			$this->args->push($arg);
+
+			return Db::queryPosts($this->getArgs());
+		}
+
+		return null;
+	}
+
+	/**
+	 * Finds posts with the current query
+	 * 
+	 * @param  mixed $args Optional arguments. Could be array of query args to be merged or post ID
+	 */
+	public function findAll($args = null)
 	{
 		$query_args = $this->getArgs();
 
@@ -179,7 +204,7 @@ class Query {
 
 		if (is_numeric($args)) {
 			
-			$this->post($args);
+			$query_args = array_merge($query_args, array('p', $args));
 		}
 
 		// Execute query

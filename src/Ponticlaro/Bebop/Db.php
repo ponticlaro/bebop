@@ -193,7 +193,7 @@ class Db {
 					'post_status'
 				);
 
-				if (in_array($key, $parameters_requiring_arrays)) {
+				if (in_array($key, $parameters_requiring_arrays) && is_string($value)) {
 					
 					$value = explode(',', $value);
 				}
