@@ -38,6 +38,7 @@ class ArgFactory {
         'status'       => 'Ponticlaro\Bebop\Db\Query\Presets\StatusArg',
         'tag'          => 'Ponticlaro\Bebop\Db\Query\Presets\TagArg',
         'tax'          => 'Ponticlaro\Bebop\Db\Query\Presets\TaxArg',
+        'taxonomy'     => 'Ponticlaro\Bebop\Db\Query\Presets\TaxArg',
     );
 
     /**

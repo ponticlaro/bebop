@@ -164,8 +164,6 @@ class Query {
 			}
 		}
 
-		var_dump($args);
-
 		return $args;
 	}
 
