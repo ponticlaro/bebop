@@ -215,10 +215,10 @@ abstract class Model {
 	 * @param  array $options List of options for Ponticlaro\Bebop\Db::queryPosts()
 	 * @return array
 	 */
-	public static function query(array $args = array(), array $options = array())
+	public static function query(array $args = array())
 	{	
 		$args  = self::__mergeQueryArgs($args);
-		$items = Db::queryPosts($args, $options);
+		$items = Db::queryPosts($args, array('with_meta' => true));
 
 		// Apply model modifications
 		if ($items) {
@@ -257,23 +257,42 @@ abstract class Model {
 		return null;
 	}
 
-	public static function __callStatic($name, $args)
+	public static function getInstance()
 	{
-		if (is_null(static::$instance)) {
+		if (is_null(static::$instance)) self::__resetInstance();
 
-			$class          = get_called_class();
-			static::$instance = new $class;
-		}
+		return static::$instance;
+	} 
 
+	private static function __resetInstance()
+	{
+		$class            = get_called_class();
+		static::$instance = new $class;
+	}
+
+
+	private static function __resetQueryInstance()
+	{
 		if (is_null(static::$query)) {
 
 			static::$query      = new Query;
 			static::$query_mode = true;
 		}
+	}
+
+	private static function __destroyQueryInstance()
+	{
+		static::$query      = null;
+		static::$query_mode = false;
+	}
+
+	public static function __callStatic($name, $args)
+	{
+		static::__resetQueryInstance();
 
 		call_user_method_array($name, static::$query, $args);
 
-		return static::$instance;
+		return static::getInstance();
 	}
 
 	public function __call($name, $args)
@@ -281,24 +300,20 @@ abstract class Model {
 		if (static::$query_mode)
 			call_user_method_array($name, static::$query, $args);
 
-		return static::$instance;
+		return static::getInstance();
 	}
 
 	public function findAll()
 	{	
-		if (is_null(static::$query)) {
+		static::__resetQueryInstance();
 
-			static::$query      = new Query;
-			static::$query_mode = true;
-		}
-		
-		static::$query->type(static::$type);
+		// Add post type as final argument
+		static::$query->postType(static::$type);
 
-		$items = static::$query->findAll();
+		$items = static::$query->find();
 		$meta  = static::$query->getMeta();
 
-		static::$query      = null;
-		static::$query_mode = false;
+		static::__destroyQueryInstance();
 
 		// Apply model modifications
 		if ($items) {

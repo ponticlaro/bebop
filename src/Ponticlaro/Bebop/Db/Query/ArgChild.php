@@ -2,38 +2,12 @@
 
 namespace Ponticlaro\Bebop\Db\Query;
 
-class Arg implements ArgInterface {
+class ArgChild implements ArgChildInterface {
     
     protected $key;
 
     protected $value;
-
-    protected $is_parent = false;
-
-    protected $has_multiple_keys = false;
-
-    protected $current_child;
     
-    public function isParent()
-    {
-        return $this->is_parent;
-    }
-
-    public function addChild()
-    {
-
-    }
-
-    public function getCurrentChild()
-    {
-        return $this->current_child;
-    }
-
-    public function hasMultipleKeys()
-    {
-        return $this->has_multiple_keys;
-    }
-
     public function setKey($key)
     {
         if (is_string($key))
@@ -57,5 +31,10 @@ class Arg implements ArgInterface {
     public function getValue()
     {
         return $this->value;
+    }
+
+    public function isComplete()
+    {
+        return $this->key && $this->value ? true : false;
     }
 }

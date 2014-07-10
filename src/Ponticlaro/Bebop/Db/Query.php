@@ -9,19 +9,53 @@ use Ponticlaro\Bebop\Db\Query\ArgFactory;
 
 class Query {
 
-	private $query_results = array();
-
-	private $query_meta;
-
+	/**
+	 * List of arguments
+	 * 
+	 * @var Ponticlaro\Bebop\Common\Collection
+	 */
 	private $args;
 
+	/**
+	 * Current argument being worked on
+	 * 
+	 * @var Ponticlaro\Bebop\Db\Query\Arg
+	 */
 	private $current_arg;
 
+	/**
+	 * Query Results
+	 * @var array
+	 */
+	private $query_results = array();
+
+	/**
+	 * List of arguments
+	 * 
+	 * @var Ponticlaro\Bebop\Common\Collection
+	 */
+	private $query_meta;
+
+	/**
+	 * Creates new query instance
+	 * 
+	 */
 	public function __construct()
 	{
 		$this->args = Bebop::Collection();
 	}
 
+	/**
+	 * Handles all the logic needed to:
+	 * - create new argument
+	 * - execute action on current argument
+	 * - execute action on current argument child
+	 * - get existing parent argument if it needs to add another child item
+	 * 
+	 * @param  string 						 $name Method name
+	 * @param  array  						 $args Method arguments
+	 * @return use Ponticlaro\Bebop\Db\Query       Query instance
+	 */
 	public function __call($name, $args)
 	{
 		$name = strtolower($name);
@@ -32,57 +66,48 @@ class Query {
 			call_user_method_array($name, $this->current_arg, $args);
 		}
 
-		// Check if current arg is a parent and if its current child have the method
+		// Check if:
+		// - current arg is a parent 
+		// - its current child have the method
+		// - its current child action is still available to be executed
 		elseif (!is_null($this->current_arg) && 
 			    $this->current_arg->isParent() && 
-			    method_exists($this->current_arg->getCurrentChild(), $name)) {
+			    method_exists($this->current_arg->getCurrentChild(), $name) && 
+			    $this->current_arg->getCurrentChild()->actionIsAvailable($name)) {
 
 			call_user_method_array($name, $this->current_arg->getCurrentChild(), $args);
 		}
 
-		// Check if we should add a new child to an already existing parent arg
+		// Check if:
+		// - current arg is a parent 
+		// - method name matches current arg factory ID
 		elseif (!is_null($this->current_arg) && 
 			    $this->current_arg->isParent() &&
 			    ArgFactory::getInstanceId($this->current_arg) == $name) {
 
-			call_user_method_array('addChild', $this->current_arg, $args);
+			$this->__addArgChild($this->current_arg, $args);
 		}
 
 		// Check if a parent arg is already instantiated for the target method $name
 		elseif ($this->args->hasKey($name)) {
 
-			$arg = $this->args->get($name);
+			$this->current_arg = $this->args->get($name);
 
-			call_user_method_array('addChild', $arg, $args);
-
-			$this->current_arg = $arg;
+			$this->__addArgChild($this->current_arg, $args);
 		}
 
 		// Check for manufacturable argument class
 		elseif (ArgFactory::canManufacture($name)) {
 
-			// Save current arg if any
-			if (!is_null($this->current_arg)) {
-
-				// Store unique arg with a key
-				if ($this->current_arg->isParent()) {
-					
-					$this->args->set(ArgFactory::getInstanceId($this->current_arg), $this->current_arg);
-				}
-
-				// Push non-unique arg to args collection
-				else {
-
-					$this->args->push($this->current_arg);
-				}
-			}
+			// Save current arg, if there is one
+			$this->__collectCurrentArg();
 
 			// Create new arg
 			$arg = ArgFactory::create($name, $args);
 
 			// If it is a parent arg, save it immediatelly
 			if ($arg->isParent())
-				$this->args->set($name, $this->current_arg);
+				$this->args->set($name, $arg);
 
 			// Store new arg as current
 			$this->current_arg = $arg;
@@ -91,146 +116,123 @@ class Query {
 		return $this;
 	}
 
-	public function metaKey($key)
-	{
-		if (is_string($key)) {
-			
-			$arg = new Arg();
-			$arg->setKey('meta_key')->setValue($key);
-
-			$this->args->push($arg);
-		}
-
-		return $this;
-	}
-
-	public function metaValue($value)
-	{	
-		if ($value) {
-
-			$arg = new Arg();
-			$arg->setKey('meta_value')->setValue($value);
-
-			$this->args->push($arg);
-		}
-
-		return $this;
-	}
-
-	public function page($page)
-	{
-		if (is_numeric($page)) {
-
-			$arg = new Arg();
-			$arg->setKey('page')->setValue($page);
-
-			$this->args->push($arg);
-		}
-
-		return $this;
-	}
-
-	public function limit($limit)
-	{
-		if (is_numeric($limit)) {
-
-			$arg = new Arg();
-			$arg->setKey('posts_per_page')->setValue($limit);
-
-			$this->args->push($arg);
-		}
-
-		return $this;
-	}
-
-	public function offset($offset)
-	{
-		if (is_numeric($offset)) {
-
-			$arg = new Arg();
-			$arg->setKey('offset')->setValue($offset);
-
-			$this->args->push($arg);
-		}
-
-		return $this;
-	}
-
-	public function order($by, $direction = 'DESC')
-	{
-		if (is_string($by) && is_string($direction)) {
-
-			$arg = new Arg();
-			$arg->setKey('orderby')->setValue($by);
-
-			$this->args->push($arg);
-
-			$arg = new Arg();
-			$arg->setKey('order')->setValue($direction);
-
-			$this->args->push($arg);
-		}
-
-		return $this;
-	}
-
-	public function ignoreSticky($ignore)
-	{
-		if (is_bool($ignore)) {
-
-			$arg = new Arg();
-			$arg->setKey('ignore_sticky_posts')->setValue($ignore);
-
-			$this->args->push($arg);
-		}
-
-		return $this;
-	}
-
-	public function getArgs()
-	{	
-		$args = array();
-
-		// Save current arg if any
-		if (!is_null($this->current_arg)) {
-
-			if ($this->current_arg->isParent()) {
-				
-				$this->args->set(ArgFactory::getInstanceId($this->current_arg), $this->current_arg);
-			}
-
-			else{
-
-				$this->args->push($this->current_arg);
-			}
-			
-			$this->current_arg = null;
-		}
-
-		foreach ($this->args->get() as $arg) {
-
-			if ($arg->getValue())
-				$args[$arg->getKey()] = $arg->getValue();
-		}
-
-		return $args;
-	}
-
+	/**
+	 * Returns all meta info for the executed query
+	 * 
+	 * NOTE: Will only contain data after executing the query
+	 * 
+	 * @return object
+	 */
 	public function getMeta()
 	{
 		return $this->query_meta;
 	}
 
-	public function findAll()
-	{
-		$data = Db::queryPosts($this->getArgs(), array('with_meta' => true));
+	/**
+	 * Returns the args array needed to query for posts
+	 * 
+	 * @return array
+	 */
+	public function getArgs()
+	{	
+		// Save current arg, if there is one
+		$this->__collectCurrentArg();
 
+		$args = array();
+
+		foreach ($this->args->get() as $arg) {
+
+			if ($arg->getValue()) {
+
+				$value = $arg->getValue();
+
+				if ($arg->hasMultipleKeys()) {
+					
+					foreach ($value as $k => $v) {
+						
+						if (is_string($k)) {
+							
+							$args[$k] = $v;
+						}
+					}
+				}
+
+				else {
+
+					$args[$arg->getKey()] = $value;
+				}
+			}
+		}
+
+		var_dump($args);
+
+		return $args;
+	}
+
+	public function find($args = null)
+	{
+		$query_args = $this->getArgs();
+
+		if (is_array($args)) {
+			
+			// Merge user input args with 
+			$query_args = array_merge($query_args, $args);
+		}
+
+		if (is_numeric($args)) {
+			
+			$this->post($args);
+		}
+
+		// Execute query
+		$data = Db::queryPosts($query_args, array('with_meta' => true));
+
+		// Save query items
 		if (isset($data['items']))
 			$this->query_results = $data['items'];
 		
+		// Save query meta
 		if (isset($data['meta']))
-			$this->query_meta = $data['meta'];
+			$this->query_meta = (object) $data['meta'];
 
 		return $this->query_results;
+	}
+
+	/**
+	 * Collects and nullifies the current argument
+	 *  
+	 * @return void
+	 */
+	private function __collectCurrentArg()
+	{
+		if (!is_null($this->current_arg)) {
+
+			// Store unique arg with a key
+			if ($this->current_arg->isParent()) {
+				
+				$this->args->set(ArgFactory::getInstanceId($this->current_arg), $this->current_arg);
+			}
+
+			// Push non-unique arg to args collection
+			else {
+
+				$this->args->push($this->current_arg);
+			}
+
+			// Making sure this arg is not collected again by mistake
+			$this->current_arg = null;
+		}
+	}
+
+	/**
+	 * Adds child to target argument instance
+	 * 
+	 * @param  Arg    $arg  Parent argument instance
+	 * @param  array  $args Arguments for new argument child item
+	 * @return void
+	 */
+	private function __addArgChild(Arg $arg, array $args = array())
+	{
+		call_user_method_array('addChild', $arg, $args);
 	}
 }
