@@ -1,6 +1,6 @@
 <?php
 
-namespace Ponticlaro\Bebop\Common;
+namespace Ponticlaro\Bebop\Patterns;
 
 abstract class CollectionAbstract implements CollectionInterface {
 
@@ -77,16 +77,17 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 */
 	public function unshift($values, $key = null)
 	{
-		if(is_string($values)) $this->__unshiftItem($values);
-
-		if(is_array($values)) {
+		if (is_array($values)) {
 
 			foreach ($values as $key => $value) {
 
 				$this->__unshiftItem($value, $key);
-
 			}
+		}
 
+		else {
+
+			$this->__unshiftItem($values, $key);
 		}
 
 		return $this;
@@ -101,7 +102,7 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 */
 	private function __unshiftItem($value, $key = null)
 	{
-		if($key) {
+		if ($key) {
 
 			if (!array_key_exists($key, $this->data)) {
 
@@ -109,18 +110,16 @@ abstract class CollectionAbstract implements CollectionInterface {
 
 	        } elseif (is_array($this->data[$key])) {
 
-	            array_unshift($this->data[$key][] = $value);
+	            array_unshift($this->data[$key], $value);
 
 	        } else {
 
-	            $this->data[$key] = array($this->data[$key], $value);
-
+	            $this->data[$key] = array($value);
 	        }
 
 		} else {
 
 			 array_unshift($this->data, $value);
-
 		}
 	}
 
@@ -194,7 +193,6 @@ abstract class CollectionAbstract implements CollectionInterface {
 	{
 		if(!$key){
 
-			$value     = $key;
 			$value_key = array_search($value, $this->data);
 
 	        if($value_key) unset($this->data[$value_key]);
@@ -248,6 +246,16 @@ abstract class CollectionAbstract implements CollectionInterface {
 	}
 
 	/**
+	 * Returns all data
+	 * 
+	 * @return array All data currently stored
+	 */
+	public function getAll()
+	{
+		return $this->data;
+	}
+
+	/**
 	 * Removes one key or mroe key
 	 * 
 	 * @param    string|array   $key Key or keys to be removed
@@ -281,7 +289,7 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 */
     public function clear()
     {
-        $this->set(array());
+        $this->data = array();
 
         return $this;
     }

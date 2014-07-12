@@ -60,4 +60,33 @@ class Utils
 
  		return ((preg_match('/^\[/', $value) || preg_match('/^{/', $value)) && json_last_error() == JSON_ERROR_NONE) ? true : false;
 	}
+
+	/**
+	 * Return target file version based on modification date
+	 * 
+	 * @param  string $file_path Path to target file
+	 * @return string            Unix timestamp
+	 */
+	public static function getFileVersion($file_path)
+	{
+		return file_exists($file_path) ? filemtime($file_path) : null;
+	}
+
+	/**
+	 * Returns the URL from an absolute path
+	 * 
+	 * @param  string  $path     Path from which we need the URL to
+	 * @param  boolean $relative Return relative or absolute URL
+	 * @return string            URL for the target path
+	 */
+	public static function getPathUrl($path, $relative = false)
+	{
+		if (!is_string($path)) return null;
+
+		$content_base = basename(WP_CONTENT_URL);
+		$path         = str_replace(ABSPATH, '', $path);
+		$url          = '/'. preg_replace("/.*$content_base/", "$content_base", $path);
+		
+		return $relative ? $url : home_url() . $url; 
+	}
 }

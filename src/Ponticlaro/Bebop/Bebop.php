@@ -2,585 +2,553 @@
 
 namespace Ponticlaro;
 
+use Ponticlaro\Bebop\DB\ObjectMeta;
 use Ponticlaro\Bebop\Common\Collection;
+use Ponticlaro\Bebop\Helpers\Factory;
+use Ponticlaro\Bebop\Mvc\View;
+use Ponticlaro\Bebop\Patterns\SingletonAbstract;
+use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
+use Ponticlaro\Bebop\PostType;
 use Ponticlaro\Bebop\Utils;
 
-class Bebop
+class Bebop extends SingletonAbstract
 {
-	/**
-	 * The WordPress version
-	 * 
-	 * @var string
-	 */
-	private static $__wp_version;
-
-	/**
-	 * Bebop instance
-	 * 
-	 * @var Ponticlaro\Bebop
-	 */
-	private static $__instance;
-
-	/**
-	 * Configuration parameters
-	 * 
-	 * @var Ponticlaro\Bebop\Common\Collection
-	 */
-	private static $__config;
-
-	/**
-	 * Tracker object
-	 * 
-	 * @var \stdClass
-	 */
-	private static $__tracker;
-
-	/**
-	 * Collection of paths
-	 * 
-	 * @var Ponticlaro\Bebop\Common\Collection
-	 */
-	private static $__paths;
-
-	/**
-	 * Collection of urls
-	 * 
-	 * @var Ponticlaro\Bebop\Common\Collection
-	 */
-	private static $__urls;
-
-	/**
-	 * UI class handler
-	 * 
-	 * @var \Ponticlaro\Bebop\UI
-	 */
-	private static $__ui;
-
-	/**
-	 * Checks environment and build defaults 
-	 * 
-	 */
-	private function __construct()
-	{	
-		/////////////////////////////////////
-		// Get installed WordPress version //
-		/////////////////////////////////////
-		global $wp_version;
-
-		self::$__wp_version = $wp_version;
-
-		///////////////////////////////
-		// Set Default configuration //
-		///////////////////////////////
-		$default_config = array(
-			// Not currently doing anything
-		);
-
-		///////////////////////////
-		// Get base paths & Urls //
-		///////////////////////////
-		$uploads_data = wp_upload_dir();
-		$template_dir = get_template_directory();
-		$template_url = get_bloginfo('template_url');
-
-		// Default paths
-		$default_paths = array(
-			'wptools' => __DIR__,
-			'root'    => ABSPATH,
-			'admin'   => '',
-			'plugins' => '',
-			'content' => '',
-			'uploads' => $uploads_data['basedir'],
-			'themes'  => str_replace('/'. basename($template_dir), '', $template_dir),
-			'theme'   => get_template_directory()
-		);
-
-		// Default urls
-		$default_urls = array(
-			'wptools' => self::getPathUrl(__DIR__),
-			'home'    => home_url(),
-			'admin'   => admin_url(),
-			'plugins' => plugins_url(),
-			'content' => content_url(),
-			'uploads' => $uploads_data['baseurl'],
-			'themes'  => str_replace('/'. basename($template_url), '', $template_url),
-			'theme'   => $template_url
-		);
-
-		// Save default configuration, paths and urls
-		self::$__config = new Collection($default_config);
-		self::$__paths  = new Collection($default_paths);
-		self::$__urls   = new Collection($default_urls);
-
-		//////////////////////////
-		// Build Object tracker //
-		//////////////////////////
-		self::$__tracker             = new \stdClass;
-		self::$__tracker->post_types = new Collection;
-		self::$__tracker->taxonomies = new Collection;
-		self::$__tracker->metaboxes  = new Collection;
-
-		// Instantiate UI
-		$this->UI();
-		
-		// Instantiate API
-		$this->API();
-
-		// Shortcode support for in editor use 
-		add_shortcode('Bebop', array($this, 'shortcode'));
-
-		// Register stuff on the init hook
-		add_action('init', array($this, 'initRegister'), 1);
-
-		// Register custom rewrite rules
-		add_action('rewrite_rules_array', array($this, 'rewriteRules'), 99);
-
-		// Handle template includes
-		add_action('template_redirect', array($this, 'templateRedirects'));
-	}
-
-	/**
-	 * Creates Bebop instance to check environment and build defaults 
-	 * 
-	 * @return \Ponticlaro\Bebop
-	 */
-	public static function boot()
-	{
-		if(!self::$__instance || !is_a(self::$__instance, 'Ponticlaro\Bebop')) {
-
-			self::$__instance = new Bebop();
-		}
-	} 
-
-	/**
-	 * Register Bebop stuff on the init hook
-	 * 
-	 * @return void
-	 */
-	public function initRegister()
-	{
-		add_rewrite_tag('%bebop_api%','([^&]+)');
-	}
-
-	/**
-	 * Adds custom rewrite rules
-	 * 
-	 * @param  array $wp_rules Array of rewrite rules
-	 * @return array           Modified array of rewrite rules
-	 */
-	public function rewriteRules($wp_rules) 
-	{
-		$bebop_rules = array(
-			"_bebop/api/?(.*)?$" => 'index.php?bebop_api=1'
-		);
-
-		return array_merge($bebop_rules, $wp_rules);
-	}
-
-	/**
-	 * Addds template redirections
-	 * 
-	 * @return void
-	 */
-	public function templateRedirects() 
-	{
-		global $wp_query;
-
-		if($wp_query->get('bebop_api')) {
-			
-			new \Ponticlaro\Bebop\API\Router;
-			exit;
-		}
-	}
-
-	/**
-	 * Returns WordPress version
-	 * 
-	 * @return string
-	 */
-	public static function getVersion() 
-	{
-		return self::$__wp_version;
-	}
-
-	/**
-	 * Creates single imnstance of target class
-	 * 
-	 * @return mixed Instance of target class or false
-	 */
-	public static function create()
-	{	
-		$args = func_get_args();
-
-		if (!isset($args[0])) 
-			throw new ErrorException("You must specify the type of object to create");
-
-		$obj_name = $args[0];
-
-		unset($args[0]);
-
-		switch ($obj_name) {
-
-			case 'Collection':
-
-				$class = __CLASS__ ."\Common\Collection";
-				break;
-
-			case 'Option':
-
-				$class = __CLASS__ ."\\Database\\" . $obj_name;
-				break;
-
-			default: 
-
-				$class = __CLASS__ .'\\'. $obj_name;
-				break;
-		}
-
-		return call_user_func(array(__CLASS__, "__createInstance"), $class, $args);
-	}
-
-	/**
-	 * Creates and instance of the target class
-	 * 
-	 * @param  string $className Target class
-	 * @param  array  $args      Arguments to pass to target class
-	 * @return mixed             Class instance or false
-	 */
-	private static function __createInstance($className, array $args = array())
-	{
-	    if (class_exists($className)) {
-
-	        return call_user_func_array(
-
-	        	array(
-					new \ReflectionClass($className), 
-					'newInstance'
-				), 
-	            $args
-	        );
-	    }
-
-	    return false;
-	}
-
-	/**
-	 * Tracks objects created by Bebop
-	 * 
-	 * @param  mixed $object Object to be tracked
-	 * @return void
-	 */
-	public static function track($object)
-	{
-		if (is_object($object)) {
-			
-			$class = get_class($object);
-			$key   = $object->getConfig('key');
-
-			switch ($class) {
-
-				case __CLASS__ . '\PostType':
-
-					$collection = 'post_types';
-					break;
-
-				case __CLASS__ . '\Taxonomy':
-
-					$collection = 'taxonomies';
-					break;
-
-				case __CLASS__ . '\Metabox':
-
-					$collection = 'metaboxes';
-					break;
-			}
-
-			self::$__tracker->{$collection}->set($key, $object);
-		}
-	}
-
-	/**
-	 * Returns the UI class instance
-	 */
-	public static function UI()
-	{
-		return Bebop\UI::getInstance();
-	}
-
-	/**
-	 * Returns the API class instance
-	 * 
-	 */
-	public static function API()
-	{
-		return Bebop\API::getInstance();
-	}
-
-	/**
-	 * Creates Bebop shortcode for usage inside content editor
-	 * 
-	 * @param  array   $attrs    Shortcode attributes
-	 * @param  string  $content  Shortcode content
-	 * @return void
-	 */
-	public function shortcode($attrs, $content = null) 
-	{
-		if ($attrs) {
-
-			if (array_key_exists('url', $attrs)) 
-				return Bebop::getUrl($attrs['url']);
-
-			if (array_key_exists('path', $attrs)) 
-				return Bebop::getPath($attrs['path']);
-		}
-	} 
-
-	public static function getPathUrl($path, $relative = false)
-	{
-		if (!is_string($path)) return null;
-
-		$content_base = basename(WP_CONTENT_URL);
-		$path         = str_replace(ABSPATH, '', $path);
-		$url          = '/'. preg_replace("/.*$content_base/", "$content_base", $path);
-		
-		return $relative ? $url : home_url() . $url; 
-	}
-
-	/**
-	 * Calls utilities from common php library
-	 * 
-	 * @return mixed
-	 */
-	public static function util()
-	{	
-		$args = func_get_args();
-
-		if( !isset($args[0])) throw new ErrorException("You need to define the utility name");
-		
-		$name = $args[0];
-
-		unset($args[0]);
-
-		return call_user_func_array(array('\Ponticlaro\Bebop\Utils', $name), $args);
-	}
-
-	/**
-	 * Includes a path from the path collection
-	 * 
-	 * @param  string  $path_key Path key string
-	 * @param  boolean $once     True if it should only be included once
-	 * @return void          
-	 */
-	public static function inc($path_key, $once = false)
-	{
-		if (!is_string($path_key)) return;
-
-		// Check for path in path collection
-		$cached_path = self::getPath($path_key);
-
-		if ($cached_path && is_readable($cached_path) && is_file($cached_path)) {
-			
-			if ($once) {
-
-				include_once $cached_path;
-
-			} else {
-
-				include $cached_path;
-			}
-		}
-	}
-
-	/**
-	 * Requires a path from the paths collection
-	 * 
-	 * @param  string  $path_key Path key string
-	 * @param  boolean $once     True if it should only be required once
-	 * @return void
-	 */
-	public static function req($path_key, $once = false)
-	{
-		if (!is_string($path_key)) return;
-
-		// Check for path in path collection
-		$cached_path = self::getPath($path_key);
-
-		if ($cached_path && is_readable($cached_path) && is_file($cached_path)) {
-			
-			if ($once) {
-
-				require_once $cached_path;
-
-			} else {
-
-				require $cached_path;
-			}
-		}
-	}
-
-	/**
-	 * Handles any call to undefined static methods
-	 * 
-	 * @param  string $name Name of the target method
-	 * @param  array  $args Arguments for the target method
-	 * @return mixed      
-	 */
-	public static function __callStatic($name, $args) 
+    /**
+     * The WordPress version
+     * 
+     * @var string
+     */
+    private static $__wp_version;
+
+    /**
+     * Contains flag for development environment
+     * 
+     * @var Bool
+     */
+    private static $__dev_env_enabled = false;
+
+    /**
+     * Checks environment and build defaults 
+     * 
+     */
+    protected function __construct()
+    {   
+        // Instantiate Context Manager
+        self::Context();
+
+        // Instantiate URLs Manager
+        self::Urls();
+
+        // Instantiate Paths Manager
+        self::Paths();
+
+        // Set default views directory
+        View::setViewsDir(self::getPath('theme', 'views'));
+ 
+        // Instantiate CSS Manager
+        self::CSS();
+
+        // Instantiate JS Manager
+        self::JS();
+
+        // Instantiate UI
+        if (is_admin()) self::UI();
+        
+        // Instantiate API
+        self::API();
+
+        // Shortcode support for in editor use 
+        add_shortcode('Bebop', array($this, 'shortcode'));
+    }
+
+    /**
+     * Creates Bebop instance to check environment and build defaults 
+     * 
+     * @return \Ponticlaro\Bebop
+     */
+    public static function boot()
     {
-	    //////////////////////////////
-    	// Check for correct method //
-	    //////////////////////////////
+        self::getInstance();
+    }
 
-    	// Check for echo
-		$is_echo_url  = $name == 'Url' ? true : false;
-		$is_echo_path = $name == 'Path' ? true : false;
+    public static function setDevEnv($enabled) 
+    {
+        self::$__dev_env_enabled = $enabled;
+    }
 
-    	// Check for create
-    	$create_methods = array(
-    		'AdminForm',
-    		'AdminPage',
-			'Collection',
-			'Metabox',
-			'Option',
-			'PostType',
-			'Taxonomy',
-    	);
+    /**
+     * Used to check if development environment is enabled
+     * 
+     * @return boolean True for enabled, false otherwise
+     */
+    public function isDevEnvEnabled()
+    {
+        return self::$__dev_env_enabled;
+    }
 
-    	if (substr($name, 0, 6) == 'create' || in_array($name, $create_methods) ) $is_create = true;
-    	if (substr($name, 0, 6) == 'create') $name = substr($name, 6, strlen($name));
+    /**
+     * Returns WordPress version
+     * 
+     * @return string
+     */
+    public static function getVersion() 
+    {
+        global $wp_version;
 
-    	// Check for set
-    	$is_get = substr($name, 0, 3) == 'get' ? true : false;
-    	$is_set = substr($name, 0, 3) == 'set' ? true : false;
+        return self::$wp_version;
+    }
 
-	    //////////
-    	// Echo //
-	    //////////
-		if ($is_echo_url) {
+    /**
+     * Returns the context manager
+     */
+    public static function Context()
+    {
+        return Bebop\Helpers\ContextManager::getInstance();
+    }
 
-			echo call_user_func_array(array(__CLASS__, 'getUrl'), $args);
-			return;
-		}
+    /**
+     * Returns the Env class instance or 
+     * the target environment by using its key
+     */
+    public static function Env($key = null)
+    {
+        $env_manager = Bebop\Helpers\EnvManager::getInstance();
 
-		if ($is_echo_path) {
+        return is_string($key) && $env_manager->exists($key) ? $env_manager->get($key) : $env_manager;
+    }
 
-			echo call_user_func_array(array(__CLASS__, 'getPath'), $args);
-			return;
-		} 
+    /**
+     * Returns an Mvc\View object with an already defined template
+     * 
+     * @param string $template Path of the template relative to the views directory, without file extension
+     */
+    public static function View($template)
+    {
+        return (new View)->setTemplate($template);
+    } 
 
-	    /////////
-    	// Set //
-	    /////////
-    	if ($is_set) {
+    /**
+     * Returns the UrlManager instance
+     */
+    public static function Urls()
+    {
+        return Bebop\Helpers\UrlManager::getInstance();
+    }
 
-    		$set_action = substr($name, 3, strlen($name));
+    /**
+     * Returns the PathManager instance
+     */
+    public static function Paths()
+    {
+        return Bebop\Helpers\PathManager::getInstance();
+    }
 
-			$is_setPath = $set_action == 'Path' ? true : false;
-			$is_setUrl  = $set_action == 'Url' ? true : false;
+    /**
+     * Returns the Scripts manager instance
+     * or the target registration hook
+     */
+    public static function CSS($hook_id = null)
+    {
+        $scripts = Bebop\Css\CssManager::getInstance();
 
-			if ( $is_setPath || $is_setUrl ){
+        return $hook_id ? $scripts->getHook($hook_id) : $scripts;
+    }
 
-				if (is_array($args[0])) {
+    /**
+     * Returns the Scripts manager instance
+     * or the target registration hook
+     */
+    public static function JS($hook_id = null)
+    {
+        $scripts = Bebop\Js\JsManager::getInstance();
 
-					$obj = $is_setPath ? self::$__paths : self::$__urls;
+        return $hook_id ? $scripts->getHook($hook_id) : $scripts;
+    }
 
-    				call_user_func_array( array($obj, 'set'), $args);
+    /**
+     * Used to instantiate an object to easily handle user meta data
+     * 
+     * @param  int                             $id      ID of the target user
+     * @param  array                           $options ObjectMeta options list
+     * @return \Ponticlaro\Bebop\Db\ObjectMeta
+     */
+    public static function UserMeta($id, array $options = array())
+    {   
+        return new ObjectMeta('user', $id, $options);
+    }
 
-				} elseif(is_string($args[0])) {
+    /**
+     * Used to instantiate an object to easily handle post meta data
+     * 
+     * @param  int                             $id      ID of the target post
+     * @param  array                           $options ObjectMeta options list
+     * @return \Ponticlaro\Bebop\Db\ObjectMeta
+     */
+    public static function PostMeta($id, array $options = array())
+    {   
+        return new ObjectMeta('post', $id, $options);
+    }
 
-					$property_in_name = substr($name, 6);
+    /**
+     * Used to instantiate an object to easily handle comment meta data
+     * 
+     * @param  int                             $id      ID of the target comment
+     * @param  array                           $options ObjectMeta options list
+     * @return \Ponticlaro\Bebop\Db\ObjectMeta
+     */
+    public static function CommentMeta($id, array $options = array())
+    {   
+        return new ObjectMeta('comment', $id, $options);
+    }
 
-	    			if($property_in_name){
+    /**
+     * Returns the UI class instance
+     */
+    public static function UI()
+    {
+        return Bebop\UI::getInstance();
+    }
 
-						$key  = Bebop::util('camelcaseToUnderscore', $property_in_name);
-						$path = isset($args[0]) ? $args[0] : null;
+    /**
+     * Returns the API class instance
+     */
+    public static function API()
+    {
+        return Bebop\API::getInstance();
+    }
 
-	    			}else{
+    /**
+     * Returns the API class instance
+     */
+    public static function ObjectTracker()
+    {
+        return Bebop\Helpers\ObjectTracker::getInstance();
+    }
 
-						$key  = isset($args[0]) ? $args[0] : null;
-						$path = isset($args[1]) ? $args[1] : null;
-	    			}	
+    /**
+     * Tracks objects created by Bebop
+     * 
+     * @param  mixed $object Object to be tracked
+     * @return void
+     */
+    public static function track($object)
+    {
+        $tracker = Bebop\Helpers\ObjectTracker::getInstance();
+        $tracker->track($object);
 
-	    			if ($is_setPath) {
+        return $this;
+    }
 
-						self::$__paths->set($key, $path);
-		    		}
+    /**
+     * Used to get a previously instantiated trackable object 
+     * 
+     * @param  string $type Type of the target object
+     * @param  string $id   ID of the target object
+     * @return object       Target bject
+     */
+    public static function getTrackedObject($type, $id)
+    {
+        $tracker = Bebop\Helpers\ObjectTracker::getInstance();
 
-		    		if ($is_setUrl) {
+        return $tracker->get($type, $id);
+    }
 
-		    			self::$__urls->set($key, $path);
-		    		}	
-	    		}
-			}
-    	}
+    /**
+     * Creates Bebop shortcode for usage inside content editor
+     * 
+     * @param  array   $attrs    Shortcode attributes
+     * @param  string  $content  Shortcode content
+     * @return void
+     */
+    public function shortcode($attrs, $content = null) 
+    {
+        if ($attrs) {
 
-	    /////////
-    	// Get //
-	    /////////
-    	elseif ($is_get) {
+            if (array_key_exists('url', $attrs)) 
+                return Bebop::getUrl($attrs['url']);
 
-    		$get_action     = substr($name, 3, strlen($name));
+            if (array_key_exists('path', $attrs)) 
+                return Bebop::getPath($attrs['path']);
+        }
+    }
 
-			$is_getPath     = $get_action == 'Path' ? true : false;
-			$is_getUrl      = $get_action == 'Url' ? true : false;
-			
-			$is_getPostType = $get_action == 'PostType' ? true : false;
-			$is_getMetabox  = $get_action == 'Metabox' ? true : false;
+    /**
+     * Calls methods from the Ponticlaro\Bebop\Utils class
+     * 
+     * @return mixed
+     */
+    public static function util()
+    {   
+        // Get function arguments
+        $args = func_get_args();
 
-    		if( $is_getPath || $is_getUrl ){
+        // Get utility method name
+        $name = isset($args[0]) && is_string($args[0]) ? $args[0] : null;
 
-    			if (!$args) {
+        // Unset first argument
+        unset($args[0]);
 
-    				return $is_getPath ? self::$__paths->get() : self::$__urls->get();
-    			}
+        // Throw error if method to not exit
+        if(!$name || !method_exists('\Ponticlaro\Bebop\Utils', $name)) 
+            throw new ErrorException("You need to select an existing utility name");
 
-    			$key           = isset($args[0]) ? $args[0] : null;
-				$relative_path = isset($args[1]) ? $args[1] : null;
+        // Call utility and return result
+        return call_user_func_array(array('\Ponticlaro\Bebop\Utils', $name), $args);
+    }
 
-    			if ($is_getPath) {
 
-					$key       = self::$__paths->hasKey($key) ? $key : 'home';
-					$separator = DIRECTORY_SEPARATOR;
-					$base      = self::$__paths->get($key);
-	    		}
+    /**
+     * Includes a path from the path collection
+     * 
+     * @param  string  $path_key Path key string
+     * @param  boolean $once     True if it should only be included once
+     * @return void          
+     */
+    public static function inc($path_key, $once = false)
+    {
+        // Include file
+        self::__includeFile($path_key, $once);
+    }
 
-	    		if ($is_getUrl) {
+    /**
+     * Requires a path from the paths collection
+     * 
+     * @param  string  $path_key Path key string
+     * @param  boolean $once     True if it should only be required once
+     * @return void
+     */
+    public static function req($path_key, $once = false)
+    {
+        // Require file
+        self::__includeFile($path_key, $once, true);
+    }
 
-					$key       = self::$__urls->hasKey($key) ? $key : 'home';
-					$separator = "/";
-					$base      = self::$__urls->get($key);
-	    		}
+    /**
+     * Echoes single URL
+     * with an optionally suffixed realtive URL
+     * 
+     * @param  string $key          Key for the target URL
+     * @param  string $relative_url Optional relative URL
+     * @return void
+     */
+    public static function Url($key, $relative_url = null)
+    {
+        echo self::Urls()->get($key, $relative_url);    
+    }
 
-	    		$separator = $relative_path == $separator ? null : $separator;
+    /**
+     * Sets a single URL
+     * 
+     * @param string $key   URL key
+     * @param string $value URL
+     */
+    public static function setUrl($key, $value = null)
+    {
+        self::Urls()->set($key, $value);
 
-	    		return $relative_path ? $base . $separator . $relative_path : $base;
-   
+        return $this;   
+    }
 
-    		} elseif( $is_getPostType || $is_getMetabox ){
+    /**
+     * Sets several URLs using an associative array
+     * 
+     * @param array $urls List of URLs
+     */
+    public static function setUrls(array $urls = array())
+    {
+        self::Urls()->set($key);
 
-    			if (!isset($args[0])) return;
+        return $this;
+    }
 
-    			if (is_string($args[0])) {
+    /**
+     * Returns a single URL using a key
+     * with an optionally suffixed realtive URL
+     * 
+     * @param  string $key          Key for the target URL
+     * @param  string $relative_url Optional relative URL
+     * @return string               URL
+     */
+    public static function getUrl($key, $relative_url = null)
+    {
+        return self::Urls()->get($key, $relative_url);
+    }
 
-    				$key = Bebop::util('slugify', $args[0]);
-    				
-    				if ($is_getPostType) 
-    					return self::$__tracker->post_types->get($key);
+    /**
+     * Returns all URLs
+     * 
+     */
+    public static function getUrls()
+    {
+        return self::Urls()->get();
+    }
 
-    				if ($is_getMetabox) 
-    					return self::$__tracker->metaboxes->get($key);
-    			}
-    		}
-    	}
+    /**
+     * Remove single URL using its key
+     * 
+     * @param string $key Key for target URL
+     */
+    public static function removeUrl($key)
+    {
+        self::Urls()->remove($key);
 
-	    ////////////
-    	// Create //
-	    ////////////
-    	elseif ($is_create) {
+        return $this;
+    }
 
-    		array_unshift($args, $name);
+    /**
+     * Echoes single path
+     * with an optionally suffixed realtive path
+     * 
+     * @param  string $key           Key for target path
+     * @param  string $relative_path Optional relative path
+     * @return void
+     */
+    public static function Path($key, $relative_path = null)
+    {
+        echo self::Paths()->get($key, $relative_path);  
+    }
 
-    		return call_user_func_array(array(__CLASS__, 'create'), $args);
-    	}
+    /**
+     * Sets a single Path
+     * 
+     * @param string $key   Path key
+     * @param string $value Path
+     */
+    public static function setPath($key, $value = null)
+    {
+        self::Paths()->set($key, $value);
+
+        return $this;   
+    }
+
+    /**
+     * Sets several paths using an associative array
+     * 
+     * @param array $paths List of Paths
+     */
+    public static function setPaths(array $paths = array())
+    {
+        self::Paths()->set($paths);
+
+        return $this;
+    }
+
+    /**
+     * Gets single path
+     * with an optionally suffixed realtive path
+     * 
+     * @param  string $key           Key for target path
+     * @param  string $relative_path Optional relative path
+     * @return string                Path
+     */
+    public static function getPath($key, $relative_path = null)
+    {
+        return self::Paths()->get($key, $relative_path);
+    }
+
+    /**
+     * Returns all paths
+     * 
+     */
+    public static function getPaths()
+    {
+        return self::Paths()->get();
+    }
+
+    /**
+     * Remove single path using its key
+     * 
+     * @param string $key Key for target path
+     */
+    public static function removePath($key)
+    {
+        self::Paths()->remove($key);
+
+        return $this;
+    }
+
+    /**
+     * Used to manage include/require functions
+     * 
+     * @param  string  $path Path of the file to include
+     * @param  boolean $once True to include/require only once
+     * @param  string  $fn   True to use 'require', false to use 'include'
+     * @return void
+     */
+    protected static function __includeFile($path_key, $once = false, $require = false)
+    {   
+        // Return if path key is not a string
+        if (!is_string($path_key)) return;
+
+        // Check for path in path collection
+        $path = self::Paths()->get($path_key);
+
+        // Return if $path is not a string or not readable
+        if (!$path || !is_string($path) || !is_readable($path)) return;
+
+        // Require file
+        if ($require) {
+            
+            $once ? require_once $path : require $path;
+        }
+
+        // Include file
+        else {
+
+            $once ? include_once $path : include $path;
+        }
+    } 
+
+    /**
+     * Handles any call to undefined static methods
+     * 
+     * @param  string $name Name of the target method
+     * @param  array  $args Arguments for the target method
+     * @return mixed      
+     */
+    public static function __callStatic($name, $args) 
+    {
+        //////////////////////////////
+        // Check for correct method //
+        //////////////////////////////
+
+        // Check for get
+        $is_get = substr($name, 0, 3) == 'get' ? true : false;
+
+        /////////
+        // Get //
+        /////////
+        if ($is_get) {
+
+            $get_action     = substr($name, 3, strlen($name));
+    
+            $is_getPostType = $get_action == 'PostType' ? true : false;
+            $is_getTaxonomy = $get_action == 'Taxonomy' ? true : false;
+            $is_getMetabox  = $get_action == 'Metabox' ? true : false;
+            
+            if ($is_getPostType || $is_getTaxonomy || $is_getMetabox) {
+
+                if (!isset($args[0])) return;
+
+                if (is_string($args[0])) {
+
+                    $key = Bebop::util('slugify', $args[0]);
+                    
+                    if ($is_getPostType) $type = 'post_type';
+                    if ($is_getTaxonomy) $type = 'taxonomy';
+                    if ($is_getMetabox) $type = 'metabox';
+
+                    return $type ? Bebop::getTrackedObject($type, $key) : null;
+                }
+            }
+        }
+
+        //////////////////////////
+        // Try to create object //
+        //////////////////////////
+        else {
+
+            return call_user_func_array(array('\Ponticlaro\Bebop\Helpers\Factory', 'create'), array($name, $args));
+        }
     }
 }

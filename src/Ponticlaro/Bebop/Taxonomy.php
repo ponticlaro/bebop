@@ -3,9 +3,12 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
-class Taxonomy
+class Taxonomy extends TrackableObjectAbstract
 {
+	protected $__type = 'taxonomy';
+
 	protected $__config;
 
 	protected $__labels;
@@ -41,19 +44,7 @@ class Taxonomy
 
 		add_action("init", array($this, 'register'));
 
-		if(class_exists('\Ponticlaro\Bebop')){
-
-			// Keep track of this object on Bebop
-			Bebop::track($this);
-			$key = $this->getConfig('key');
-			unset($this);
-
-			return Bebop::getTaxonomy($key);
-
-		} else {
-
-			return $this;
-		}
+		return $this;
 	}
 
 	private function __handleInit($name, $post_types, array $config = array())
@@ -76,9 +67,9 @@ class Taxonomy
 
 		} 
 
-		// Set taxonomy key
-		$key = Bebop::util('slugify', $this->__config->get('singular_name') );
-		$this->__config->set('key', $key);
+		// Set post_type id
+		$this->__id = Bebop::util('slugify', $this->__config->get('singular_name') );
+		$this->__config->set('key', $this->__id);
 
 		// Post types to be associated with
 		if( isset($post_types) ) {	

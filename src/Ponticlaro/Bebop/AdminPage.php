@@ -309,7 +309,7 @@ class AdminPage
 			
 			<?php
 				$fn = $this->__config->get('function');
-				$fn();
+				call_user_func($fn);
 			?>
 			
 		</div><!-- /.wrap -->

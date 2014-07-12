@@ -14,6 +14,11 @@
 	[bebop-list--el="container"] {
 		margin: -6px -12px -12px -12px;
 		border: none;
+
+		[bebop-list--el="container"] {
+			margin: 0;
+			border: 1px solid #ccc;
+		}
 	}
 
 	[bebop-list--el="title"] {
@@ -134,7 +139,7 @@
 			
 		}
 
-		.bebop-list--item-actions {
+		[bebop-list--el="item-actions"] {
 			position: absolute;
 			top: 8px;
 			right: 8px;
@@ -167,13 +172,17 @@
 
 [bebop-list--el="form"] {
 	padding: 10px;
+	
+	input[type="text"] {
+		width: auto !important;
+	}
 
 	.button {
 		padding-left: 8px;
 		padding-right: 8px; 
 	}
 
-	[bebop-list--action="toggleReorder"].is-enabled {
+	[bebop-list--formAction="toggleReorder"].is-enabled {
 		background-color: #bbb;
 		border-color: #888;
 		color: #fff;
@@ -205,7 +214,7 @@
 	margin-right: 10px;
 }
 
-.bebop-list--empty-state-indicator {
+[bebop-list--el="empty-state-indicator"] {
 	padding: 10px;
 	border-bottom: 1px solid #d0d0d0;
 }

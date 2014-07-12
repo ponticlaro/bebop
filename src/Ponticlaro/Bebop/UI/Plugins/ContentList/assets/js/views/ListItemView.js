@@ -11,14 +11,23 @@
 		className: 'bebop-list--item',
 
 		events: {
-			'click [bebop-list--action]': 'doAction',
-			'change [bebop-list--el="content"] [bebop-ui--field]': 'updateSingle',
-			'keyup [bebop-list--el="content"] [bebop-ui--field]': 'updateSingle'
+			'click > [bebop-list--el="item-actions"] [bebop-list--action]': 'doAction',
+			'change > [bebop-list--el="content"] [bebop-ui--field]': 'updateSingle',
+			'keyup > [bebop-list--el="content"] [bebop-ui--field]': 'updateSingle'
 		},
 
 		initialize: function(options) {
 
 			var self = this;
+
+			// Store reference to container list
+			this.list = options.list;
+
+			// Used to define a single parameter we want to edit on a given model
+			this.dataContext = options.dataContext ? options.dataContext : '';
+
+			// add mode id to $el as an attribute
+			this.$el.attr('bebop-list--model-id', this.model.cid);
 
 			// Set main template as $el html
 			this.$el.html(options.templates.main);
@@ -32,30 +41,42 @@
 				remove: {
 					$el: this.$el.find('[bebop-list--action="remove"]')
 				}
-			}
+			};
 
-			this.fields = {}
+			this.fields = {};
 
 			// Build views object
-			this.views = {
-				browse: {
-					$el: this.$el.find('[bebop-list--view="browse"]'),
-					template: options.templates.browse,
-				},
-				edit: {
-					$el: this.$el.find('[bebop-list--view="edit"]'),
-					template: options.templates.edit,
-					cleanHTML: options.templates.edit.replace(/\{\{[^\}]*\}\}/g, '')
-				},
-				reorder: {
-					$el: this.$el.find('[bebop-list--view="reorder"]'),
-					template: options.templates.reorder
-				}
-			}
+			this.views = {};
+
+			var browseTplName  = this.dataContext ? this.dataContext + '.browse' : 'browse',
+				editTplName    = this.dataContext ? this.dataContext + '.edit' : 'edit',
+				reorderTplName = this.dataContext ? this.dataContext + '.reorder' : 'reorder';
+
+			this.views.browse = {
+				$el: this.$el.find('[bebop-list--view="browse"]'),
+				template: options.templates[browseTplName],
+			};
+
+			this.views.edit = {
+				$el: this.$el.find('[bebop-list--view="edit"]'),
+				template: options.templates[editTplName],
+				cleanHTML: options.templates[editTplName].replace(/\{\{[^\}]*\}\}/g, '')
+			};
+
+			// Reorder template falls back to browse template
+			this.views.reorder = {
+				$el: this.$el.find('[bebop-list--view="reorder"]'),
+				template: options.templates[reorderTplName] === undefined || options.templates[reorderTplName] === '' ? options.templates[browseTplName] : options.templates[reorderTplName]
+			};
 
 			// Collect data container input
-			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]').attr('name', options.fieldName +'[]');
+			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]');
+			
+			if (!this.list.status.get('isChildList')) {
 
+				this.$dataContainer.attr('name', options.fieldName +'[]');
+			}
+			
 			this.mode = options.mode ? options.mode : null;
 
 			// Get image widget
@@ -89,7 +110,7 @@
 			var action = $(event.currentTarget).attr('bebop-list--action');
 
 			// Execute action if available
-			if (this[action] != undefined) this[action](event);
+			if (this[action] !== undefined) this[action](event);
 		},
 
 		edit: function() {
@@ -109,6 +130,11 @@
 			var name = $(event.currentTarget).attr('bebop-ui--field');
 
 			this.model.set(name, this.getFieldValue(name));
+
+			if (this.list.status.get('isChildList')) {
+
+				this.list.collection.trigger('updateParentCollection');
+			}
 		},
 
 		update: function() {
@@ -118,6 +144,11 @@
 				this.model.set(name, this.getFieldValue(name));
 
 			}, this);
+
+			if (this.list.status.get('isChildList')) {
+
+				this.list.collection.trigger('updateParentCollection');
+			}
 		},
 
 		storeData: function() {
@@ -134,6 +165,11 @@
 		remove: function() {
 
  			this.model.destroy();
+
+ 			if (this.list.status.get('isChildList')) {
+
+				this.list.collection.trigger('updateParentCollection');
+			}
 		},
 
 		destroy: function() {
@@ -141,7 +177,7 @@
 			this.$el.slideUp(250, function() {
 
 				$(this).remove();
-			})
+			});
 		},
 
 		prepareView: function() {
@@ -162,7 +198,7 @@
 			 		$el: $el,
 			 		tagName: $el.get(0).tagName,
 			 		type: $el.attr('type')
-			 	}
+			 	};
 
 			 	if (!this.model.has(name)) {
 
@@ -170,7 +206,14 @@
 
 			 		if ($el.get(0).tagName == 'INPUT') {
 
-			 			value = $el.val();
+			 			if ($el.attr('type') == 'checkbox' && !$el.is(':checked')) {
+
+			 				value = '';
+
+			 			} else {
+
+			 				value = $el.val();
+			 			}
 			 		}
 
 			 		// Set value to empty array in case of a select with multiple values
@@ -230,8 +273,6 @@
 
 		getFieldValue: function(name)
 		{
-			console.log(name);
-
 			var $field = this.$content.find('[bebop-ui--field="'+ name +'"]');
 
 			switch($field.get(0).tagName) {
@@ -292,9 +333,7 @@
 					value = $field.val();
 					break;
 			}
-
-			console.log(value);
-
+			
 			return value;
 		},
 
@@ -307,7 +346,7 @@
 			if ($field.length > 0 && $field.get(0).tagName == 'SELECT') {
 
 				value = value ? $field.find('option[value="'+ value +'"]').text() : value;
-			};
+			}
 
 			return value;
 		},
@@ -376,6 +415,16 @@
 
 			// Show item if not already visible
 			if(!this.$el.is(':visible')) this.$el.slideDown(200);
+
+			_.each(this.views[view].$el.find('[bebop-list--el="container"]'), function(item, index) {
+
+				new Bebop.List({
+					el: item,
+					parentList: this.list,
+					parentModel: this.model
+				});
+
+			}, this);
 
 			return this;
 		}

@@ -5,87 +5,253 @@
 	var List = Bebop.List = Backbone.View.extend({
 
 		events: {
-			'click [bebop-list--el="form"] [bebop-list--action]': 'doAction'
+			'click > [bebop-list--el="form"] [bebop-list--formAction]': 'doFormAction'
 		},
 
 		initialize: function(options) {
 
 			// Store reference to current instance
-			var self = this;
+			var self = this,	
+				data;
 
+			// Get parent list & model
+			this.parentList  = options.parentList;
+			this.parentModel = options.parentModel;
+
+			//////////////////////////
+			// Handle configuration //
+			//////////////////////////
+			var config = this.$el.attr('bebop-list--config');
+
+			// This is a child list
+			if (config == 'inherit') {
+
+				this.config = this.parentList.config;
+			}
+
+			// This is a parent list
+			else {
+
+				this.config = new Backbone.Model(config ? JSON.parse(config) : {});
+			}
+
+			this.$el.attr('bebop-media--config', null);
+
+			// Build status object
+			this.status = new Backbone.Model({
+				isChildList: config == 'inherit' ? true : false,
+				dataContext: null,
+				mode: this.config.get('mode'),
+				view: 'browse',
+				insertPosition: null,
+				empty: false,
+				isSortable: true,
+				templateEngine: 'mustache',
+				currentEvent: null
+			});
+
+			//////////////////////////////
+			// END Handle configuration //
+			//////////////////////////////
+
+ 			//////////////////
+			// Collect data //
+			//////////////////
+			
+			// This is a child list
+			if (this.status.get('isChildList') && this.parentList) {
+
+				data = this.$el.attr('bebop-list--data');
+
+				var dataContext = data.replace('context:', '');
+
+				this.status.set('dataContext', dataContext);
+
+				var contextData = this.parentModel.get(dataContext);
+
+				this.collection = new List.Collection(contextData);
+			} 
+
+			// This is a parent list
+			else {
+
+				this.collection = new List.Collection();
+
+				var dataJSON = this.$el.attr('bebop-list--data');
+
+				data = dataJSON ? JSON.parse(dataJSON) : [];
+
+				_.each(data, function(item) {
+
+					this.collection.add(JSON.parse(item));
+				}, this);
+			}
+
+			//////////////////////
+			// END Collect data //
+			//////////////////////
+
+			//////////////////////////////////
+			// Build default HTML structure //
+			//////////////////////////////////
+			
 			// Collect container DOM element
 			this.$el = $(options.el);
 
-			// Get instance configuration
-			var config  = this.$el.attr('bebop-list--config');
-			this.config = new Backbone.Model(config ? JSON.parse(config) : {});
-			this.$el.attr('bebop-media--config', null);
+			// Title
+			this.$title = $('<div>').attr('bebop-list--el', 'title');
 
-			this.status = new Backbone.Model({
-				mode: this.config.get('mode'),
-				view: 'browse',
-				insertAction: null,
-				empty: false,
-				isSortable: true,
-				templateEngine: 'mustache'
-			});
+			if (!this.status.get('isChildList') && this.config.get('title')) 
+				this.$el.append(this.$title.text(this.config.get('title')));
 
-			this.collection = new List.Collection(),
+			// Description
+			this.$description = $('<div>').attr('bebop-list--el', 'description');
 
-			// Collect form DOM element and action buttons
-			this.$form = this.$el.find('[bebop-list--el="form"]');
+			if (!this.status.get('isChildList') && this.config.get('description')) 
+				this.$el.append(this.$description.text(this.config.get('description')));
 
-			this.buttons = {
-				add: {
-					$el: this.$form.find('[bebop-list--action^="insertAtThe"]')
-				},
-				sort: {
-					$el: this.$form.find('[bebop-list--action="toggleReorder"]')
-				}
+			// Top Form
+			this.$topForm = $('<div>').attr('bebop-list--el', 'form').attr('bebop-list--formId', 'top').addClass('bebop-ui-clrfix');
+			this.$el.append(this.$topForm);
+
+			// List
+			this.$list = $('<ul>').attr('bebop-list--el', 'list');
+			this.$el.append(this.$list);
+
+			// Empty state indicatior
+			this.$emptyStateIndicator = $('<div>').attr('bebop-list--el', 'empty-state-indicator').css('display', 'none')
+												  .append('<input type="hidden"><span class="bebop-list--item-name">No items added until now</span>');
+			this.$el.append(this.$emptyStateIndicator);
+
+			// Bottom Form
+			this.$bottomForm = $('<div>').attr('bebop-list--el', 'form').attr('bebop-list--formId', 'bottom').addClass('bebop-ui-clrfix');
+			this.$el.append(this.$bottomForm);
+
+			//////////////////////////////////////
+			// END Build default HTML structure //
+			//////////////////////////////////////
+
+			// This is a child list
+			if (this.status.get('isChildList') && this.parentList) {
+
+				// Set sort function for child lists
+				this.collection.comparator = function(modelA, modelB) {
+
+					var indexOfA = self.$list.find('li[bebop-list--model-id="'+ modelA.cid +'"]').index(),
+						indexOfB = self.$list.find('li[bebop-list--model-id="'+ modelB.cid +'"]').index();
+					
+					if (indexOfA < indexOfB) {
+
+						return -1;
+					}
+
+					else if (indexOfA > indexOfB) {
+
+						return 1;
+					}
+
+					else {
+
+						return 0;
+					}
+				};
+
+				this.itemTemplates = this.parentList.itemTemplates;
+				this.formTemplates = this.parentList.formTemplates;
+			} 
+
+			// This is a parent list
+			else {
+
+				this.formTemplates = {};
+
+				///////////////////////////
+				// Handle Item Templates //
+				///////////////////////////
+				$formTemplates     = this.$el.find('[bebop-list--formTemplate]');
+				this.formTemplates = {};
+
+				_.each($formTemplates, function(el, index) {
+
+					var $el        = $(el),
+						templateId = $el.attr('bebop-list--formTemplate');
+
+					// If we have a template ID, store it in the templates object
+					if (templateId) this.formTemplates[templateId] = $el.html();
+
+					// Remove element from DOM
+					$el.remove();
+					
+				}, this);
+
+				///////////////////////////
+				// Handle Item Templates //
+				///////////////////////////
+				$itemTemplates     = this.$el.find('[bebop-list--itemTemplate]');
+				this.itemTemplates = {};
+
+				_.each($itemTemplates, function(el, index) {
+
+					var $el        = $(el),
+						templateId = $el.attr('bebop-list--itemTemplate');
+
+					// If we have a template ID, store it in the templates object
+					if (templateId) {
+
+						var html;
+
+						if (templateId == 'main') {
+
+							html = $el.clone().find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html();
+						}
+
+						else {
+
+							html = $el.html();
+						}
+
+						this.itemTemplates[templateId] = html;
+					}
+
+					// Remove element from DOM
+					$el.remove();
+					
+				}, this);
 			}
 
-			// Collect list DOM element
-			this.$list = this.$el.find('[bebop-list--el="list"]');
+			// Add forms HTML to DOM
+			if (this.formTemplates.top) this.$topForm.html(this.formTemplates.top);
+			if (this.formTemplates.bottom) this.$bottomForm.html(this.formTemplates.bottom);
 
-			// Collect item DOM elements
-			this.$dataPlaceholders = this.$list.find('[bebop-list--el="data-placeholder"]');
+			// Collect form DOM element and action buttons
+			this.$form   = this.$el.find('[bebop-list--el="form"]');
+			this.buttons = {};
 
-			// Add each item to collection
-			_.each(this.$dataPlaceholders, function(el, index) {
+			// handle forms & buttons
+			_.each(this.$form, function(el, index) {
 
-				var jsonData = $(el).val();
+				var $form    = $(el),
+					formId   = $form.attr('bebop-list--formId'),
+					$buttons = $form.find('[bebop-list--formAction]');
 
-				if (jsonData) this.collection.add(JSON.parse(jsonData));
+				_.each($buttons, function(el, index) {
+
+					var $button  = $(el);
+						buttonId = $button.attr('bebop-list--formElId');
+
+					if (!$.isArray(this.buttons[buttonId])) this.buttons[buttonId] = [];
+
+					this.buttons[buttonId].push({
+						$el: $button,
+						formId: formId
+					});
+
+				}, this);
 
 			}, this);
 
 			// Get field name
 			this.fieldName = this.config.get('field_name');
-
-			//////////////////////
-			// Handle templates //
-			//////////////////////
-			this.templates = {};
-			
-			$rawItemTemplate = this.$el.find('[bebop-list--template="item"]');
-			$browseTemplate  = this.$el.find('[bebop-list--template="browse-view"]');
-			$reorderTemplate = this.$el.find('[bebop-list--template="reorder-view"]');
-			$editTemplate    = this.$el.find('[bebop-list--template="edit-view"]');
-
-			this.itemTemplates = {
-				main: $rawItemTemplate.clone().find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html(),
-				browse: $browseTemplate.html(),
-				reorder: $reorderTemplate.html(),
-				edit: $editTemplate.html()
-			}
-
-			$rawItemTemplate.remove();
-			$browseTemplate.remove();
-			$reorderTemplate.remove();
-			$editTemplate.remove();
-
-			// Collect empty state indicator DOM element
-			this.$emptyStateIndicator = this.$el.find('[bebop-list--el="empty-state-indicator"]');
 
 			this.handleEmptyIndicator = function() {
 
@@ -100,36 +266,53 @@
 						self.$emptyStateIndicator.attr('name', '').slideUp(200);
 					}
 				}
-			}
+			};
 
 			this.listenTo(this.status, 'change:empty', this.handleEmptyIndicator);
 
-			if (this.collection.length == 0) this.status.set('empty', true);
+			if (this.collection.length === 0) this.status.set('empty', true);
 
 			// Remove empty state item
 			this.collection.on('add', function(model) {
 
-				var insertAction = this.status.get('insertAction');
+				var insertPosition = this.status.get('insertPosition');
 
-				if (insertAction == 'append') {
+				if (insertPosition == 'append') {
 
 					this.appendItem(model);
 
-				} else if(insertAction == 'prepend') {
+				} else if(insertPosition == 'prepend') {
 
 					this.prependItem(model);
 				}
 
 				if(this.collection.length == 1) this.status.set('empty', false);
 
+				if (this.status.get('isChildList')) {
+
+					this.collection.sort();
+					this.collection.trigger('updateParentCollection');
+				}
+
 			}, this);
 
 			// Add empty state item
 			this.collection.on('remove', function(model) {
 
-				if(this.collection.length == 0) this.status.set('empty', true);
+				if (this.collection.length === 0) this.status.set('empty', true);
 
 			}, this);
+
+
+			if (this.parentList && this.parentModel) {
+
+				// Update parent collection
+				this.collection.on('updateParentCollection', function() {
+
+					this.parentModel.set(this.status.get('dataContext'), this.collection.toJSON());
+					
+				}, this);
+			}
 
 			// Check sortable configuration attribute
 			if (this.$list.attr('bebop-list--is-sortable') == 'true')
@@ -181,17 +364,31 @@
 				placeholder: "bebop-list--item-placeholder bebop-ui-icon-target"
 			});
 
+			// This is a child list
+			if (this.status.get('isChildList')) {
+
+				// Handle items order
+				this.$list.on("sortstop", function(event, ui) {
+
+					self.collection.sort();
+					self.collection.trigger('updateParentCollection');
+				});
+			}
+
 			this.render();
 		},
 
-		doAction: function(event) {
+		doFormAction: function(event) {
 
 			event.preventDefault();
 
-			var action = $(event.currentTarget).attr('bebop-list--action');
+			var action = $(event.currentTarget).attr('bebop-list--formAction');
+
+			// Save current event
+			this.status.set('currentEvent', event);
 
 			// Execute action if available
-			if (this[action] != undefined) this[action](event);
+			if (this['formAction_' + action] !== undefined) this['formAction_' + action](event);
 		},
 
 		isMode: function(mode) {
@@ -199,23 +396,36 @@
 			return this.status.get('mode') == mode ? true : false;
 		},
 
-		toggleReorder: function() {
+		formAction_toggleReorder: function(event) {
 
 			if (this.status.get('view') != 'reorder') {
 
 				this.status.set('view', 'reorder');
-				this.buttons.sort.$el.addClass('is-enabled');
+
+				_.each(this.buttons.sort, function(item) {
+					item.$el.addClass('is-enabled');
+				});
 
 			} else {
 
 				this.status.set('view', 'browse');
-				this.buttons.sort.$el.removeClass('is-enabled');
+
+				_.each(this.buttons.sort, function(item) {
+					item.$el.removeClass('is-enabled');
+				});
 			}
 		},
 
-		insertAtTheTop: function(event) {
+		formAction_insertItem: function(event) {
 
-			this.status.set('insertAction', 'prepend');
+			this.addNewitem();
+		},
+
+		addNewitem: function(data) {
+
+			this.setInsertPosition();
+
+			if (!data) data = {};
 
 			if (this.isMode('gallery')) {
 
@@ -223,22 +433,17 @@
 
 			} else {
 
-				this.addNewEmptyModel();
+				this.addNewModel(data);
 			}
 		},
 
-		insertAtTheBottom: function(event) {
+		setInsertPosition: function() {
 
-			this.status.set('insertAction', 'append');
+			var event          = this.status.get('currentEvent'),
+				$form          = $(event.currentTarget).parents('[bebop-list--el="form"]'),
+				insertPosition = $form.attr('bebop-list--formId') == 'top' ? 'prepend' : 'append';
 
-			if (this.isMode('gallery')) {
-
-				this.mediaPicker.open();
-
-			} else {
-				
-				this.addNewEmptyModel();
-			}
+			this.status.set('insertPosition', insertPosition);
 		},
 
 		getNewItemView: function(model) {
@@ -247,13 +452,19 @@
 				model: model,
 				templates: this.itemTemplates,
 				fieldName: this.fieldName,
-				mode: this.status.get('mode')
+				mode: this.status.get('mode'),
+				list: this,
+				dataContext: this.status.get('dataContext')
 			});
 		},
 
-		addNewEmptyModel: function() {
+		addNewModel: function(data) {
 
-			this.collection.add(new List.ItemModel({view: 'edit'}));
+			if (!data) data = {};
+
+			if (data.view === undefined) data.view = 'edit';
+
+			this.collection.add(new List.ItemModel(data));
 		},
 
 		prependItem: function(model) {
@@ -292,12 +503,15 @@
 
 			}, this);
 
-			// Remove all data placeholders if we still have them
-			if (this.$dataPlaceholders.length > 0)
-				this.$dataPlaceholders.remove();
-
 			return this;
 		}
 	});
+
+	List.addFormAction = function(name, fn) {
+
+		var actionFn = 'formAction_' + name;
+
+		this.prototype[actionFn] = fn;
+	};
 
 })(window, document, undefined, jQuery || $);

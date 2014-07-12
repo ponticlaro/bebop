@@ -1,60 +1,23 @@
-<?php 
+<div bebop-list--el="container" 
+	 bebop-list--config='<?php echo json_encode($this->config->get()); ?>'
+	 bebop-list--data='<?php echo preg_replace("/'/", "&#39;", json_encode($this->data->get())); ?>'
+	 >
 
-$data         = $config->get('data');
-$browse_view  = $config->get('browse_view');
-$reorder_view = $config->get('reorder_view');
-$edit_view    = $config->get('edit_view');
+	<script bebop-list--itemTemplate="main" class="bebop-list--item" type="text/template" style="display:none">
 
-$config->remove('data');
-$config->remove('browse_view');
-$config->remove('reorder_view');
-$config->remove('edit_view');
-
-?>
-
-<div bebop-list--el="container" bebop-list--config='<?php echo json_encode($config->get()); ?>' class="bebop-list--container">
-
-	<div bebop-list--el="title">
-		<?php echo $config->get('title'); ?>
-	</div>
-
-	<?php if ($config->get('form_before_list')) include dirname(__FILE__) .'/../../partials/form-before.php'; ?>
-
-	<ul bebop-list--el="list" bebop-list--is-sortable="true" class="bebop-list--list">
-		<?php if ($data) {
-			foreach ($data as $item) {
-
-				// Escape single quotes
-				$item = preg_replace("/([^\"]*)'([^\"]*)/", "$1&#39;$2", $item); ?>
-								
-				<input bebop-list--el="data-placeholder" type="hidden" name="<?php echo $config->get('field_name'); ?>[]" value='<?php echo $item; ?>'>
-
-			<?php }
-		} ?>
-	</ul>
-
-	<div bebop-list--el="empty-state-indicator" class="bebop-list--empty-state-indicator" style="display:none">
-		<input type="hidden">
-		<span class="bebop-list--item-name">No items added until now</span>
-	</div>
-
-	<?php if ($config->get('form_after_list')) include dirname(__FILE__) .'/../../partials/form-after.php'; ?>
-	
-	<script bebop-list--template="item" class="bebop-list--item" type="text/template" style="display:none">
-		
 		<input bebop-list--el="data-container" type="hidden">
 		
 		<div class="bebop-list--drag-handle">
 			<span class="bebop-ui-icon-move"></span>
 		</div>
 		
-		<div bebop-list--el="content" class="bebop-list--item-content">
+		<div bebop-list--el="content">
 			<div bebop-list--view="browse"></div>
 			<div bebop-list--view="reorder"></div>
 			<div bebop-list--view="edit"></div>
 		</div>
 
-		<div class="bebop-list--item-actions">
+		<div bebop-list--el="item-actions">
 			<button bebop-list--action="edit" class="button button-small">
 				<b>Edit</b>
 				<span class="bebop-ui-icon-edit"></span>
@@ -64,17 +27,25 @@ $config->remove('edit_view');
 			</button>
 		</div>
 	</script>
-
-	<script bebop-list--template="browse-view" type="text/template" style="display:none">
-		<?php echo $browse_view; ?>
-	</script>
-
-	<script bebop-list--template="reorder-view" type="text/template" style="display:none">
-		<?php echo $reorder_view; ?>
-	</script>
-
-	<script bebop-list--template="edit-view" type="text/template" style="display:none">
-		<?php echo $edit_view; ?>
-	</script>
 	
+	<?php $views = $this->getAllItemViews();
+
+	if ($views) {
+
+		foreach ($views as $key => $template) { ?>
+			 
+			<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none"><?php echo $template; ?></script>
+
+		<?php }
+
+	} ?>
+
+	<script bebop-list--formTemplate="top" type="text/template" style="display:none">
+		<?php if ($this->config->get('show_top_form')) echo $this->getForm(); ?>
+	</script>
+
+	<script bebop-list--formTemplate="bottom" type="text/template" style="display:none">
+		<?php if ($this->config->get('show_bottom_form')) echo $this->getForm(); ?>
+	</script>
+
 </div>

@@ -3,9 +3,13 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Helpers\MetaboxData;
+use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
-class Metabox
+class Metabox extends TrackableObjectAbstract
 {
+	protected $__type = 'metabox';
+
 	protected $__config;
 
 	protected $__post_types;
@@ -41,7 +45,7 @@ class Metabox
 		$this->__post_types  = Bebop::Collection();
 		$this->__meta_fields = Bebop::Collection();
 		$this->__fields      = Bebop::Collection();
-		$this->__data        = Bebop::Collection();
+		$this->__data        = new MetaboxData;
 	}
 
 	private function __init()
@@ -52,19 +56,7 @@ class Metabox
 
 		add_action('save_post', array($this, 'saveMeta'));
 
-		if (class_exists('\Ponticlaro\Bebop')) {
-
-			// Keep track of this object on Bebop
-			Bebop::track($this);
-			$key = $this->getConfig('key');
-			unset($this);
-
-			return Bebop::getMetabox($key);
-
-		} else {
-
-			return $this;
-		}
+		return $this;
 	}
 
 	private function __handleInit($title, $post_types, array $meta_fields = array(), $fn = null,  array $config = array())
@@ -74,9 +66,9 @@ class Metabox
 
 		$this->__config->set('title', $title);
 
-		// Set key
-		$key = Bebop::util('slugify', $title);
-		$this->__config->set('key', $key);
+		// Set post_type id
+		$this->__id = Bebop::util('slugify', $title);
+		$this->__config->set('key', $this->__id);
 
 		if (!isset($post_types)) 
 			throw new ErrorException("You must define post types for this metabox");
@@ -168,9 +160,11 @@ class Metabox
 
 			if($meta_fields) {
 
+				$meta = Bebop::PostMeta($entry->ID);
+
 				foreach ($meta_fields as $meta_field) {
 
-					$this->__data->set($meta_field, get_post_meta($entry->ID, $meta_field, true) );
+					$this->__data->set($meta_field, $meta->getAll($meta_field));
 				}
 			}
 
@@ -233,7 +227,30 @@ class Metabox
 
 				$value = isset($_POST[$field]) ? $_POST[$field] : '';
 
-				update_post_meta($post_id, $field, $value);
+				// Empty values
+				if (!$value) {
+					
+					delete_post_meta($post_id, $field);
+				}
+
+				// Arrays
+				elseif (is_array($value)) {
+					
+					// Delete all entries
+					delete_post_meta($post_id, $field);
+
+					foreach ($value as $v) {
+
+						// Add single entry with same meta_key
+						add_post_meta($post_id, $field, $v);
+					}
+				}
+
+				// Strings, booleans, etc
+				else {
+
+					update_post_meta($post_id, $field, $value);
+				}
 			}
 		}
 	}

@@ -22,8 +22,22 @@ nbproject
 *.sublime-project
 *.sublime-workspace
 
-# WordPress Core
-/wp-core
+# WordPress Stuff
+/.htaccess
+/index.php
+/license.txt
+/sitemap.xml
+/sitemap.xml.gz
+/readme.html
+/wp-*.php
+/wp-admin/
+/wp-includes/
+/wp-content/
+/xmlrpc.php
+*.log
+
+# Node
+/node_modules
 
 # Composer
 /vendor

@@ -15,15 +15,11 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	protected static $__base_url;
 
-	protected $__instances;
-
 	protected $__current_instance_key;
 
 	public function __construct()
 	{
-		self::$__base_url = Bebop::getPathUrl(__DIR__);
-
-		$this->__instances = Bebop::Collection();
+		self::$__base_url = Bebop::util('getPathUrl', __DIR__);
 
 		$args = func_get_args();
 
@@ -43,29 +39,57 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function registerScripts()
 	{
-		$app_css_dependencies = array(
-			'bebop-ui'
-		);
+		// Register CSS
+		$css_path         = '/assets/css/bebop-ui--list.css';
+		$css_url          = self::$__base_url . $css_path;
+		$css_version      = Bebop::util('getFileVersion', __DIR__ . $css_path);
+		$css_dependencies = array('bebop-ui');
 
-		wp_register_style('bebop-ui--list', self::$__base_url .'/assets/css/bebop-ui--list.css', $app_css_dependencies);
+		wp_register_style('bebop-ui--list', $css_url, $css_dependencies, $css_version);
 
-		wp_register_script('bebop-ui--listView', self::$__base_url .'/assets/js/views/List.js', array(), false, true);
-		wp_register_script('bebop-ui--listItemView', self::$__base_url .'/assets/js/views/ListItemView.js', array(), false, true);
-		wp_register_script('bebop-ui--listItemModel', self::$__base_url .'/assets/js/models/ListItemModel.js', array(), false, true);
-		wp_register_script('bebop-ui--listCollection', self::$__base_url .'/assets/js/collections/ListCollection.js', array(), false, true);
+		// Register development JS
+		if (Bebop::isDevEnvEnabled()) {
+			
+			wp_register_script('bebop-ui--listView', self::$__base_url .'/assets/js/views/List.js', array(), false, true);
+			wp_register_script('bebop-ui--listItemView', self::$__base_url .'/assets/js/views/ListItemView.js', array(), false, true);
+			wp_register_script('bebop-ui--listItemModel', self::$__base_url .'/assets/js/models/ListItemModel.js', array(), false, true);
+			wp_register_script('bebop-ui--listCollection', self::$__base_url .'/assets/js/collections/ListCollection.js', array(), false, true);
 
-		$app_dependencies = array(
-			'jquery',
-			'jquery-ui-sortable',
-			'underscore',
-			'backbone',
-			'mustache',
-			'bebop-ui--listView',
-			'bebop-ui--listItemView',
-			'bebop-ui--listItemModel',
-			'bebop-ui--listCollection'
-		);		
-		wp_register_script('bebop-ui--list', self::$__base_url .'/assets/js/bebop-ui--list.js', $app_dependencies, false, true);
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-sortable',
+				'underscore',
+				'backbone',
+				'mustache',
+				'bebop-ui--listView',
+				'bebop-ui--listItemView',
+				'bebop-ui--listItemModel',
+				'bebop-ui--listCollection'
+			);
+			
+			wp_register_script('bebop-ui--list', self::$__base_url .'/assets/js/bebop-ui--list.js', $js_dependencies, false, true);
+		}
+
+		// Register optimized JS
+		else {
+
+			// The following dependencies should never be concatenated and minified
+			// Some are use by other WordPress features and plugins
+			// and other are register by Bebop UI
+			$js_dependencies = array(
+				'jquery',
+				'jquery-ui-sortable',
+				'underscore',
+				'backbone',
+				'mustache'
+			);
+
+			$js_path    = '/assets/js/bebop-ui--list.min.js';
+			$js_url     = self::$__base_url . $js_path;
+			$js_version = Bebop::util('getFileVersion', __DIR__ . $js_path);
+
+			wp_register_script('bebop-ui--list', $js_url, $js_dependencies, $js_version, true);
+		}
 	}
 
 	private function __enqueueScripts()
@@ -90,46 +114,62 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		$title = $key;
 		$key   = Bebop::util('slugify', $key);
 
+		// Default main configuration
 		$default_config = array(
-			'key'               => $key,
-			'title'             => $title,
-			'field_name'        => $key,
-			'label__add_button' => 'Add Item',
-			'form_before_list'  => true,
-			'form_after_list'   => true,
-			'data'              => is_array($data) ? $data : array(),
-			'browse_view'       => '',
-			'reorder_view'      => '',
-			'edit_view'         => '',
-			'type'              => 'single',
-			'mode'              => 'default'
+			'key'              => $key,
+			'title'            => $title,
+			'description'      => '',
+			'field_name'       => $key,
+			'show_top_form'    => true,
+			'show_bottom_form' => true,
+			'type'             => 'single',
+			'mode'             => 'default'
 		);
 
+		// Main configuration
 		$this->config = Bebop::Collection(array_merge($default_config, $config));
+
+		// Data
+		$this->data = Bebop::Collection($data ?: array());
+
+		// Views
+		$this->views = Bebop::Collection(array(
+			'browse'  => '',
+			'reorder' => '',
+			'edit'    => ''
+		));
+
+		// Labels
+		$this->labels = Bebop::Collection(array(
+			'add_button'  => 'Add Item',
+			'sort_button' => 'Sort'
+		));
+
+		// Form elements
+		$this->form_elements = Bebop::Collection(array(
+			'add'  => __DIR__ .'/templates/partials/form/default/elements/add.php',
+			'sort' => __DIR__ .'/templates/partials/form/default/elements/sort.php'
+		));
 
 		return $this;
 	}
 
-	private function __renderTemplate($template_name, $config)
-	{
-		include __DIR__ . '/templates/'. $template_name .'.php';
-	}
-
 	public function setData(array $data = array())
 	{
-		$this->config->set('data', $data);
+		$this->data->set($data);
 
 		return $this;
 	}
 
 	public function getData()
 	{
-		return $this->config->get('data');
+		return $this->data->get();
 	}
 
 	public function setTitle($title)
 	{
-		if ($title) $this->config->set('title', $title);
+		if (is_string($title)) 
+			$this->config->set('title', $title);
 
 		return $this;
 	}
@@ -139,19 +179,57 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		return $this->config->get('title');
 	}
 
-	public function setLabel($key, $value)
+	public function setDescription($description)
 	{
-		$this->config->set('label_'.$key, $value);
+		if (is_string($description)) 
+			$this->config->set('description', $description);
 
 		return $this;
 	}
 
-	public function setMode($mode)
+	public function getDescription()
 	{
-		$this->config->set('mode', $mode);
+		return $this->config->get('description');
+	}
 
-		if ($mode == 'gallery') {
-			$this->config->set('label__add_button', 'Add images');
+	public function setFieldName($name)
+	{
+		if (is_string($name)) 
+			$this->config->set('field_name', $name);
+
+		return $this;
+	}
+
+	public function getFieldName()
+	{
+		return $this->config->get('field_name');
+	}
+
+	public function setLabel($key, $value)
+	{	
+		if (is_string($key) && is_string($value)) 
+			$this->labels->set($key, $value);
+
+		return $this;
+	}
+
+	public function getLabel($key)
+	{	
+		if (!is_string($key)) return '';
+
+		return $this->labels->get($key);
+	}
+
+	public function setMode($mode)
+	{	
+		if (is_string($mode)) {
+
+			$this->config->set('mode', $mode);
+
+			if ($mode == 'gallery') {
+				
+				$this->labels->set('add_button', 'Add images');
+			}
 		}
 
 		return $this;
@@ -159,53 +237,166 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function setItemView($view, $template)
 	{
-		if(!$view) return $this;
+		if(!is_string($view)) return $this;
 
-		if (is_callable($template)) {
+		$this->views->set($view, $this->__getHtml($template));
+
+		return $this;
+	}
+
+	public function getItemView($view)
+	{
+		if(!is_string($view)) return $this;
+
+		return $this->views->get($view);
+	}
+
+	public function getAllItemViews()
+	{
+		return $this->views->get();
+	}
+
+	public function clearForm()
+	{
+		$this->form_elements->clear();
+
+		return $this;
+	}
+
+	public function addFormEl($element_id, $template)
+	{
+		$this->appendFormEl($element_id, $template);
+
+		return $this;
+	}
+
+	public function prependFormEl($element_id, $template)
+	{
+		$this->form_elements->unshift($element_id, $template);
+
+		return $this;
+	}
+
+	public function appendFormEl($element_id, $template)
+	{
+		$this->form_elements->set($element_id, $template);
+
+		return $this;
+	}
+
+	public function replaceFormEl($element_id, $template)
+	{
+		$this->form_elements->set($element_id, $template);
+
+		return $this;
+	}
+
+	public function removeFormEl($element_id)
+	{
+		$this->form_elements->remove($element_id);
+
+		return $this;
+	}
+
+	public function showForms($value)
+	{
+		$this->showTopForm($value);
+		$this->showBottomForm($value);
+
+		return $this;
+	}
+
+	public function showTopForm($value)
+	{
+		if (is_bool($value))
+			$this->config->set('show_top_form', $value);
+
+		return $this;
+	}
+
+	public function showBottomForm($value)
+	{
+		if (is_bool($value))
+			$this->config->set('show_bottom_form', $value);
+
+		return $this;
+	}
+
+	public function getForm()
+	{
+		$html     = '';
+		$elements = $this->form_elements->get();
+
+		if ($elements) {
+			
+			foreach ($elements as $element_id => $element_tpl) {
+				
+				$html .= "<div bebop-list--formElementId='$element_id' class='bebop-list--formField'>";
+				$html .= $this->__getHtml($element_tpl);
+				$html .= '</div>';
+			}
+		}
+
+		return $html;
+	}
+
+	private function __getHtml($source) 
+	{
+		if (is_callable($source)) {
 
 			ob_start();
-			call_user_func($template);
+			call_user_func($source);
 			$html = ob_get_contents();
 			ob_clean();
 
-		} elseif (is_file($template) && is_readable($template)) {
+		} elseif (is_file($source) && is_readable($source)) {
 
-			$html = file_get_contents($template);
+			ob_start();
+			$this->__renderTemplate($source, $this);
+			$html = ob_get_contents();
+			ob_clean();
 
-		} elseif (is_string($template)) {
+		} elseif (is_string($source)) {
 
-			$html = $template;
+			$html = $source;
 
 		} else {
 
 			$html = '';
 		}
 
-		$this->config->set($view .'_view', $html);
-
-		return $this;
+		return $html;
 	}
 
 	public function render()
 	{
-		// Add default reorder view if in gallery mode
+		// Force default reorder view if in gallery mode
 		if ($this->config->get('mode') == 'gallery') {
 			
-			$this->setItemView('reorder', __DIR__ .'/templates/views/single/gallery/reorder.mustache');
-		}
-
-		// Fallback to browse view if there is no reorder view
-		if (!$this->config->get('reorder_view')) {
-
-			$this->setItemView('reorder', $this->config->get('browse_view'));
+			$this->setItemView('reorder', __DIR__ .'/templates/partials/items/gallery/reorder.mustache');
 		}
 
 		// Set path to template
 		$this->template = 'views/'. $this->config->get('type') .'/'. $this->config->get('mode');
 
 		// Render list
-		$this->__renderTemplate($this->template, $this->config);
+		$this->__renderTemplate($this->template, $this);
 
 		return $this;
+	}
+
+	private function __renderTemplate($template_name, $instance)
+	{
+		// Absolute path templates
+		if (is_file($template_name) && is_readable($template_name)) {
+			
+			include $template_name;
+		}
+
+		// Main View Templates
+		else {
+
+			include __DIR__ . '/templates/'. $template_name .'.php';
+		}
 	}
 }

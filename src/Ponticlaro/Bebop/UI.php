@@ -3,21 +3,15 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
-class UI {
+class UI extends SingletonAbstract {
 
 	/**
 	 * Class that plugins should be extending to get loaded
 	 * 
 	 */
 	const PLUGIN_ABSTRACT_CLASS = 'Ponticlaro\Bebop\UI\PluginAbstract';
-
-	/**
-	 * Bebop UI instance
-	 * 
-	 * @var Ponticlaro\Bebop\UI
-	 */
-	private static $__instance;
 
 	/**
 	 * URL for current directory
@@ -36,10 +30,10 @@ class UI {
 	 * Instantiates UI object
 	 * 
 	 */
-	private function __construct()
+	protected function __construct()
 	{
 		// Get URL for current directory
-		self::$__base_url = Bebop::getPathUrl(__DIR__);
+		self::$__base_url = Bebop::util('getPathUrl', __DIR__);
 
 		// Instantiate plugins collection object
 		$this->__plugins = Bebop::Collection();
@@ -58,37 +52,58 @@ class UI {
 	}
 
 	/**
-	 * Gets single instance of Bebop UI
-	 * 
-	 * @return Ponticlaro\Bebop\UI Bebop UI class instance
-	 */
-	public static function getInstance() 
-	{
-		if(!self::$__instance || !is_a(self::$__instance, 'Ponticlaro\Bebop\UI')) {
-
-			self::$__instance = new UI();
-		}
-
-		return self::$__instance;
-	}
-
-	/**
 	 * Register common scripts for UI plugins
 	 * 
 	 * @return void
 	 */
 	public function registerScripts()
 	{
-		wp_register_style('bebop-ui', self::$__base_url .'/UI/assets/css/bebop-ui.css');
-		wp_register_script('mustache', self::$__base_url .'/UI/assets/js/vendor/mustache.js', array(), '0.8.1', true);
-		wp_register_script('jquery.debounce', self::$__base_url .'/UI/assets/js/vendor/jquery.ba-throttle-debounce.min.js', array('jquery'), '0.8.1', true);
-		
-		$dependencies = array(
-			'jquery',
-			'jquery.debounce',
-			'mustache'
-		);
-		wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.js', $dependencies, false, true);
+		// Register CSS
+		$css_path    = '/UI/assets/css/bebop-ui.css';
+		$css_url     = self::$__base_url . $css_path;
+		$css_version = Bebop::util('getFileVersion', __DIR__ . $css_path);
+
+		wp_register_style('bebop-ui', $css_url, array(), $css_version);
+
+		// Register development JS
+		if (Bebop::isDevEnvEnabled()) {
+			
+			wp_register_script('mustache', self::$__base_url .'/UI/assets/js/vendor/mustache.js', array(), '0.8.1', true);
+			wp_register_script('jquery.debounce', self::$__base_url .'/UI/assets/js/vendor/jquery.ba-throttle-debounce.min.js', array('jquery'), '0.8.1', true);
+			
+			$dependencies = array(
+				'jquery',
+				'jquery-ui-datepicker',
+				'jquery.debounce'
+			);
+			
+			wp_register_script('bebop-ui', self::$__base_url .'/UI/assets/js/bebop-ui.js', $dependencies, false, true);
+		}
+
+		// Register optimized JS
+		else {
+
+			// Mustache is optimized separately 
+			// so that other components can load it only if needed
+			$mustache_path    = '/UI/assets/js/vendor/mustache.min.js';
+			$mustache_url     = self::$__base_url . $mustache_path;
+			$mustache_version = Bebop::util('getFileVersion', __DIR__ . $mustache_path); 
+			
+			wp_register_script('mustache', $mustache_url, array(), $mustache_version, true);
+
+			// The following dependencies should never be concatenated and minified
+			// These are used by other WordPress features and plugins
+			$dependencies = array(
+				'jquery',
+				'jquery-ui-datepicker'
+			);
+
+			$bebop_ui_path    = '/UI/assets/js/bebop-ui.min.js';
+			$bebop_ui_url     = self::$__base_url . $bebop_ui_path;
+			$bebop_ui_version = Bebop::util('getFileVersion', __DIR__ . $bebop_ui_path); 
+
+			wp_register_script('bebop-ui', $bebop_ui_url, $dependencies, $bebop_ui_version, true);
+		}
 	}
 
 	/**
