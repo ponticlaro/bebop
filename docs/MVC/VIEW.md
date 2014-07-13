@@ -28,8 +28,10 @@ $view->setVars($vars);
 ```
 
 ## Rendering a full view
+**Notes:**
+- If the second parameter is `false`, `$vars` will replace the existing variables instead of merging with them. 
 ```php
-Bebop::View('products/single')->render($vars, true);
+Bebop::View('products/single')->render($vars, false);
 ```
 
 ## Rendering a partial inside a view
@@ -37,5 +39,5 @@ Bebop::View('products/single')->render($vars, true);
 - You should not pass the file extension
 
 ```php
-$this->partial('products/details', $vars);
+$this->partial('products/single/partials/details', $vars);
 ```
