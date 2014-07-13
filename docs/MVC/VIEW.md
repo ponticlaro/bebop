@@ -31,7 +31,7 @@ $view->setVars($vars);
 **Notes:**
 - If the second parameter is `false`, `$vars` will replace the existing variables instead of merging with them. 
 ```php
-Bebop::View('products/single')->render($vars, false);
+$view->render($vars, false);
 ```
 
 ## Rendering a partial inside a view
