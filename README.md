@@ -11,6 +11,7 @@ Bebop::boot();
 
 ## Custom Features
 - [RESTful API](docs/API.md)
+- [MVC Architecture](docs/MVC.md)
 - Admin UI Widgets
 
 ## Utilities
