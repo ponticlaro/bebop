@@ -40,7 +40,7 @@ Product::addLoadable('gallery', function($product) {
 Product::onContext('single/product', function($product) {
     
     // Load loadables
-    $product->load(['gallery', 'links', );
+    $product->load(['gallery', 'links']);
 
     // Do other stuff
 });
@@ -94,5 +94,3 @@ $products = Product::findAll([
     'order'          => 'ASC'
 ]);
 ```
-
-####
