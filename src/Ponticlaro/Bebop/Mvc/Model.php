@@ -46,6 +46,13 @@ abstract class Model {
     protected static $query;
 
     /**
+     * Contains the current query meta data
+     * 
+     * @var stdClass
+     */
+    protected static $query_meta;
+
+    /**
      * States that there is a query instance available or not
      * 
      * @var boolean
@@ -238,11 +245,11 @@ abstract class Model {
 
             if (is_numeric($ids)) {
                     
-                $data = static::$query->find($ids);
+                $post = static::$query->find($ids);
 
                 static::__disableQueryMode();
 
-                return $data && $data[0] instanceof \WP_Post ? static::__applyModelMods($data[0]) : null;
+                return $post && $post->post_type == static::$type ? static::__applyModelMods($post) : null;
             }
 
             elseif (is_array($ids)) {
@@ -290,10 +297,11 @@ abstract class Model {
         // Add post type as final argument
         static::$query->postType(static::$type);
 
+        // Get query results
         $items = static::$query->findAll($args);
-        $meta  = static::$query->getMeta();
 
-        static::__disableQueryMode();
+        // Save query meta data
+        static::$instance->query_meta  = static::$query->getMeta();
 
         // Apply model modifications
         if ($items) {
@@ -303,7 +311,19 @@ abstract class Model {
             }
         }
 
+        static::__disableQueryMode();
+
         return $items;
+    }
+
+    /**
+     * Returns last query meta data
+     * 
+     * @return object
+     */
+    public function getQueryMeta()
+    {
+        return static::$instance ? static::$instance->query_meta : null;
     }
 
     /**

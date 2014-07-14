@@ -177,12 +177,10 @@ class Query {
 	{	
 		if (is_numeric($id)) {
 
-			$posts = Db::queryPosts(array(
-				'p' => $id
-			));
+			$post = get_post($id);
 
-			if ($posts && $posts[0] instanceof \WP_Post && $posts[0]->ID == $id)
-				return $posts[0];
+			if ($post && $post instanceof \WP_Post && $post->ID == $id)
+				return $post;
 		}
 
 		return null;
@@ -193,20 +191,13 @@ class Query {
 	 * 
 	 * @param  mixed $args Optional arguments. Could be array of query args to be merged or post ID
 	 */
-	public function findAll($args = null)
+	public function findAll(array $args = array())
 	{
 		$query_args = $this->getArgs();
 
-		if (is_array($args)) {
-			
-			// Merge user input args with 
+		// Merge user input args with 
+		if (is_array($args))
 			$query_args = array_merge($query_args, $args);
-		}
-
-		if (is_numeric($args)) {
-			
-			$query_args = array_merge($query_args, array('p', $args));
-		}
 
 		// Execute query
 		$data = Db::queryPosts($query_args, array('with_meta' => true));
