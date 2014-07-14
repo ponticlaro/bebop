@@ -219,7 +219,7 @@ abstract class Model {
      * @param  midex $ids Single ID or array of IDs
      * @return mixed      Single Object or array of objects
      */
-    public static function find($ids = null)
+    public static function find($ids = null, $keep_order = true)
     {
         static::__resetQuery();
         static::$query->postType(static::$type);
@@ -247,19 +247,29 @@ abstract class Model {
 
             elseif (is_array($ids)) {
 
-                $data = static::$query->post($ids)->ppp(count($ids))->findAll();
+                $posts = static::$query->post($ids)->ppp(count($ids))->findAll();
 
-                // Apply model modifications
-                if ($data) {
-                    foreach ($data as $key => $item) {
+                if ($posts && $keep_order) {
+                    
+                    $ordered_posts = array();
 
-                        $data[$key] = static::__applyModelMods($item);
+                    foreach ($ids as $key => $id) {
+                        
+                        foreach ($posts as $post) {
+                            
+                            if ($post instanceof \WP_Post && $post->ID == $id && $post->post_type == static::$type) {
+                                
+                                 $ordered_posts[$key] = static::__applyModelMods($post);
+                            }
+                        }
                     }
+
+                    $posts = $ordered_posts;
                 }
 
                 static::__disableQueryMode();
                 
-                return $data;
+                return $posts;
             }
         }
 

@@ -177,11 +177,12 @@ class Query {
 	{	
 		if (is_numeric($id)) {
 
-			$arg = new Arg;
-			$arg->setkey('p')->setValue($id);
-			$this->args->push($arg);
+			$posts = Db::queryPosts(array(
+				'p' => $id
+			));
 
-			return Db::queryPosts($this->getArgs());
+			if ($posts && $posts[0] instanceof \WP_Post && $posts[0]->ID == $id)
+				return $posts[0];
 		}
 
 		return null;
