@@ -168,10 +168,11 @@ class Query {
 	}
 
 	/**
-	 * Finds post by ID
+	 * Returns posts by ID
 	 * 
-	 * @param  int $id ID of the target post
-	 * @return WP_Post
+	 * @param  mixed   $ids        Single ID or array of IDs
+	 * @param  bool    $keep_order True if posts order should match the order of $ids, false otherwise
+	 * @return mixed               Single WP_Post object or array of WP_Post objects
 	 */
 	public function find($ids, $keep_order = true)
 	{	

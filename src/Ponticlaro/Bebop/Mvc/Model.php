@@ -223,8 +223,9 @@ abstract class Model {
     /**
      * Returns entries by ID
      * 
-     * @param  midex $ids Single ID or array of IDs
-     * @return mixed      Single Object or array of objects
+     * @param  mixed $ids        Single ID or array of IDs
+     * @param  bool  $keep_order True if posts order should match the order of $ids, false otherwise
+     * @return mixed             Single object or array of objects
      */
     public static function find($ids = null, $keep_order = true)
     {
