@@ -173,15 +173,41 @@ class Query {
 	 * @param  int $id ID of the target post
 	 * @return WP_Post
 	 */
-	public function find($id)
+	public function find($ids, $keep_order = true)
 	{	
-		if (is_numeric($id)) {
+		if (is_numeric($ids)) {
+                    
+            $posts = $this->post(array($ids))->ppp(1)->findAll();
 
-			$post = get_post($id);
+            return $posts && $posts[0] instanceof \WP_Post ? $posts[0] : null;
+        }
 
-			if ($post && $post instanceof \WP_Post && $post->ID == $id)
-				return $post;
-		}
+        elseif (is_array($ids)) {
+
+            // Get posts
+            $posts = $this->post($ids)->ppp(count($ids))->findAll();
+
+            // Make sure posts order match IDs order
+            if ($posts && $keep_order) {
+                
+                $ordered_posts = array();
+
+                foreach ($ids as $key => $id) {
+                    
+                    foreach ($posts as $post) {
+                        
+                        if ($post instanceof \WP_Post && $post->ID == $id) {
+                            
+                             $ordered_posts[$key] = $post;
+                        }
+                    }
+                }
+
+                $posts = $ordered_posts;
+            }
+            
+            return $posts;
+        }
 
 		return null;
 	}

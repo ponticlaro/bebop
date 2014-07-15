@@ -242,45 +242,27 @@ abstract class Model {
 
         else {
 
-            if (is_numeric($ids)) {
+            // Add post type as final argument
+            $data = static::$query->postType(static::$type)->find($ids, $keep_order);
+
+            if ($data) {
+                
+                if (is_object($data)) {
+                
+                    $data = static::__applyModelMods($data);
+                } 
+
+                elseif (is_array($data)) {
                     
-                $post = static::$query->find($ids);
-
-                static::__disableQueryMode();
-
-                return $post && $post->post_type == static::$type ? static::__applyModelMods($post) : null;
-            }
-
-            elseif (is_array($ids)) {
-
-                // Add post type as final argument
-                static::$query->postType(static::$type);
-
-                // Get posts
-                $posts = static::$query->post($ids)->ppp(count($ids))->findAll();
-
-                // Make sure posts order match IDs order
-                if ($posts && $keep_order) {
-                    
-                    $ordered_posts = array();
-
-                    foreach ($ids as $key => $id) {
+                    foreach ($data as $key => $post) {
                         
-                        foreach ($posts as $post) {
-                            
-                            if ($post instanceof \WP_Post && $post->ID == $id) {
-                                
-                                 $ordered_posts[$key] = static::__applyModelMods($post);
-                            }
-                        }
+                        $data[$key] = static::__applyModelMods($post);
                     }
-
-                    $posts = $ordered_posts;
                 }
 
                 static::__disableQueryMode();
-                
-                return $posts;
+
+                return $data;
             }
         }
 
