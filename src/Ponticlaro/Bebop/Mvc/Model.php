@@ -229,7 +229,6 @@ abstract class Model {
     public static function find($ids = null, $keep_order = true)
     {
         static::__resetQuery();
-        static::$query->postType(static::$type);
 
         if (is_null($ids)) {
             
@@ -254,8 +253,13 @@ abstract class Model {
 
             elseif (is_array($ids)) {
 
+                // Add post type as final argument
+                static::$query->postType(static::$type);
+
+                // Get posts
                 $posts = static::$query->post($ids)->ppp(count($ids))->findAll();
 
+                // Make sure posts order match IDs order
                 if ($posts && $keep_order) {
                     
                     $ordered_posts = array();
@@ -264,7 +268,7 @@ abstract class Model {
                         
                         foreach ($posts as $post) {
                             
-                            if ($post instanceof \WP_Post && $post->ID == $id && $post->post_type == static::$type) {
+                            if ($post instanceof \WP_Post && $post->ID == $id) {
                                 
                                  $ordered_posts[$key] = static::__applyModelMods($post);
                             }
