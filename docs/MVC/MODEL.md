@@ -7,7 +7,7 @@ MVC - Model
 class Product extends \Ponticlaro\Bebop\Mvc\Model {
     
     // Post type name 
-    protected $type = 'product';
+    protected $__type = 'product';
 }
 ```
 

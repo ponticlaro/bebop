@@ -20,7 +20,7 @@ abstract class Model {
      * 
      * @var string
      */
-    protected static $type = 'post';
+    protected static $__type = 'post';
 
     /**
      * Function to execute for each model item
@@ -91,7 +91,7 @@ abstract class Model {
     public static function setType($type)
     {
         if (is_string($type))
-            static::$type = $type;
+            static::$__type = $type;
     }
 
     /**
@@ -259,7 +259,7 @@ abstract class Model {
         else {
 
             // Get results
-            $data = static::$query->postType(static::$type)->find($ids, $keep_order);
+            $data = static::$query->postType(static::$__type)->find($ids, $keep_order);
 
             if ($data) {
                 
@@ -292,7 +292,7 @@ abstract class Model {
         static::__enableQueryMode();
 
         // Add post type as final argument
-        static::$query->postType(static::$type);
+        static::$query->postType(static::$__type);
 
         // Get query results
         $items = static::$query->findAll($args);
