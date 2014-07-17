@@ -9,193 +9,202 @@ use Ponticlaro\Bebop\Db\Query\ArgFactory;
 
 class Query {
 
-	/**
-	 * List of arguments
-	 * 
-	 * @var Ponticlaro\Bebop\Common\Collection
-	 */
-	private $args;
+    /**
+     * List of arguments
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    private $args;
 
-	/**
-	 * Current argument being worked on
-	 * 
-	 * @var Ponticlaro\Bebop\Db\Query\Arg
-	 */
-	private $current_arg;
+    /**
+     * Current argument being worked on
+     * 
+     * @var Ponticlaro\Bebop\Db\Query\Arg
+     */
+    private $current_arg;
 
-	/**
-	 * Query Results
-	 * @var array
-	 */
-	private $query_results = array();
+    /**
+     * Query Results
+     * @var array
+     */
+    private $query_results = array();
 
-	/**
-	 * List of arguments
-	 * 
-	 * @var Ponticlaro\Bebop\Common\Collection
-	 */
-	private $query_meta;
+    /**
+     * List of arguments
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    private $query_meta;
 
-	/**
-	 * Creates new query instance
-	 * 
-	 */
-	public function __construct()
-	{
-		$this->args = Bebop::Collection();
-	}
+    /**
+     * Flag to check if query was already used to returns retults or not
+     * 
+     * @var boolean
+     */
+    private $was_executed = false;
 
-	/**
-	 * Handles all the logic needed to:
-	 * - create new argument
-	 * - execute action on current argument
-	 * - execute action on current argument child
-	 * - get existing parent argument if it needs to add another child item
-	 * 
-	 * @param  string 						 $name Method name
-	 * @param  array  						 $args Method arguments
-	 * @return use Ponticlaro\Bebop\Db\Query       Query instance
-	 */
-	public function __call($name, $args)
-	{
-		$name = strtolower($name);
+    /**
+     * Creates new query instance
+     * 
+     */
+    public function __construct()
+    {
+        $this->args = Bebop::Collection();
+    }
 
-		// Check current arg for method
-		if (!is_null($this->current_arg) && method_exists($this->current_arg, $name)) {
-			
-			call_user_method_array($name, $this->current_arg, $args);
-		}
+    /**
+     * Handles all the logic needed to:
+     * - create new argument
+     * - execute action on current argument
+     * - execute action on current argument child
+     * - get existing parent argument if it needs to add another child item
+     * 
+     * @param  string                        $name Method name
+     * @param  array                         $args Method arguments
+     * @return use Ponticlaro\Bebop\Db\Query       Query instance
+     */
+    public function __call($name, $args)
+    {
+        $name = strtolower($name);
 
-		// Check if:
-		// - current arg is a parent 
-		// - its current child have the method
-		// - its current child action is still available to be executed
-		elseif (!is_null($this->current_arg) && 
-			    $this->current_arg->isParent() && 
-			    method_exists($this->current_arg->getCurrentChild(), $name) && 
-			    $this->current_arg->getCurrentChild()->actionIsAvailable($name)) {
+        // Check current arg for method
+        if (!is_null($this->current_arg) && method_exists($this->current_arg, $name)) {
+            
+            call_user_method_array($name, $this->current_arg, $args);
+        }
 
-			call_user_method_array($name, $this->current_arg->getCurrentChild(), $args);
-		}
+        // Check if:
+        // - current arg is a parent 
+        // - its current child have the method
+        // - its current child action is still available to be executed
+        elseif (!is_null($this->current_arg) && 
+                $this->current_arg->isParent() && 
+                method_exists($this->current_arg->getCurrentChild(), $name) && 
+                $this->current_arg->getCurrentChild()->actionIsAvailable($name)) {
 
-		// Check if:
-		// - current arg is a parent 
-		// - method name matches current arg factory ID
-		elseif (!is_null($this->current_arg) && 
-			    $this->current_arg->isParent() &&
-			    ArgFactory::getInstanceId($this->current_arg) == $name) {
+            call_user_method_array($name, $this->current_arg->getCurrentChild(), $args);
+        }
 
-			$this->__addArgChild($this->current_arg, $args);
-		}
+        // Check if:
+        // - current arg is a parent 
+        // - method name matches current arg factory ID
+        elseif (!is_null($this->current_arg) && 
+                $this->current_arg->isParent() &&
+                ArgFactory::getInstanceId($this->current_arg) == $name) {
 
-		// Check if a parent arg is already instantiated for the target method $name
-		elseif ($this->args->hasKey($name)) {
+            $this->__addArgChild($this->current_arg, $args);
+        }
 
-			$this->current_arg = $this->args->get($name);
+        // Check if a parent arg is already instantiated for the target method $name
+        elseif ($this->args->hasKey($name)) {
 
-			$this->__addArgChild($this->current_arg, $args);
-		}
+            $this->current_arg = $this->args->get($name);
 
-		// Check for manufacturable argument class
-		elseif (ArgFactory::canManufacture($name)) {
+            $this->__addArgChild($this->current_arg, $args);
+        }
 
-			// Save current arg, if there is one
-			$this->__collectCurrentArg();
+        // Check for manufacturable argument class
+        elseif (ArgFactory::canManufacture($name)) {
 
-			// Create new arg
-			$arg = ArgFactory::create($name, $args);
+            // Save current arg, if there is one
+            $this->__collectCurrentArg();
 
-			// If it is a parent arg, save it immediatelly
-			if ($arg->isParent())
-				$this->args->set($name, $arg);
+            // Create new arg
+            $arg = ArgFactory::create($name, $args);
 
-			// Store new arg as current
-			$this->current_arg = $arg;
-		}
+            // If it is a parent arg, save it immediatelly
+            if ($arg->isParent())
+                $this->args->set($name, $arg);
 
-		return $this;
-	}
+            // Store new arg as current
+            $this->current_arg = $arg;
+        }
 
-	/**
-	 * Returns all meta info for the executed query
-	 * 
-	 * NOTE: Will only contain data after executing the query
-	 * 
-	 * @return object
-	 */
-	public function getMeta()
-	{
-		return $this->query_meta;
-	}
+        return $this;
+    }
 
-	/**
-	 * Returns the args array needed to query for posts
-	 * 
-	 * @return array
-	 */
-	public function getArgs()
-	{	
-		// Save current arg, if there is one
-		$this->__collectCurrentArg();
+    /**
+     * Returns all meta info for the executed query
+     * 
+     * NOTE: Will only contain data after executing the query
+     * 
+     * @return object
+     */
+    public function getMeta()
+    {
+        return $this->query_meta;
+    }
 
-		$args = array();
+    /**
+     * Returns the args array needed to query for posts
+     * 
+     * @return array
+     */
+    public function getArgs()
+    {   
+        // Save current arg, if there is one
+        $this->__collectCurrentArg();
 
-		foreach ($this->args->get() as $arg) {
+        $args = array();
 
-			if ($arg->getValue()) {
+        foreach ($this->args->get() as $arg) {
 
-				$value = $arg->getValue();
+            if ($arg->getValue()) {
 
-				if ($arg->hasMultipleKeys()) {
-					
-					foreach ($value as $k => $v) {
-						
-						if (is_string($k)) {
-							
-							$args[$k] = $v;
-						}
-					}
-				}
+                $value = $arg->getValue();
 
-				else {
+                if ($arg->hasMultipleKeys()) {
+                    
+                    foreach ($value as $k => $v) {
+                        
+                        if (is_string($k)) {
+                            
+                            $args[$k] = $v;
+                        }
+                    }
+                }
 
-					$args[$arg->getKey()] = $value;
-				}
-			}
-		}
+                else {
 
-		return $args;
-	}
+                    $args[$arg->getKey()] = $value;
+                }
+            }
+        }
 
-	/**
-	 * Returns posts by ID
-	 * 
-	 * @param  mixed   $ids        Single ID or array of IDs
-	 * @param  bool    $keep_order True if posts order should match the order of $ids, false otherwise
-	 * @return mixed               Single WP_Post object or array of WP_Post objects
-	 */
-	public function find($ids, $keep_order = true)
-	{	
-		if (is_numeric($ids)) {
+        return $args;
+    }
+
+    /**
+     * Returns posts by ID
+     * 
+     * @param  mixed   $ids        Single ID or array of IDs
+     * @param  bool    $keep_order True if posts order should match the order of $ids, false otherwise
+     * @return mixed               Single WP_Post object or array of WP_Post objects
+     */
+    public function find($ids, $keep_order = true)
+    {   
+        // Add placeholder for data to return
+        $data = null;
+
+        if (is_numeric($ids)) {
                     
             $posts = $this->post(array($ids))->ppp(1)->findAll();
-
-            return $posts && $posts[0] instanceof \WP_Post ? $posts[0] : null;
+            $data  = $posts && $posts[0] instanceof \WP_Post ? $posts[0] : null;
         }
 
         elseif (is_array($ids)) {
 
             // Get posts
-            $posts = $this->post($ids)->ppp(count($ids))->findAll();
+            $data = $this->post($ids)->ppp(count($ids))->findAll();
 
             // Make sure posts order match IDs order
-            if ($posts && $keep_order) {
+            if ($data && $keep_order) {
                 
                 $ordered_posts = array();
 
                 foreach ($ids as $key => $id) {
                     
-                    foreach ($posts as $post) {
+                    foreach ($data as $post) {
                         
                         if ($post instanceof \WP_Post && $post->ID == $id) {
                             
@@ -204,77 +213,91 @@ class Query {
                     }
                 }
 
-                $posts = $ordered_posts;
+                $data = $ordered_posts;
             }
-            
-            return $posts;
         }
 
-		return null;
-	}
+        // Mark query as executed
+        $this->was_executed = true;
 
-	/**
-	 * Finds posts with the current query
-	 * 
-	 * @param  mixed $args Optional arguments. Could be array of query args to be merged or post ID
-	 */
-	public function findAll(array $args = array())
-	{
-		$query_args = $this->getArgs();
+        return $data;
+    }
 
-		// Merge user input args with 
-		if (is_array($args))
-			$query_args = array_merge($query_args, $args);
+    /**
+     * Finds posts with the current query
+     * 
+     * @param  mixed $args Optional arguments. Could be array of query args to be merged or post ID
+     */
+    public function findAll(array $args = array())
+    {
+        $query_args = $this->getArgs();
 
-		// Execute query
-		$data = Db::queryPosts($query_args, array('with_meta' => true));
+        // Merge user input args with 
+        if (is_array($args))
+            $query_args = array_merge($query_args, $args);
 
-		// Save query items
-		if (isset($data['items']))
-			$this->query_results = $data['items'];
-		
-		// Save query meta
-		if (isset($data['meta']))
-			$this->query_meta = (object) $data['meta'];
+        // Execute query
+        $data = Db::queryPosts($query_args, array('with_meta' => true));
 
-		return $this->query_results;
-	}
+        // Save query items
+        if (isset($data['items']))
+            $this->query_results = $data['items'];
+        
+        // Save query meta
+        if (isset($data['meta']))
+            $this->query_meta = (object) $data['meta'];
 
-	/**
-	 * Collects and nullifies the current argument
-	 *  
-	 * @return void
-	 */
-	private function __collectCurrentArg()
-	{
-		if (!is_null($this->current_arg)) {
+        // Mark query as executed
+        $this->was_executed = true;
 
-			// Store unique arg with a key
-			if ($this->current_arg->isParent()) {
-				
-				$this->args->set(ArgFactory::getInstanceId($this->current_arg), $this->current_arg);
-			}
+        return $this->query_results;
+    }
 
-			// Push non-unique arg to args collection
-			else {
+    /**
+     * Checks if this query instance was already used to return results
+     * 
+     * @return bool True is already executed, false otherwise
+     */
+    public function wasExecuted()
+    {
+        return $this->was_executed;
+    }
 
-				$this->args->push($this->current_arg);
-			}
+    /**
+     * Collects and nullifies the current argument
+     *  
+     * @return void
+     */
+    private function __collectCurrentArg()
+    {
+        if (!is_null($this->current_arg)) {
 
-			// Making sure this arg is not collected again by mistake
-			$this->current_arg = null;
-		}
-	}
+            // Store unique arg with a key
+            if ($this->current_arg->isParent()) {
+                
+                $this->args->set(ArgFactory::getInstanceId($this->current_arg), $this->current_arg);
+            }
 
-	/**
-	 * Adds child to target argument instance
-	 * 
-	 * @param  Arg    $arg  Parent argument instance
-	 * @param  array  $args Arguments for new argument child item
-	 * @return void
-	 */
-	private function __addArgChild(Arg $arg, array $args = array())
-	{
-		call_user_method_array('addChild', $arg, $args);
-	}
+            // Push non-unique arg to args collection
+            else {
+
+                $this->args->push($this->current_arg);
+            }
+
+            // Making sure this arg is not collected again by mistake
+            $this->current_arg = null;
+        }
+    }
+
+    /**
+     * Adds child to target argument instance
+     * 
+     * @param  Arg    $arg  Parent argument instance
+     * @param  array  $args Arguments for new argument child item
+     * @return void
+     */
+    private function __addArgChild(Arg $arg, array $args = array())
+    {
+        call_user_method_array('addChild', $arg, $args);
+    }
 }

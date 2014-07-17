@@ -8,6 +8,11 @@ use Ponticlaro\Bebop\Db\Query;
 
 abstract class Model {
 
+    /**
+     * Instance of the currently called class
+     * 
+     * @var \Ponticlaro\Bebop\Mvc\Model
+     */
     protected static $instance;
 
     /**
@@ -53,16 +58,9 @@ abstract class Model {
     protected static $query_meta;
 
     /**
-     * States that there is a query instance available or not
-     * 
-     * @var boolean
-     */
-    protected static $query_mode = false;
-
-    /**
      * Instantiates new model by inheriting all the $post properties
      * 
-     * @param \WP_Post $post
+     * @param WP_Post $post
      */
     final public function __construct($post = null)
     {
@@ -71,6 +69,18 @@ abstract class Model {
                 $this->{$key} = $value;
             }
         }
+    }
+
+    /**
+     * Creates an instance of the currently called class
+     * 
+     * @return Ponticlaro\Bebop\Mvc\Model
+     */
+    public static function create(\WP_Post $post = null)
+    {
+        $class = get_called_class();
+        
+        return new $class($post);    
     }
 
     /**
@@ -229,8 +239,13 @@ abstract class Model {
      */
     public static function find($ids = null, $keep_order = true)
     {
+        // Make sure we have a clean query object to be used
         static::__resetQuery();
 
+        // Setting placeholder for data to return
+        $data = null;
+
+        // Get current context global $post
         if (is_null($ids)) {
             
             if (Bebop::Context()->is('single')) {
@@ -243,7 +258,7 @@ abstract class Model {
 
         else {
 
-            // Add post type as final argument
+            // Get results
             $data = static::$query->postType(static::$type)->find($ids, $keep_order);
 
             if ($data) {
@@ -251,7 +266,7 @@ abstract class Model {
                 if (is_object($data)) {
                 
                     $data = static::__applyModelMods($data);
-                } 
+                }
 
                 elseif (is_array($data)) {
                     
@@ -260,16 +275,10 @@ abstract class Model {
                         $data[$key] = static::__applyModelMods($post);
                     }
                 }
-
-                static::__disableQueryMode();
-
-                return $data;
             }
         }
 
-        static::__disableQueryMode();
-
-        return null;
+        return $data;
     }
 
     /**
@@ -279,7 +288,8 @@ abstract class Model {
      */
     public function findAll(array $args = array())
     {   
-        static::__enabledQueryMode();
+        // Make sure we have a query object to be used
+        static::__enableQueryMode();
 
         // Add post type as final argument
         static::$query->postType(static::$type);
@@ -298,55 +308,45 @@ abstract class Model {
             }
         }
 
-        static::__disableQueryMode();
-
         return $items;
     }
 
     /**
-     * Returns last query meta data
+     * Returns current query object
      * 
-     * @return object
+     * @return Ponticlaro\Bebop\Db\Query
      */
-    public function getQueryMeta()
+    public static function query()
     {
-        return static::$instance ? static::$instance->query_meta : null;
-    }
+        // Make sure we have a query object to be used
+        if(is_null(static::$query))
+            static::__enableQueryMode();
+
+        return static::$query;
+    } 
 
     /**
      * Returns called class instance
      * 
      * @return object Called class instance
      */
-    public static function getInstance()
+    private static function __getInstance()
     {
-        if (is_null(static::$instance)) self::__resetInstance();
+        if (is_null(static::$instance)) 
+            static::$instance = static::create();
 
         return static::$instance;
     } 
-
-    /**
-     * Resets called class instance
-     * 
-     * @return object Called class instance
-     */
-    private static function __resetInstance()
-    {
-        $class            = get_called_class();
-        static::$instance = new $class;
-    }
 
     /**
      * Enables query mode and creates a new query
      * 
      * @return void
      */
-    private static function __enabledQueryMode()
+    private static function __enableQueryMode()
     {
-        if (is_null(static::$query)) {
-
-            static::$query      = new Query;
-            static::$query_mode = true;
+        if (is_null(static::$query) || static::$query->wasExecuted()) {
+            static::$query = new Query;
         }
     }
 
@@ -357,19 +357,7 @@ abstract class Model {
      */
     private static function __resetQuery()
     {
-        static::$query      = new Query;
-        static::$query_mode = true;
-    }
-
-    /**
-     * Disables query mode and destroys current query
-     * 
-     * @return void
-     */
-    private static function __disableQueryMode()
-    {
-        static::$query      = null;
-        static::$query_mode = false;
+        static::$query = new Query;
     }
 
     /**
@@ -381,11 +369,11 @@ abstract class Model {
      */
     public static function __callStatic($name, $args)
     {
-        static::__enabledQueryMode();
+        static::__enableQueryMode();
 
         call_user_method_array($name, static::$query, $args);
 
-        return static::getInstance();
+        return static::__getInstance();
     }
 
     /**
@@ -397,31 +385,9 @@ abstract class Model {
      */
     public function __call($name, $args)
     {
-        if (static::$query_mode)
+        if (!is_null(static::$query))
             call_user_method_array($name, static::$query, $args);
 
-        return static::getInstance();
-    }
-
-    /**
-     * Checks if a WP_Post have the correct post type
-     * 
-     * @param  \WP_Post $post Post to be checked
-     * @return boolean        True if it has the correct post type, false otherwise
-     */
-    private static function __isValidType(\WP_Post $post)
-    {
-        return $post->post_type == static::$type ? true : false;
-    } 
-
-    /**
-     * Merges user args with unmodifiable post type
-     * 
-     * @param  array $args Query args
-     * @return array
-     */
-    private static function __mergeQueryArgs(array $args = array())
-    {
-        return array_merge($args, array('post_type' => static::$type));
+        return static::__getInstance();
     }
 }

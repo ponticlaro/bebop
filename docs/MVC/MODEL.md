@@ -94,3 +94,12 @@ $products = Product::findAll([
     'order'          => 'ASC'
 ]);
 ```
+
+#### Getting query meta data after getting results
+**Notes:** 
+- You must get meta data before starting a new query, otherwise the meta data for the previous query will be lost.  
+- The `getMeta` method will return `null` if the query was not executed with `findAll`.  
+
+```php
+$meta = Product::query()->getMeta();
+```
