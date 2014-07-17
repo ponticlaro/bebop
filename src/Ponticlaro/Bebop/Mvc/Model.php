@@ -20,7 +20,7 @@ abstract class Model {
      * 
      * @var string
      */
-    public static $type = 'post';
+    protected static $type = 'post';
 
     /**
      * Function to execute for each model item
