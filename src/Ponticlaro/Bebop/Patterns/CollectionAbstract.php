@@ -195,7 +195,8 @@ abstract class CollectionAbstract implements CollectionInterface {
 
 			$value_key = array_search($value, $this->data);
 
-	        if($value_key) unset($this->data[$value_key]);
+	        if($value_key !== false) 
+	        	unset($this->data[$value_key]);
 
 		} else {
 
