@@ -24,9 +24,10 @@ class CssScript extends \Ponticlaro\Bebop\Patterns\Script {
             'id'           => $id,
             'path'         => ltrim($path, '/'),
             'media'        => $media,
-            'dependencies' => $dependencies,
             'base_url'     => null
         ));
+
+        $this->dependencies->push($dependencies);
     }
 
     /**

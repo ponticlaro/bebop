@@ -24,9 +24,10 @@ class JsScript extends \Ponticlaro\Bebop\Patterns\Script {
             'id'           => $id,
             'path'         => ltrim($path, '/'),
             'in_footer'    => $in_footer,
-            'dependencies' => $dependencies,
             'base_url'     => null
         ));
+
+        $this->dependencies->push($dependencies);
     }
 
     /**

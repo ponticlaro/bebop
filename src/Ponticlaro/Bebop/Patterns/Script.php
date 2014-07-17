@@ -7,11 +7,18 @@ use Ponticlaro\Bebop;
 abstract class Script implements ScriptInterface {
 
     /**
-     * Holds configuration parameters
+     * Holds configuration parameters, except dependencies
      * 
      * @var \Ponticlaro\Bebop\Common\Collection
      */
     protected $config;
+
+    /**
+     * Holds dependencies
+     * 
+     * @var \Ponticlaro\Bebop\Common\Collection
+     */
+    protected $dependencies;
 
     /**
      * Holds environment specific configuration modifications
@@ -33,6 +40,9 @@ abstract class Script implements ScriptInterface {
      */
     public function __construct()
     {
+        // Create dependencies collection
+        $this->dependencies = Bebop::Collection();
+
         // Create environment configuration collection
         $this->env_configs = Bebop::Collection();
     }
@@ -158,7 +168,75 @@ abstract class Script implements ScriptInterface {
      */
     public function setDependencies(array $dependencies = array())
     {
-        $this->config->set('dependencies', $dependencies);
+        $this->dependencies->push($dependencies);
+
+        return $this;
+    }
+
+    /**
+     * Adds dependencies to existing set
+     * 
+     * @param array $dependencies
+     */
+    public function addDependencies(array $dependencies = array())
+    {
+        foreach ($dependencies as $dependency) {
+            
+            $this->dependencies->push($dependency);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Replaces all dependencies
+     * 
+     * @param array $dependencies
+     */
+    public function replaceDependencies(array $dependencies = array())
+    {
+        $this->dependencies->clear()->push($dependencies);
+
+        return $this;
+    }
+
+    /**
+     * Removes dependencies
+     * 
+     * @param array $dependencies
+     */
+    public function removeDependencies(array $dependencies = array())
+    {
+        foreach ($dependencies as $dependency) {
+            
+            $this->dependencies->pop($dependency);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets a single dependency
+     * 
+     * @param array $handle THe script handle
+     */
+    public function addDependency($handle)
+    {
+        if (is_string($handle))
+            $this->dependencies->push($handle);
+
+        return $this;
+    }
+
+    /**
+     * Sets dependencies
+     * 
+     * @param array $dependencies
+     */
+    public function removeDependency($handle)
+    {
+        if (is_string($handle))
+            $this->dependencies->pop($handle);
 
         return $this;
     }
@@ -170,7 +248,7 @@ abstract class Script implements ScriptInterface {
      */
     public function getDependencies()
     {
-        return $this->config->get('dependencies');
+        return $this->dependencies->getAll();
     }
 
     /**
