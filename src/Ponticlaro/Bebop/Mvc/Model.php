@@ -72,6 +72,18 @@ abstract class Model {
     }
 
     /**
+     * Returns post meta
+     * 
+     * @param  string  $key    Meta key
+     * @param  boolean $single True if meta value is single, false otherwise
+     * @return mixed           
+     */
+    public function getMeta($key, $single = false)
+    {
+        return get_post_meta($this->ID, $key, $single);
+    }
+
+    /**
      * Creates an instance of the currently called class
      * 
      * @return Ponticlaro\Bebop\Mvc\Model
