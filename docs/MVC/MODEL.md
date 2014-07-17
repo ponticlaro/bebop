@@ -95,6 +95,13 @@ $products = Product::findAll([
 ]);
 ```
 
+#### Getting query arguments before executing query
+**Notes:** The returning value will be compatible with the arguments you can use with **WP_Query**.  
+
+```php
+$args = Product::query()->getArgs();
+```
+
 #### Getting query meta data after getting results
 **Notes:** 
 - You must get meta data before starting a new query, otherwise the meta data for the previous query will be lost.  
