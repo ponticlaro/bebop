@@ -7,7 +7,7 @@ use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
 class Taxonomy extends TrackableObjectAbstract
 {
-	protected $__type = 'taxonomy';
+	protected $__trackable_type = 'taxonomy';
 
 	protected $__config;
 
@@ -68,8 +68,8 @@ class Taxonomy extends TrackableObjectAbstract
 		} 
 
 		// Set post_type id
-		$this->__id = Bebop::util('slugify', $this->__config->get('singular_name') );
-		$this->__config->set('key', $this->__id);
+		$this->__trackable_id = Bebop::util('slugify', $this->__config->get('singular_name') );
+		$this->__config->set('key', $this->__trackable_id);
 
 		// Post types to be associated with
 		if( isset($post_types) ) {	

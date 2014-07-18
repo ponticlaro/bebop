@@ -7,7 +7,7 @@ use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
 class PostType extends TrackableObjectAbstract
 {
-	protected $__type = 'post_type';
+	protected $__trackable_type = 'post_type';
 
 	private $__config;
 
@@ -83,8 +83,8 @@ class PostType extends TrackableObjectAbstract
 		} 
 
 		// Set post_type id
-		$this->__id = Bebop::util('slugify', $this->__config->get('singular_name'));
-		$this->__config->set('key', $this->__id);
+		$this->__trackable_id = Bebop::util('slugify', $this->__config->get('singular_name'));
+		$this->__config->set('key', $this->__trackable_id);
 
 		// Handle configuration arguments
 		if ($config) {	

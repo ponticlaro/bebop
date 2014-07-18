@@ -9,14 +9,14 @@ class TrackableObjectAbstract implements TrackableObjectInterface {
 	 * 
 	 * @var string
 	 */
-	protected $__id;
+	protected $__trackable_id;
 
 	/**
 	 * Object type
 	 * 
 	 * @var string
 	 */
-	protected $__type;
+	protected $__trackable_type;
 
 	/**
 	 * Returns object ID
@@ -25,7 +25,7 @@ class TrackableObjectAbstract implements TrackableObjectInterface {
 	 */
 	public function getObjectID()
 	{
-		return $this->__id;
+		return $this->__trackable_id;
 	}
 
 	/**
@@ -35,6 +35,6 @@ class TrackableObjectAbstract implements TrackableObjectInterface {
 	 */
 	public function getObjectType()
 	{
-		return $this->__type;
+		return $this->__trackable_type;
 	}
 }

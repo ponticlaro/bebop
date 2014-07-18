@@ -8,368 +8,428 @@ use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
 class Metabox extends TrackableObjectAbstract
 {
-	protected $__type = 'metabox';
-
-	protected $__config;
-
-	protected $__post_types;
-
-	protected $__meta_fields;
-
-	protected $__fields;
-
-	protected $__data;
-
-	public function __construct($title, $post_types, array $meta_fields = array(), $fn = null, array $config = array())
-	{
-		// Take any necessary actions to make this object usable
-		$this->__preInit();
-
-		// Initialize class
-		call_user_func_array(array($this, '__init'), func_get_args());
-	}
-
-	private function __preInit()
-	{
-		$default_config = array(
-			'id'            => '',
-			'title'         => '',
-			'callback'      => '',
-			'post_type'     => '',
-			'context'       => 'normal',
-			'priority'      => 'default',
-			'callback_args' => null
- 		);
-
-		$this->__config      = Bebop::Collection($default_config);
-		$this->__post_types  = Bebop::Collection();
-		$this->__meta_fields = Bebop::Collection();
-		$this->__fields      = Bebop::Collection();
-		$this->__data        = new MetaboxData;
-	}
-
-	private function __init()
-	{
-		call_user_func_array(array($this, '__handleInit'), func_get_args());
-
-		add_action("add_meta_boxes", array($this, 'register'));
-
-		add_action('save_post', array($this, 'saveMeta'));
-
-		return $this;
-	}
-
-	private function __handleInit($title, $post_types, array $meta_fields = array(), $fn = null,  array $config = array())
-	{
-		if (!isset($title) || !is_string($title)) 
-			throw new ErrorException("You must set a title for the metabox and it must be a string");
-
-		$this->__config->set('title', $title);
-
-		// Set post_type id
-		$this->__id = Bebop::util('slugify', $title);
-		$this->__config->set('key', $this->__id);
-
-		if (!isset($post_types)) 
-			throw new ErrorException("You must define post types for this metabox");
-
-		if (is_string($post_types)) {
-
-			$this->__post_types->push($post_types);
-
-		} elseif(is_object($post_types) && is_a($post_types, 'Ponticlaro\Bebop\PostType')) {
-
-			$key = $post_types->getConfig('key');
-			$this->__post_types->push($key);
-
-		} elseif(is_array($post_types) && !empty($post_types)) {
-
-			foreach ($post_types as $post_type) {
-				
-				if (is_string($post_type)) {
-
-					$this->__post_types->push($post_type);
-
-				} elseif(is_object($post_type) && is_a($post_type, 'Ponticlaro\Bebop\PostType')) {
-
-					$key = $post_type->getConfig('key');
-					$this->__post_types->push($key);
-				}
-			}
-		}	
-
-		if (isset($meta_fields) && is_array($meta_fields)) {
-
-			$this->__meta_fields->set($meta_fields);
-		}
-
-		if ($fn) {
-
-			if (is_callable($fn)) {
-
-				$this->__config->set('callback', $fn);
-
-			} elseif(is_array($fn)) {
-
-				if (isset($fn[0]) && is_callable($fn)) {
-
-					$this->__config->set('callback', $fn[0]);
-				}
-
-				if (isset($fn[1]) && is_array($fn[1])) {
-
-					$this->__config->set('callback_args', $fn[1]);
-				}
-			}	
-
-		} elseif (is_array($fn) && !$config) {
-			
-			$config = $fn;
-		}
-
-		if ($config) { 
-
-			foreach ($config as $key => $value) {
-
-				$this->__config->set($key, $value);
-			}
-		}
-
-		$this->__validateConfig();
-	}
-
-	private function __validateConfig()
-	{
-		if (!$this->__config->get('id')) {
-
-			$key = $this->__config->get('key');
-			$this->__config->set('id', $key);
-		}
-	}
-
-	public function __callbackWrapper($entry, $metabox)
-	{	
-		$id           = $this->__config->get('id');
-		$callback     = $this->__config->get('callback');
-		$meta_fields  = $this->__meta_fields->get();
-		$fields       = $this->__fields->get();
-		
-		//wp_nonce_field( basename( __FILE__ ), $id);
-
-		if($callback){
-
-			if($meta_fields) {
-
-				$meta = Bebop::PostMeta($entry->ID);
-
-				foreach ($meta_fields as $meta_field) {
-
-					$this->__data->set($meta_field, $meta->getAll($meta_field));
-				}
-			}
-
-			$callback($this->__data, $entry, $metabox);
-
-		} else {
-
-			if($fields) {
-
-				foreach ($fields as $field) {
-					
-					$field->render();
-				}
-			}
-		}
-	}
-
-	public function register()
-	{
-		$post_types = $this->__post_types->get();
-
-		foreach ($post_types as $post_type) {
-
-			add_meta_box( 
-
-				$this->__config->get('id'), 
-				$this->__config->get('title'), 
-				array($this, '__callbackWrapper'),
-				$post_type, 
-				$this->__config->get('context'),  
-			    $this->__config->get('priority'), 
-			    $this->__config->get('callback_args') 
-			);
-		}
-	}
-
-	public function metaValue($key) 
-	{
-		echo $this->__data->get($key);
-	}
-
-	public function saveMeta($post_id) 
-	{
-		global $wpdb;
-
-		$post        = get_post($post_id);
-		$post_type   = $post->post_type;
-		$meta_fields = $this->__meta_fields->get();
-
-		if( isset($_POST['post_type']) && $_POST['post_type'] == $post_type ) {
-
-			if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
-
-			if (!current_user_can('edit_post', $post->ID)) return $post_id;
-
-			// if our nonce isn't there, or we can't verify it, bail 
-   			//if( !isset( $_POST['meta_box_nonce'] ) || !wp_verify_nonce( $_POST['meta_box_nonce'], 'my_meta_box_nonce' ) ) return; 
-
-			foreach($meta_fields as $field) {
-
-				$value = isset($_POST[$field]) ? $_POST[$field] : '';
-
-				// Empty values
-				if (!$value) {
-					
-					delete_post_meta($post_id, $field);
-				}
-
-				// Arrays
-				elseif (is_array($value)) {
-					
-					// Delete all entries
-					delete_post_meta($post_id, $field);
-
-					foreach ($value as $v) {
-
-						// Add single entry with same meta_key
-						add_post_meta($post_id, $field, $v);
-					}
-				}
-
-				// Strings, booleans, etc
-				else {
-
-					update_post_meta($post_id, $field, $value);
-				}
-			}
-		}
-	}
-
-	private function __addField($field_type, $label, $config)
-	{
-		//$field = Field::factory($field_type, $label, $config);
-
-		//$key = $field->getKey();
-
-		//$this->__fields->set($key, $field);
-		//$this->__meta_fields->set($key, $field);
-	}
-
-	public function __call($name, $args)
+    /**
+     * Required trackable object type
+     * 
+     * @var string
+     */
+    protected $__trackable_type = 'metabox';
+
+    /**
+     * Required trackable object ID
+     * 
+     * @var string
+     */
+    protected $__trackable_id;
+
+    /**
+     * Configuration for this metabox 
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $config;
+
+    /**
+     * List of post types that should have this metabox
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $post_types;
+
+    /**
+     * List of form field names contained in the output of callback function
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $meta_fields;
+
+    /**
+     * List of data for each meta fields
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $data;
+
+    /**
+     * Instantiates new metabox
+     * 
+     * @param string $title      Metabox title
+     * @param mixed  $post_types Post types this metabox should be assigned to
+     * @param mixed  $callback   Function to display this metabox
+     */
+    public function __construct($title, $post_types = null, $callback = null)
     {
-	    //////////////////////////////
-    	// Check for correct action //
-	    //////////////////////////////
-    	$is_add    = substr($name, 0, 3) == 'add' ? true : false;
-		$is_get    = substr($name, 0, 3) == 'get' ? true : false;
-		$is_set    = substr($name, 0, 3) == 'set' ? true : false;
-		$is_remove = substr($name, 0, 6) == 'remove' ? true : false;
-		//$is_add_field = in_array(strtolower($name), Bebop::getAvailableFields());
+        // Default configuration
+        $default_config = array(
+            'context'  => 'normal',
+            'priority' => 'default'
+        );
 
-		/////////////////////
-		// Add Form Fields //
-		/////////////////////
-   		// if($is_add_field){
+        // Set basic structures
+        $this->config      = Bebop::Collection($default_config);
+        $this->post_types  = Bebop::Collection();
+        $this->meta_fields = Bebop::Collection();
+        $this->data        = new MetaboxData;
 
-			// if(!isset($args[0])) throw new ErrorException("You must set the label for this field");
+        // Set Title
+        $this->setTitle($title);
 
-			// $field_type = $name;
-			// $label      = $args[0];
-			// $config     = isset($post_types) ? $post_types : array();
+        // Set Post types
+        if (!is_null($post_types)) {
+            
+            if (is_string($post_types) || 
+                is_object($post_types) && $post_types instanceof \Ponticlaro\Bebop\PostType) {
+                
+                $this->addPostType($post_types);
+            }
 
-			// $this->__addField($field_type, $label, $config);
+            elseif (is_array($post_types)) {
+                
+                $this->setPostTypes($post_types);
+            }
 
-  		 // }
+            else {
 
-		/////////
-		// Add //
-		/////////
-		if ($is_add) {
+                throw new \Exception('Metabox $post_types argument must be either a string, array or a \Ponticlaro\Bebop\PostType instance.');
+            }
+        }
 
-			$is_addMetaField = substr($name, 3, strlen($name)) == 'MetaField' ? true : false;
+        // Set callback
+        if (!is_null($callback))
+            $this->setCallback($callback);
 
-			if ($is_addMetaField) {
+        // Function to save metabox data
+        add_action('save_post', array($this, '__saveMeta'));
 
-				if (isset($args[0])) $this->__meta_fields->push($args[0]);
-			}
-		}
+        // Register a metabox for each post type
+        add_action("add_meta_boxes", array($this, '__register'));
+    }
 
-	    /////////
-    	// Set //
-	    /////////
-    	if ($is_set) {
+    /**
+     * Sets metabox ID
+     * 
+     * @param string $id
+     */
+    public function setId($id)
+    {
+        if (is_string($id))
+            $this->__trackable_id = $id;
 
-			$is_setConfig   = substr($name, 3, 6) == 'Config' ? true : false;
-			$is_setPostType = substr($name, 3, 8) == 'PostType' ? true : false;
+        return $this;
+    }
 
-			if ($args[0]) {
+    /**
+     * Returns metabox ID
+     * 
+     * @return string $id
+     */
+    public function getId()
+    {
+        return $this->__trackable_id;
+    }
 
-				if (is_string($args[0])) {
+    /**
+     * Sets metabox title
+     * 
+     * @param string $title
+     */
+    public function setTitle($title)
+    {
+        if (!is_string($title))
+            throw new \Exception('Metabox $title argument must be a string.');
 
-					$key   = $args[0];
-					$value = isset($post_types) ? $post_types : null;
+        $this->config->set('title', $title);
+        $this->setId(Bebop::util('slugify', $title));
 
-					if($is_setConfig) $this->__config->set($key, $value);
-					if($is_setPostType) $this->__post_types->set($key, $value);
+        return $this;
+    }
 
-				} elseif(is_array($args[0])) {
+    /**
+     * Returns metabox title
+     * 
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->config->get('title');
+    }
 
-					if($is_setConfig) $this->__config->set($args[0]);
-					if($is_setPostType) $this->__post_types->set($args[0]);
-				}
-			}
-    	}
+    /**
+     * Sets metabox callback
+     * 
+     * @param callable
+     */
+    public function setCallback($callback)
+    {
+        if (!is_callable($callback))
+            throw new \Exception('Metabox $callback argument must be callable.');
 
-	    ///////////
-    	// Unset //
-	    ///////////
-    	if ($is_remove) {
+        $this->config->set('callback', $callback);
+        $this->__getFieldNamesFromCallback();
 
-			$is_removeConfig   = substr($name, 6, 6) == 'Config' ? true : false;
-			$is_removePostType = substr($name, 6, 8) == 'PostType' ? true : false;
+        return $this;
+    }
 
-			if ($args[0]) {
+    /**
+     * Returns metabox callback
+     * 
+     * @return callable
+     */
+    public function getCallback()
+    {
+        return $this->config->get('callback');
+    }
 
-				if (is_string($args[0])) {
+    /**
+     * Sets posts types that should have this metabox
+     * 
+     * @param array $post_types List containing strings and/or \Ponticlaro\Bebop\PostType instances
+     */
+    public function setPostTypes(array $post_types = array())
+    {
+        foreach ($post_types as $post_type) {
+            
+            $this->addPostType($post_type);
+        }
 
-					$key   = $args[0];
-					$value = isset($post_types) ? $post_types : null;
+        return $this;
+    }
 
-					if($is_removeConfig) $this->__config->remove($key, $value);
-					if($is_removePostType) $this->__post_types->remove($key, $value);
+    /**
+     * Adds a single 
+     * @param [type] $post_type Post type name or \Ponticlaro\Bebop\PostType instances
+     */
+    public function addPostType($post_type)
+    {
+        if (is_string($post_type)) {
 
-				} elseif( is_array($args[0]) ){
+            $this->post_types->push($post_type);
 
-					if($is_removeConfig) $this->__config->remove($args[0]);
-					if($is_removePostType) $this->__post_types->remove($args[0]);
-				}
-			}
-    	}
+        } elseif(is_object($post_type) && is_a($post_type, 'Ponticlaro\Bebop\PostType')) {
 
-	    /////////
-    	// Get //
-	    /////////
-    	if ($is_get) {
+            $this->post_types->push($post_type->getConfig('key'));
+        }
 
-			$is_getConfig   = substr($name, 3, 6) == 'Config' ? true : false;
-			$is_getPostType = substr($name, 3, 8) == 'PostType' ? true : false;
+        return $this;
+    }
 
-			$keys = isset($args[0]) ? $args[0] : null;
+    public function removePostType($post_type)
+    {
+        $this->post_types->pop($post_type);
 
-			if($is_getConfig) $results = $this->__config->get($keys);
-			if($is_getPostType) $results = $this->__post_types->get($keys);
+        return $this;
+    }
 
-    		return $results ? $results : null;
-    	}
+    /**
+     * Removes all post types
+     * 
+     */
+    public function clearPostTypes()
+    {
+        $this->post_types->clear();
+
+        return $this;
+    }
+
+    /**
+     * Returns all post types
+     * 
+     * @return array List of post types will contain this metabox
+     */
+    public function getPostTypes()
+    {
+        return $this->post_types->get();
+    }
+
+    /**
+     * Sets context
+     * 
+     * @param string $context
+     */
+    public function setContext($context)
+    {
+        if (!is_string($context))
+            throw new \Exception('Metabox context must be a string.');
+
+        $this->config->set('context', $context);
+
+        return $this;
+    }
+
+    /**
+     * Returns context
+     * 
+     * @return string
+     */
+    public function getContext()
+    {
+        return $this->config->get('context');
+    }
+
+    /**
+     * Sets priority
+     * 
+     * @param string $priority
+     */
+    public function setPriority($priority)
+    {
+        if (!is_string($priority))
+            throw new \Exception('Metabox priority must be a string.');
+
+        $this->config->set('priority', $priority);
+
+        return $this;
+    }
+
+    /**
+     * Returns priority
+     * 
+     * @return string
+     */
+    public function getPriority()
+    {
+        return $this->config->get('priority');
+    }
+
+    /**
+     * Sets callback arguments
+     * 
+     * @param array $args
+     */
+    public function setCallbackArgs(array $args = array())
+    {
+        if ($args)
+            $this->config->set('callback_args', $args);
+
+        return $this;
+    }
+
+    /**
+     * Returns callback arguments
+     * 
+     * @return array
+     */
+    public function getCallbackArgs()
+    {
+        return $this->config->get('callback_args');
+    }
+
+    /**
+     * Gets field names from callback function
+     * 
+     */
+    private function __getFieldNamesFromCallback()
+    {
+
+    }
+
+    /**
+     * Wrapper that executes callback 
+     * 
+     * @param  \WP_Post                  $post    Post being edited
+     * @param  \Ponticlaro\Bebop\Metabox $metabox This metabox instance
+     * @return void
+     */
+    public function __callbackWrapper($post, $metabox)
+    {   
+        $id           = $this->getId();
+        $callback     = $this->getCallback();
+        $meta_fields  = $this->meta_fields->get();
+        
+        // Add nonce field for security
+        wp_nonce_field('metabox_'. $id .'_saving_meta', 'metabox_'. $id .'_nonce');
+
+        if ($callback){
+
+            if ($meta_fields) {
+
+                $meta = Bebop::PostMeta($post->ID);
+
+                foreach ($meta_fields as $meta_field) {
+
+                    $this->data->set($meta_field, $meta->getAll($meta_field));
+                }
+            }
+
+            // Execute callback
+            call_user_func_array($callback, array($this->data, $post, $metabox));
+        }
+    }
+
+    /**
+     * Registers this metabox for each post types it was assigned to
+     * 
+     * @return void
+     */
+    public function __register()
+    {
+        foreach ($this->getPostTypes() as $post_type) {
+
+            add_meta_box( 
+                $this->getId(),
+                $this->getTitle(),
+                array($this, '__callbackWrapper'),
+                $post_type, 
+                $this->getContext(),
+                $this->getPriority(), 
+                $this->getCallbackArgs()
+            );
+        }
+    }
+
+    /**
+     * Saves meta data
+     * 
+     * @param  int  $post_id ID of the post currently being edited
+     * @return void
+     */
+    public function __saveMeta($post_id) 
+    {
+        $id = $this->getId();
+
+        // Check if $_POST is not empty and nonce is there 
+        if (!empty($_POST) && check_admin_referer('metabox_'. $id .'_saving_meta', 'metabox_'. $id .'_nonce')) {
+
+            $post = get_post($post_id);
+
+            if (isset($_POST['post_type']) && $_POST['post_type'] == $post->post_type ) {
+
+                // Get out if current post is in the middle of an auto-save
+                if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return $post_id;
+
+                // Get out if current user cannot edit this post
+                if (!current_user_can('edit_post', $post_id)) return $post_id;
+
+                foreach($this->meta_fields->get() as $field) {
+
+                    $value = isset($_POST[$field]) ? $_POST[$field] : '';
+
+                    // Empty values
+                    if (!$value) {
+                        
+                        delete_post_meta($post_id, $field);
+                    }
+
+                    // Arrays
+                    elseif (is_array($value)) {
+                        
+                        // Delete all entries
+                        delete_post_meta($post_id, $field);
+
+                        foreach ($value as $v) {
+
+                            // Add single entry with same meta_key
+                            add_post_meta($post_id, $field, $v);
+                        }
+                    }
+
+                    // Strings, booleans, etc
+                    else {
+
+                        update_post_meta($post_id, $field, $value);
+                    }
+                }
+            }
+        }
     }
 }
