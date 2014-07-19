@@ -61,8 +61,9 @@ class Metabox extends TrackableObjectAbstract
     {
         // Default configuration
         $default_config = array(
-            'context'  => 'normal',
-            'priority' => 'default'
+            'context'       => 'normal',
+            'priority'      => 'default',
+            'callback_args' => array()
         );
 
         // Set basic structures
@@ -165,7 +166,6 @@ class Metabox extends TrackableObjectAbstract
             throw new \Exception('Metabox $callback argument must be callable.');
 
         $this->config->set('callback', $callback);
-        $this->__getFieldNamesFromCallback();
 
         return $this;
     }
@@ -315,12 +315,96 @@ class Metabox extends TrackableObjectAbstract
     }
 
     /**
+     * Sets metafields to be persisted
+     * 
+     * @param array $fields
+     */
+    public function setMetaFields(array $fields = array())
+    {
+        $this->meta_fields->push($fields);
+
+        return $this;
+    }
+
+    /**
+     * Sets a single metafield to be persisted
+     * 
+     * @param string $field
+     */
+    public function addMetaField($field)
+    {
+        if (!is_string($field))
+            throw new \Exception('Metabox meta field must be a string.');
+
+        $this->meta_fields->push($field);
+
+        return $this;
+    }
+
+    /**
+     * Removes a single metafield from being persisted
+     * 
+     * @param string $field
+     */
+    public function removeMetaField($field)
+    {
+        if (!is_string($field))
+            throw new \Exception('Metabox meta field must be a string.');
+
+        $this->meta_fields->pop($field);
+
+        return $this;
+    }
+
+    /**
      * Gets field names from callback function
      * 
      */
     private function __getFieldNamesFromCallback()
-    {
+    {   
+        // Only execute if there are no manually defined meta fields
+        if (empty($this->meta_fields->getAll())) {
 
+            ob_start();
+
+            echo call_user_func_array(
+                $this->getCallback(), 
+                array(
+                    $this->data,
+                    null,
+                    $this
+                )
+            );
+            
+            $html = ob_get_clean();
+
+            $doc = new \DOMDocument;
+            $doc->loadHTML($html);
+
+            foreach ($doc->getElementsByTagname('input') as $el) {
+
+                $name = $el->getAttribute('name');
+
+                if ($name)
+                    $this->meta_fields->push($name);
+            }
+
+            foreach ($doc->getElementsByTagname('select') as $el) {
+
+                $name = $el->getAttribute('name');
+
+                if ($name)
+                    $this->meta_fields->push($name);
+            }
+
+            foreach ($doc->getElementsByTagname('textarea') as $el) {
+
+                $name = $el->getAttribute('name');
+
+                if ($name)
+                    $this->meta_fields->push($name);
+            }
+        }
     }
 
     /**
@@ -332,14 +416,19 @@ class Metabox extends TrackableObjectAbstract
      */
     public function __callbackWrapper($post, $metabox)
     {   
-        $id           = $this->getId();
-        $callback     = $this->getCallback();
-        $meta_fields  = $this->meta_fields->get();
-        
-        // Add nonce field for security
-        wp_nonce_field('metabox_'. $id .'_saving_meta', 'metabox_'. $id .'_nonce');
+        $callback = $this->getCallback();
 
         if ($callback){
+
+            $id = $this->getId();
+
+            // Add nonce field for security
+            wp_nonce_field('metabox_'. $id .'_saving_meta', 'metabox_'. $id .'_nonce');
+
+            // Get fields from callback function
+            $this->__getFieldNamesFromCallback();
+
+            $meta_fields = $this->meta_fields->get();
 
             if ($meta_fields) {
 
@@ -399,6 +488,9 @@ class Metabox extends TrackableObjectAbstract
 
                 // Get out if current user cannot edit this post
                 if (!current_user_can('edit_post', $post_id)) return $post_id;
+
+                // Get fields from callback function
+                $this->__getFieldNamesFromCallback();
 
                 foreach($this->meta_fields->get() as $field) {
 
