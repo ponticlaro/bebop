@@ -377,12 +377,14 @@ class Metabox extends TrackableObjectAbstract
                 $this->getCallback(), 
                 array(
                     $this->data,
-                    null,
+                    new \WP_Post(new \stdClass),
                     $this
                 )
             );
             
-            $html = ob_get_clean();
+            $html = ob_get_contents();
+
+            ob_end_clean();
 
             $doc = new \DOMDocument;
             $doc->loadHTML($html);
@@ -392,7 +394,7 @@ class Metabox extends TrackableObjectAbstract
                 $name = $el->getAttribute('name');
 
                 if ($name)
-                    $this->meta_fields->push($name);
+                    $this->meta_fields->push(str_replace('[]', '', $name));
             }
 
             foreach ($doc->getElementsByTagname('select') as $el) {
@@ -400,7 +402,7 @@ class Metabox extends TrackableObjectAbstract
                 $name = $el->getAttribute('name');
 
                 if ($name)
-                    $this->meta_fields->push($name);
+                    $this->meta_fields->push(str_replace('[]', '', $name));
             }
 
             foreach ($doc->getElementsByTagname('textarea') as $el) {
@@ -408,7 +410,7 @@ class Metabox extends TrackableObjectAbstract
                 $name = $el->getAttribute('name');
 
                 if ($name)
-                    $this->meta_fields->push($name);
+                    $this->meta_fields->push(str_replace('[]', '', $name));
             }
         }
     }
