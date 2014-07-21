@@ -196,8 +196,9 @@ class Metabox extends TrackableObjectAbstract
     }
 
     /**
-     * Adds a single 
-     * @param [type] $post_type Post type name or \Ponticlaro\Bebop\PostType instances
+     * Adds a single post type
+     * 
+     * @param mixed $post_type Post type name or \Ponticlaro\Bebop\PostType instances
      */
     public function addPostType($post_type)
     {
@@ -213,6 +214,11 @@ class Metabox extends TrackableObjectAbstract
         return $this;
     }
 
+    /**
+     * Removes a single post type
+     * 
+     * @param mixed $post_type Post type name or \Ponticlaro\Bebop\PostType instances
+     */
     public function removePostType($post_type)
     {
         $this->post_types->pop($post_type);
@@ -367,7 +373,7 @@ class Metabox extends TrackableObjectAbstract
 
             ob_start();
 
-            echo call_user_func_array(
+            call_user_func_array(
                 $this->getCallback(), 
                 array(
                     $this->data,
