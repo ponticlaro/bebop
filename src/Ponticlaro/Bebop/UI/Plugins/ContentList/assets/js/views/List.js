@@ -14,6 +14,12 @@
 			var self = this,	
 				data;
 
+			// set data inputs property
+			this.$dataInputs;
+
+			// Collect container DOM element
+			this.$el = $(options.el);
+
 			// Get parent list & model
 			this.parentList  = options.parentList;
 			this.parentModel = options.parentModel;
@@ -22,6 +28,9 @@
 			// Handle configuration //
 			//////////////////////////
 			var config = this.$el.attr('bebop-list--config');
+
+			// Remove config attribute
+			this.$el.attr('bebop-list--config', null);
 
 			// This is a child list
 			if (config == 'inherit') {
@@ -35,7 +44,11 @@
 				this.config = new Backbone.Model(config ? JSON.parse(config) : {});
 			}
 
+			// Remove config attribute from DOM
 			this.$el.attr('bebop-media--config', null);
+
+			// Add mode to container as attribute
+			this.$el.attr('bebop-list--mode', this.config.get('mode'));
 
 			// Build status object
 			this.status = new Backbone.Model({
@@ -75,15 +88,16 @@
 			// This is a parent list
 			else {
 
-				this.collection = new List.Collection();
+				this.collection  = new List.Collection();
+				this.$dataInputs = this.$el.find('input');
 
-				var dataJSON = this.$el.attr('bebop-list--data');
+				_.each(this.$dataInputs, function(item) {
 
-				data = dataJSON ? JSON.parse(dataJSON) : [];
+					var value = $(item).val();
 
-				_.each(data, function(item) {
+					if (value)
+						this.collection.add(JSON.parse(value));
 
-					this.collection.add(JSON.parse(item));
 				}, this);
 			}
 
@@ -95,9 +109,6 @@
 			// Build default HTML structure //
 			//////////////////////////////////
 			
-			// Collect container DOM element
-			this.$el = $(options.el);
-
 			// Title
 			this.$title = $('<div>').attr('bebop-list--el', 'title');
 
@@ -163,12 +174,15 @@
 			// This is a parent list
 			else {
 
+				// Find template container for this list
+				var $tplContainer = $('#bebop-list--'+ this.config.get('field_name') +'-templates-container')
+
 				this.formTemplates = {};
 
 				///////////////////////////
 				// Handle Item Templates //
 				///////////////////////////
-				$formTemplates     = this.$el.find('[bebop-list--formTemplate]');
+				$formTemplates     = $tplContainer.find('[bebop-list--formTemplate]');
 				this.formTemplates = {};
 
 				_.each($formTemplates, function(el, index) {
@@ -187,7 +201,7 @@
 				///////////////////////////
 				// Handle Item Templates //
 				///////////////////////////
-				$itemTemplates     = this.$el.find('[bebop-list--itemTemplate]');
+				$itemTemplates     = $tplContainer.find('[bebop-list--itemTemplate]');
 				this.itemTemplates = {};
 
 				_.each($itemTemplates, function(el, index) {
@@ -217,6 +231,8 @@
 					$el.remove();
 					
 				}, this);
+
+				$tplContainer.remove();
 			}
 
 			// Add forms HTML to DOM
@@ -497,9 +513,13 @@
 		render: function(){
 
 			// Re-render all 
-			this.collection.each(function(model) {	
+			this.collection.each(function(model, index) {	
 
+				// Append new model
 				this.appendItem(model);
+
+				// Remove source data input from DOM
+				this.$dataInputs.get(index).remove();
 
 			}, this);
 

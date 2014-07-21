@@ -92,6 +92,71 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		}
 	}
 
+	public function renderTemplates()
+	{ 
+		?>
+
+		<div id="bebop-list--<?php echo $this->getFieldName(); ?>-templates-container">
+			<script bebop-list--itemTemplate="main" class="bebop-list--item" type="text/template" style="display:none">
+
+				<input bebop-list--el="data-container" type="hidden">
+				
+				<div class="bebop-list--drag-handle">
+					<span class="bebop-ui-icon-move"></span>
+				</div>
+				
+				<div bebop-list--el="content" class="bebop-ui-clrfix">
+
+					<?php if ($this->isMode('gallery')) {
+
+						\Ponticlaro\Bebop::UI()->Media('Image', '', array(
+							'field_name' => 'id',
+							'mime_types' => array(
+								'image'
+							)
+						))->render();
+
+					} ?>
+
+					<div bebop-list--view="browse"></div>
+					<div bebop-list--view="reorder"></div>
+					<div bebop-list--view="edit"></div>
+				</div>
+
+				<div bebop-list--el="item-actions">
+					<button bebop-list--action="edit" class="button button-small">
+						<b>Edit</b>
+						<span class="bebop-ui-icon-edit"></span>
+					</button>
+					<button bebop-list--action="remove" class="button button-small">
+						<span class="bebop-ui-icon-remove"></span>
+					</button>
+				</div>
+			</script>
+
+			<script bebop-list--formTemplate="top" type="text/template" style="display:none">
+				<?php if ($this->config->get('show_top_form')) echo $this->getForm(); ?>
+			</script>
+
+			<script bebop-list--formTemplate="bottom" type="text/template" style="display:none">
+				<?php if ($this->config->get('show_bottom_form')) echo $this->getForm(); ?>
+			</script>
+
+			<?php $items_views = $this->getAllItemViews();
+
+			if ($items_views) {
+
+				foreach ($items_views as $key => $template) { ?>
+					 
+					<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none"><?php echo $template; ?></script>
+
+				<?php }
+
+			} ?>
+		</div>
+
+	<?php }
+
 	private function __enqueueScripts()
 	{
 		global $wp_version;
@@ -147,9 +212,12 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		// Form elements
 		$this->form_elements = Bebop::Collection(array(
-			'add'  => __DIR__ .'/templates/partials/form/default/elements/add.php',
-			'sort' => __DIR__ .'/templates/partials/form/default/elements/sort.php'
+			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
+			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
 		));
+
+		// Register templates on admin footer
+		add_action('admin_footer', array($this, 'renderTemplates'));
 
 		return $this;
 	}
@@ -233,6 +301,16 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		}
 
 		return $this;
+	}
+
+	public function getMode()
+	{	
+		return $this->config->get('mode');
+	}
+
+	public function isMode($mode)
+	{
+		return is_string($mode) && $this->config->get('mode') == $mode ? true : false;
 	}
 
 	public function setItemView($view, $template)
@@ -347,14 +425,14 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			ob_start();
 			call_user_func($source);
 			$html = ob_get_contents();
-			ob_clean();
+			ob_end_clean();
 
 		} elseif (is_file($source) && is_readable($source)) {
 
 			ob_start();
 			$this->__renderTemplate($source, $this);
 			$html = ob_get_contents();
-			ob_clean();
+			ob_end_clean();
 
 		} elseif (is_string($source)) {
 
@@ -371,16 +449,11 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	public function render()
 	{
 		// Force default reorder view if in gallery mode
-		if ($this->config->get('mode') == 'gallery') {
-			
-			$this->setItemView('reorder', __DIR__ .'/templates/partials/items/gallery/reorder.mustache');
-		}
-
-		// Set path to template
-		$this->template = 'views/'. $this->config->get('type') .'/'. $this->config->get('mode');
+		if ($this->isMode('gallery'))
+			$this->setItemView('reorder', __DIR__ .'/partials/items/gallery/reorder.mustache');
 
 		// Render list
-		$this->__renderTemplate($this->template, $this);
+		$this->__renderTemplate('default', $this);
 
 		return $this;
 	}
@@ -396,7 +469,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		// Main View Templates
 		else {
 
-			include __DIR__ . '/templates/'. $template_name .'.php';
+			include __DIR__ . '/views/'. $template_name .'.php';
 		}
 	}
 }
