@@ -14,9 +14,6 @@
 			var self = this,	
 				data;
 
-			// set data inputs property
-			this.$dataInputs;
-
 			// Collect container DOM element
 			this.$el = $(options.el);
 
@@ -93,10 +90,20 @@
 
 				_.each(this.$dataInputs, function(item) {
 
-					var value = $(item).val();
+					var $el   = $(item),
+						value = $el.val();
 
-					if (value)
+					// Add value to collection
+					if (value) {
+
 						this.collection.add(JSON.parse(value));
+					}
+
+					// Remove input with empty value from DOM
+					else {
+
+						$el.remove();
+					}
 
 				}, this);
 			}
@@ -175,7 +182,7 @@
 			else {
 
 				// Find template container for this list
-				var $tplContainer = $('#bebop-list--'+ this.config.get('field_name') +'-templates-container')
+				var $tplContainer = $('#bebop-list--'+ this.config.get('field_name') +'-templates-container');
 
 				this.formTemplates = {};
 
@@ -275,11 +282,11 @@
 
 					if (self.status.get('empty')) {
 
-						self.$emptyStateIndicator.attr('name', self.fieldName).slideDown(200);
+						self.$emptyStateIndicator.find('input').attr('name', self.fieldName).end().slideDown(200);
 
 					} else {
 
-						self.$emptyStateIndicator.attr('name', '').slideUp(200);
+						self.$emptyStateIndicator.find('input').attr('name', '').end().slideUp(200);
 					}
 				}
 			};

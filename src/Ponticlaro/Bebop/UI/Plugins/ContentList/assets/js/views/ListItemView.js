@@ -156,8 +156,9 @@
 			// Clone model attributes so that we can exclude 'view' from data to be saved
 			var data = _.clone(this.model.attributes);
 
-			// Remove 'view' from data to be saved
+			// Remove 'view' and 'mode' from data to be saved
 			delete data.view;
+			delete data.mode;
 
 			this.$dataContainer.val(JSON.stringify(data));
 		},
