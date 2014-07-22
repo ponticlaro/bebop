@@ -88,10 +88,9 @@ class PostType extends TrackableObjectAbstract
     /**
      * Instantiates new post type
      * 
-     * @param string $singular_name Post type singular name
-     * @param string $plural_name   Post type plural name
+     * @param mixed $name String or array with singular name first and plural name in second
      */
-    public function __construct($singular_name, $plural_name = null)
+    public function __construct($name)
     {
         // Instantiate configuration object with defaults
         $this->config = Bebop::Collection(array(
@@ -122,10 +121,10 @@ class PostType extends TrackableObjectAbstract
         $this->rewrite_config = Bebop::Collection();
 
         // Set post type name
-        $this->__setName($singular_name, $plural_name);
+        call_user_method_array('__setName', $this, is_array($name) ? $name : array($name));
 
         // Set post_type id
-        $this->__trackable_id = Bebop::util('slugify', $singular_name);
+        $this->__trackable_id = Bebop::util('slugify', is_array($name) ? $name[0] : $name);
 
         // Set default labels based on singular and plural names
         $this->__setDefaultLabels();
@@ -535,6 +534,12 @@ class PostType extends TrackableObjectAbstract
         return $this;
     }
 
+    /**
+     * Adds a single capability
+     * 
+     * @param  string                     $capability
+     * @return \Ponticlaro\Bebop\PostType             PostType instance
+     */
     public function addCapability($capability)
     {
         if (!is_string($capability))
@@ -546,6 +551,44 @@ class PostType extends TrackableObjectAbstract
         return $this;
     }
 
+    /**
+     * Removes capabilities
+     * 
+     * @param  array                      $capabilities Indexed array with capabilities
+     * @return \Ponticlaro\Bebop\PostType               PostType instance
+     */
+    public function removeCapabilities(array $capabilities = array())
+    {
+        foreach ($capabilities as $capability) {
+            
+            $this->removeCapability($capability);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes a single capability
+     * 
+     * @param  string                     $capability
+     * @return \Ponticlaro\Bebop\PostType             PostType instance
+     */
+    public function removeCapability($capability)
+    {
+        if (!is_string($capability))
+            throw new \Exception('PostType capability must be a string.');
+
+        if (!$this->capabilities->hasValue($capability))
+            $this->capabilities->pop($capability);
+
+        return $this;
+    }
+
+    /**
+     * Returns all capabilities
+     * 
+     * @return array
+     */
     public function getCapabilities()
     {
          return $this->capabilities->getAll();
