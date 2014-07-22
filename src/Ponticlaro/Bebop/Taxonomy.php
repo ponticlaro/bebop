@@ -7,273 +7,797 @@ use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
 class Taxonomy extends TrackableObjectAbstract
 {
-	protected $__trackable_type = 'taxonomy';
+    /**
+     * Required trackable object type
+     * 
+     * @var string
+     */
+    protected $__trackable_type = 'post_type';
 
-	protected $__config;
+    /**
+     * Required trackable object ID
+     * 
+     * @var string
+     */
+    protected $__trackable_id;
 
-	protected $__labels;
+    /**
+     * Configuration 
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $config;
 
-	protected $__post_types;
+    /**
+     * Labels
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $labels;
 
-	public function __construct($name, $post_types, array $config = array())
-	{
-		// Take any necessary actions to make this object usable
-		$this->__preInit();
+    /**
+     * Capabilities
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $capabilities;
 
-		// Initialize class
-		call_user_func_array(array($this, '__init'), func_get_args());
-	}
+    /**
+     * Rewrite configuration
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $rewrite_config;
 
-	private function __preInit()
-	{	
-		$default_config = array(
-			'hierarchical'      => true,
-			'show_ui'           => true,
-			'show_admin_column' => true,
-			'query_var'         => true
-		);
+    /**
+     * Post types
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $post_types;
 
-		$this->__config     = Bebop::Collection( $default_config );
-		$this->__labels     = Bebop::Collection();
-		$this->__post_types = Bebop::Collection();
-	}
+    /**
+     * Map with alias for existing methods
+     * 
+     * @var array
+     */
+    protected $methods_alias = array(
+        'setPublic'          => 'makePublic',
+        'setShowInNavMenus'  => 'showInNavMenus',
+        'setShowTagcloud'    => 'showTagcloud',
+        'setMetaBoxCb'       => 'setMetaboxCallback',
+        'setShowAdminColumn' => 'showAdminColumn',
+        'setSort'            => 'sortEnabled',
+    );
 
-	private function __init()
-	{
-		call_user_func_array(array($this, '__handleInit'), func_get_args());
-
-		add_action("init", array($this, 'register'));
-
-		return $this;
-	}
-
-	private function __handleInit($name, $post_types, array $config = array())
-	{   
-		if( !isset($name) ) throw new ErrorException("You must set a name for the post type");
-
-		if( is_string($name) ){
-			$this->__config->set('singular_name', $name);
-
-		} elseif( is_array($name) ){
-
-			if( isset($name[0]) ){
-				$this->__config->set('singular_name', $name[0]);
-			}
-
-			if( isset($name[1]) ){
-				$this->__config->set('plural_name', $name[1]);
-				$this->__config->set('label', $name[1]);
-			}
-
-		} 
-
-		// Set post_type id
-		$this->__trackable_id = Bebop::util('slugify', $this->__config->get('singular_name') );
-		$this->__config->set('key', $this->__trackable_id);
-
-		// Post types to be associated with
-		if( isset($post_types) ) {	
-
-			if( is_string($post_types)){
-
-				$this->__post_types->push($post_types);
-
-
-			} elseif( is_object($post_types) && is_a($post_types, 'Ponticlaro\Bebop\PostType') ){
-
-				$key = $post_types->getId();
-				$this->__post_types->push($key);
-
-
-			} elseif( is_array($post_types) && !empty($post_types) ){
-
-				foreach ($post_types as $post_type) {
-					
-					if( is_string($post_type)){
-						$this->__post_types->push($post_type);
-
-					} elseif( is_object($post_type) && is_a($post_type, 'Ponticlaro\Bebop\PostType') ){
-
-						$key = $post_type->getId();
-						$this->__post_types->push($key);
-
-					}
-					
-				}
-
-			}		
-		}	
-
-		// Handle configuration arguments
-		if( isset($config) ) 
-		{	
-			if( is_array($config) ) {
-
-				// Intercept labels
-				if( isset($config['labels']) ){
-
-					$this->__labels->set( $config['labels'] );
-					unset($config['labels']);
-
-				}
-
-				$this->__config->set($config);
-
-			} 
-		}
-
-		$this->__validateConfig();
-		$this->__setLabels();
-	}
-
-	private function __validateConfig()
-	{	
-		if(!$this->__config->get('plural_name')){
-
-			$plural = $this->__config->get('singular_name') .'s';
-			$this->__config->set('plural_name', $plural);
-
-		}
-
-		if(!$this->__config->get('label')) {
-			$this->__config->set('label', $this->__config->get('plural_name'));
-		}
-
-		if(!$this->__config->get('menu_name')){
-
-			$this->__config->set('menu_name', $this->__config->get('plural_name'));
-
-		}
-	}
-
-	private function __setLabels()
-	{
-		$singular = $this->__config->get('singular_name');
-		$plural   = $this->__config->get('plural_name');
-
-		$labels = array(
-			'name'              => _x( $plural, 'taxonomy general name' ),
-			'singular_name'     => _x( $singular, 'taxonomy singular name' ),
-			'search_items'      => __( 'Search '. $plural ),
-			'all_items'         => __( 'All '. $plural ),
-			'parent_item'       => __( 'Parent '. $singular),
-			'parent_item_colon' => __( 'Parent '. $singular .':'),
-			'edit_item'         => __( 'Edit '. $singular),
-			'update_item'       => __( 'Update '. $singular),
-			'add_new_item'      => __( 'Add New '. $singular),
-			'new_item_name'     => __( 'New '. $singular .' Name' ),
-			'menu_name'         => __(  $singular ),
-		);
-
-		$labels = array_merge($labels, $this->__labels->get());
-
-		$this->__labels->set($labels);
-	}
-
-	public function register()
-	{
-		$config           = $this->__config->get();
-		$config['labels'] = $this->__labels->get();
-		$post_types       = $this->__post_types->get();
-
-		register_taxonomy($config['key'], $post_types, $config);
-	}
-
-	public function __call($name, $args)
+    /**
+     * Instantiates a new taxonomy
+     * 
+     * @param mixed $name String or array with singular name first and plural name in second
+     */
+    public function __construct($name, $post_types = null)
     {
-    	/*----------------------------------
-    		Check for correct main method
-    	 ----------------------------------*/
-		$is_get    = substr($name, 0, 3) == 'get' ? true : false;
-		$is_set    = substr($name, 0, 3) == 'set' ? true : false;
-		$is_remove = substr($name, 0, 6) == 'remove' ? true : false;
+        $this->config = Bebop::Collection(array(
+            'hierarchical'      => true,
+            'show_ui'           => true,
+            'show_admin_column' => true,
+            'query_var'         => true
+        ));
 
-    	/*---------------------------
-    		Set Stuff
-    	 ---------------------------*/
-    	if($is_set){
+         // Instantiate labels object
+        $this->labels = Bebop::Collection();
 
-			$is_setConfig   = substr($name, 3, 6) == 'Config' ? true : false;
-			$is_setLabel    = substr($name, 3, 5) == 'Label' ? true : false;
-			$is_setPostType = substr($name, 3, 8) == 'PostType' ? true : false;
+        // Instantiate capabilities object
+        $this->capabilities = Bebop::Collection();
 
-			if($args[0]){
+        // Instantiate rewrite configuration object
+        $this->rewrite_config = Bebop::Collection();
 
-				if( is_string($args[0])){
+         // Instantiate post types object
+        $this->post_types = Bebop::Collection();
 
-					$key   = $args[0];
-					$value = isset($args[1]) ? $args[1] : null;
+        // Set post type name
+        call_user_method_array('__setName', $this, is_array($name) ? $name : array($name));
 
-					if($is_setConfig) $this->__config->set($key, $value);
-					if($is_setLabel) $this->__labels->set($key, $value);
-					if($is_setPostType) $this->__post_types->push($value);
+        // Set post_type id
+        $this->__trackable_id = Bebop::util('slugify', is_array($name) ? $name[0] : $name);
 
-				}elseif( is_array($args[0]) ){
+        // Set Post types
+        if (!is_null($post_types)) {
+            
+            if (is_string($post_types) || 
+                is_object($post_types) && $post_types instanceof \Ponticlaro\Bebop\PostType) {
+                
+                $this->addPostType($post_types);
+            }
 
-					if($is_setConfig) $this->__config->set($args[0]);
-					if($is_setLabel) $this->__labels->set($args[0]);
-					if($is_setPostType) {
+            elseif (is_array($post_types)) {
+                
+                $this->setPostTypes($post_types);
+            }
 
-						foreach ($args[0] as $key => $value) {
-						 	$this->__post_types->push($value);
-						}
+            else {
 
-					}
-				}
+                throw new \Exception('Taxonomy $post_types argument must be either a string, array or a \Ponticlaro\Bebop\PostType instance.');
+            }
+        }
 
-			}
-    	}
+        // Set default labels based on singular and plural names
+        $this->__setDefaultLabels();
 
-    	/*---------------------------
-    		Unset Stuff
-    	 ---------------------------*/
-    	 if($is_remove){
-
-			$is_removeConfig   = substr($name, 6, 6) == 'Config' ? true : false;
-			$is_removePostType = substr($name, 6, 8) == 'PostType' ? true : false;
-
-			if($args[0]){
-
-				if( is_string($args[0])){
-
-					$key   = $args[0];
-					$value = isset($args[1]) ? $args[1] : null;
-
-					if($is_removeConfig) $this->__config->remove($key, $value);
-					if($is_removePostType) $this->__post_types->pop($value);
-
-				}elseif( is_array($args[0]) ){
-
-					if($is_removeConfig) $this->__config->remove($args[0]);
-					if($is_removePostType) {
-
-						foreach ($args[0] as $key => $value) {
-							if($is_setPostType) $this->__post_types->pop($value);
-						}
-
-					}
-				}
-
-			}
-    	}
-
-    	/*---------------------------
-    		Get Stuff
-    	 ---------------------------*/
-    	if($is_get){
-
-			$is_getConfig   = substr($name, 3, 6) == 'Config' ? true : false;
-			$is_getLabel    = substr($name, 3, 5) == 'Label' ? true : false;
-			$is_getPostType = substr($name, 3, 8) == 'PostType' ? true : false;
-
-			$keys = isset($args[0]) ? $args[0] : null;
-
-			if($is_getConfig) $results = $this->__config->get($keys);
-  			if($is_getLabel) $results = $this->__labels->get($keys);
-			if($is_getPostType) $results = $this->__post_types->get();
-
-    		return $results ? $results : null;
-    	}
+        // Hook into init action to register taxonomy
+        add_action("init", array($this, '__register'));
     }
 
+    /**
+     * Sets taxonomy ID
+     * 
+     * @param  string                     $id
+     * @return \Ponticlaro\Bebop\Taxonomy     Taxonomy instance
+     */
+    public function setId($id)
+    {
+        if (is_string($id))
+            $this->__trackable_id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Returns taxonomy ID
+     * 
+     * @return string $id
+     */
+    public function getId()
+    {
+        return $this->__trackable_id;
+    }
+
+    /**
+     * Sets taxonomy labels 
+     * 
+     * @param  array                      $labels Associative array with post type labels
+     * @return \Ponticlaro\Bebop\Taxonomy         Taxonomy instance
+     */
+    public function setLabels(array $labels = array())
+    {
+        foreach ($labels as $key => $value) {
+            
+            $this->setLabel($key, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets a single taxonomy label
+     * 
+     * @param  string                     $key   Label key
+     * @param  string                     $value Label value
+     * @return \Ponticlaro\Bebop\Taxonomy        Taxonomy instance
+     */
+    public function setLabel($key, $value)
+    {
+        if (!is_string($key) || !is_string($value))
+            throw new \Exception('Taxonomy label $key and $value arguments must be strings.');
+
+        $this->labels->set($key, $value);
+
+        return $this;
+    }
+
+    /**
+     * Returns all labels
+     * 
+     * @return array
+     */
+    public function getLabels()
+    {
+        return $this->labels->getAll();
+    }
+
+    /**
+     * Returns a single label by its key
+     * 
+     * @param  string $key Label key
+     * @return string      Label value
+     */
+    public function getLabel($key)
+    {
+        return $this->labels->get($key);
+    }
+
+    /**
+     * Replaces capabilities
+     * 
+     * @param  array                      $capabilities Indexed array with capabilities
+     * @return \Ponticlaro\Bebop\Taxonomy               Taxonomy instance
+     */
+    public function replaceCapabilities(array $capabilities = array())
+    {
+        $this->capabilities->clear();
+        $this->setCapabilities($capabilities);
+
+        return $this;
+    }
+
+    /**
+     * Sets capabilities
+     * 
+     * @param  array                      $capabilities Indexed array with capabilities
+     * @return \Ponticlaro\Bebop\Taxonomy               Taxonomy instance
+     */
+    public function setCapabilities(array $capabilities = array())
+    {
+        foreach ($capabilities as $capability) {
+            
+            $this->addCapability($capability);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Adds a single capability
+     * 
+     * @param  string                     $capability
+     * @return \Ponticlaro\Bebop\Taxonomy             Taxonomy instance
+     */
+    public function addCapability($capability)
+    {
+        if (!is_string($capability))
+            throw new \Exception('Taxonomy capability must be a string.');
+
+        if (!$this->capabilities->hasValue($capability))
+            $this->capabilities->push($capability);
+
+        return $this;
+    }
+
+    /**
+     * Removes capabilities
+     * 
+     * @param  array                      $capabilities Indexed array with capabilities
+     * @return \Ponticlaro\Bebop\Taxonomy               Taxonomy instance
+     */
+    public function removeCapabilities(array $capabilities = array())
+    {
+        foreach ($capabilities as $capability) {
+            
+            $this->removeCapability($capability);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes a single capability
+     * 
+     * @param  string                     $capability
+     * @return \Ponticlaro\Bebop\Taxonomy             Taxonomy instance
+     */
+    public function removeCapability($capability)
+    {
+        if (!is_string($capability))
+            throw new \Exception('PostType capability must be a string.');
+
+        if (!$this->capabilities->hasValue($capability))
+            $this->capabilities->pop($capability);
+
+        return $this;
+    }
+
+    /**
+     * Returns all capabilities
+     * 
+     * @return array
+     */
+    public function getCapabilities()
+    {
+         return $this->capabilities->getAll();
+    }
+
+    /**
+     * Sets post types
+     * 
+     * @param  array                      $post_types Indexed array with post types
+     * @return \Ponticlaro\Bebop\Taxonomy             Taxonomy instance
+     */
+    public function setPostTypes(array $post_types = array())
+    {
+        $this->$post_types->set($post_types);
+
+        return $this;
+    }
+
+    /**
+     * Adds post types on top of existing ones
+     * 
+     * @param  array                      $post_types Indexed array with post types
+     * @return \Ponticlaro\Bebop\Taxonomy             Taxonomy instance
+     */
+    public function addPostTypes(array $post_types = array())
+    {
+        foreach ($post_types as $post_type) {
+            
+            $this->addPostType($post_type);
+        }
+
+        return $this;   
+    }
+
+    /**
+     * Adds single post_type
+     * 
+     * @param  string                     $post_type
+     * @return \Ponticlaro\Bebop\Taxonomy            Taxonomy instance
+     */
+    public function addPostType($post_type)
+    {
+        if (!is_string($post_type) && !(is_object($post_type) && $post_type instanceof \Ponticlaro\Bebop\PostType))
+            throw new \Exception('Taxonomy post type must be either a string or a \Ponticlaro\Bebop\PostType instance.');  
+
+        if (is_object($post_type) && is_a($post_type, 'Ponticlaro\Bebop\PostType'))
+            $post_type = $post_type->getId();
+
+        if (!$this->post_types->hasValue($post_type))
+            $this->post_types->push($post_type);
+
+        return $this;
+    }
+
+    /**
+     * Removes post types
+     * 
+     * @param  array                      $taxonomies Indexed array with post types
+     * @return \Ponticlaro\Bebop\Taxonomy             Taxonomy instance
+     */
+    public function removePostTypes(array $post_types = array())
+    {
+        foreach ($post_types as $post_type) {
+            
+            $this->removePostType($post_type);
+        }
+
+        return $this;   
+    }
+
+    /**
+     * Removes single post types
+     * 
+     * @param  string                     $post_type
+     * @return \Ponticlaro\Bebop\Taxonomy            Taxonomy instance
+     */
+    public function removePostType($post_type)
+    {
+        if (!is_string($post_type) && !(is_object($post_type) && $post_type instanceof \Ponticlaro\Bebop\PostType))
+            throw new \Exception('Taxonomy post type must be either a string or a \Ponticlaro\Bebop\PostType instance.');  
+
+        if (is_object($post_type) && is_a($post_type, 'Ponticlaro\Bebop\PostType'))
+            $post_type = $post_type->getId();
+
+        if (!$this->post_types->hasValue($post_type))
+            $this->post_types->pop($post_type);
+
+        return $this;
+    }
+
+    /**
+     * Returns all taxonomies
+     * 
+     * @return array
+     */
+    public function getPostTypes()
+    {
+        return $this->post_types->getAll();
+    }
+
+   /**
+     * Sets the value for 'rewrite'
+     * 
+     * @param  array                      $args
+     * @return \Ponticlaro\Bebop\Taxonomy       Taxonomy instance
+     */
+    public function setRewrite(array $args = array())
+    {
+        $this->rewrite_config->set($args);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'rewrite[slug]'
+     * 
+     * @param  string                     $slug
+     * @return \Ponticlaro\Bebop\Taxonomy       Taxonomy instance
+     */
+    public function setRewriteSlug($slug)
+    {
+        if (!is_string($slug))
+             throw new \Exception('Taxonomy rewrite slug must be a string.');
+
+        $this->rewrite_config->set('slug', $slug);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'rewrite[with_front]'
+     * 
+     * @param  string                     $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function setRewriteWithFront($enabled)
+    {
+        $this->rewrite_config->set('with_front', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'rewrite[feeds]'
+     * 
+     * @param  string                     $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy         Taxonomy instance
+     */
+    public function setRewriteFeeds($enabled)
+    {
+        $this->rewrite_config->set('feeds', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'rewrite[pages]'
+     * 
+     * @param  string                     $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy         Taxonomy instance
+     */
+    public function setRewritePages($enabled)
+    {
+        $this->rewrite_config->set('pages', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'rewrite[ep_mask]'
+     * 
+     * @param  string                     $epmask
+     * @return \Ponticlaro\Bebop\Taxonomy         Taxonomy instance
+     */
+    public function setRewriteEpmask($epmask)
+    {
+        if (!is_string($epmask))
+             throw new \Exception('Taxonomy rewrite ep_mask must be a string.');
+
+        $this->rewrite_config->set('ep_mask', $epmask);
+
+        return $this;
+    }
+
+    /**
+     * Returns rewrite configuration
+     * 
+     * @return array
+     */
+    public function getRewrite()
+    {
+        return $this->rewrite_config->getAll();
+    }
+
+    /**
+     * Sets taxonomy 'public' value
+     * 
+     * @param  boolean                    $enabled True to enable, false otherwise
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function makePublic($enabled = true)
+    {
+        $this->config->set('public', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Checks if taxonomy is public
+     * 
+     * @return boolean 
+     */
+    public function isPublic()
+    {
+        return $this->config->get('public');
+    }
+
+   /**
+     * Sets taxonomy 'hierarchical' value
+     * 
+     * @param  boolean                    $enabled True to enable, false otherwise
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function setHierarchical($enabled = true)
+    {
+        $this->config->set('hierarchical', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Checks if post type is hierarchical
+     * 
+     * @return boolean 
+     */
+    public function isHierarchical()
+    {
+        return $this->config->get('hierarchical');
+    }
+
+    /**
+     * Sets query_var
+     * 
+     * @param  string                     $query_var
+     * @return \Ponticlaro\Bebop\Taxonomy            Taxonomy instance
+     */
+    public function setQueryVar($query_var)
+    {
+        if (!is_bool($query_var) && !is_string($query_var))
+            throw new \Exception('Taxonomy query_var must be a string or false.');
+
+        $this->config->set('query_var', $query_var);
+
+        return $this;
+    }
+
+    /**
+     * Returns query_var
+     * 
+     * @return string
+     */
+    public function getQueryVar()
+    {
+        return $this->config->get('query_var');
+    }
+
+    /**
+     * Sets the value for 'show_ui'
+     * 
+     * @param  bool                       $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function showUi($enabled)
+    {
+        $this->config->set('show_ui', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'show_in_nav_menus'
+     * 
+     * @param  bool                       $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function showInNavMenus($enabled)
+    {
+        $this->config->set('show_in_nav_menus', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'show_tagcloud'
+     * 
+     * @param  bool                       $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function showTagcloud($enabled)
+    {
+        $this->config->set('show_tagcloud', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'show_admin_column'
+     * 
+     * @param  bool                       $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function showAdminColumn($enabled)
+    {
+        $this->config->set('show_admin_column', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Sets the value for 'meta_box_cb'
+     * 
+     * @param  bool                       $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function setMetaboxCallback($callback)
+    {
+        if (!is_callable($callback))
+            throw new \Exception('Taxonomy meta_box_cb must be callable.');
+
+        $this->config->set('meta_box_cb', $callback);
+
+        return $this;
+    }
+
+    /**
+     * Returns the value for 'meta_box_cb'
+     * 
+     * @return string
+     */
+    public function getMetaboxCallback()
+    {
+        return $this->config->get('update_count_callback');
+    }
+
+    /**
+     * Sets the value for 'update_count_callback'
+     * 
+     * @param  bool                       $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function setUpdateCountCallback($callback)
+    {
+        if (!is_callable($callback))
+            throw new \Exception('Taxonomy update_count_callback must be callable.');
+
+        $this->config->set('update_count_callback', $callback);
+
+        return $this;
+    }
+
+    /**
+     * Returns the value for 'update_count_callback'
+     * 
+     * @return string
+     */
+    public function getUpdateCountCallback()
+    {
+        return $this->config->get('update_count_callback');
+    }
+
+    /**
+     * Sets the value for 'sort'
+     * 
+     * @param  bool                       $enabled
+     * @return \Ponticlaro\Bebop\Taxonomy          Taxonomy instance
+     */
+    public function setSort($enabled)
+    {
+        $this->config->set('sort', $enabled);
+
+        return $this;
+    }
+
+    /**
+     * Returns the value for 'sort'
+     * 
+     * @return bool
+     */
+    public function getSort()
+    {
+        return $this->config->get('sort');
+    }
+
+    /**
+     * Checks if the called method is an alias
+     * and calls the existing method
+     * 
+     * @param  string $name Method name
+     * @param  array  $args Method arguments
+     * @return mixed        Returns current post type instance or method return value
+     */
+    public function __call($name, $args)
+    {
+        if (in_array($name, $this->methods_alias))
+            return call_user_method_array($this->methods_alias[$name], $this, $args);
+
+        return $this;
+    }
+
+    /**
+     * Sets both the singular and plural names
+     * 
+     * @param  string                     $singular Singular name to be set
+     * @param  string                     $plural   Plural name to be set
+     * @return \Ponticlaro\Bebop\Taxonomy           Taxonomy instance
+     */
+    protected function __setName($singular, $plural = null)
+    {
+        $this->__setSingularName($singular);
+
+        if (is_null($plural))
+            $plural = $singular . 's';
+
+        $this->__setPluralName($plural);
+
+        return $this;
+    }
+
+    /**
+     * Sets the singular name
+     * 
+     * @param  string                     $name Singular name to be set
+     * @return \Ponticlaro\Bebop\Taxonomy       Taxonomy instance
+     */
+    protected function __setSingularName($name)
+    {
+        if (!is_string($name))
+             throw new \Exception('Taxonomy singular name must be a string.');
+
+        $this->config->set('singular_name', $name);
+
+        return $this;
+    }
+
+    /**
+     * Sets the plural name
+     * 
+     * @param  string                     $name Plural name to be set
+     * @return \Ponticlaro\Bebop\Taxonomy       Taxonomy instance
+     */
+    protected function __setPluralName($name)
+    {
+        if (!is_string($name))
+             throw new \Exception('Taxonomy plural name must be a string.');
+
+        $this->config->set('plural_name', $name);
+
+        if (!$this->config->get('label'))
+            $this->config->set('label', $name);
+
+        return $this;
+    }
+
+    /**
+     * Sets default labels based on singular and plural names
+     * 
+     * @return void
+     */
+    private function __setDefaultLabels()
+    {
+        $singular = $this->config->get('singular_name');
+        $plural   = $this->config->get('plural_name');
+        $labels   = array(
+            'name'              => _x($plural, 'taxonomy general name'),
+            'singular_name'     => _x($singular, 'taxonomy singular name'),
+            'search_items'      => __('Search '. $plural),
+            'all_items'         => __('All '. $plural),
+            'parent_item'       => __('Parent '. $singular),
+            'parent_item_colon' => __('Parent '. $singular .':'),
+            'edit_item'         => __('Edit '. $singular),
+            'update_item'       => __('Update '. $singular),
+            'add_new_item'      => __('Add New '. $singular),
+            'new_item_name'     => __('New '. $singular .' Name'),
+            'menu_name'         => __($plural),
+        );
+
+        $this->setLabels($labels);
+    }
+
+    /**
+     * Returns built configuration array
+     * 
+     * @return array
+     */
+    public function getFullConfig()
+    {
+        $config                 = $this->config->get();
+        $config['labels']       = $this->getLabels();
+        $config['capabilities'] = $this->getCapabilities();
+        $config['rewrite']      = $this->getRewrite();
+
+        return $config;
+    }
+
+    public function __register()
+    {
+        register_taxonomy($this->getId(), $this->getPostTypes(), $this->getFullConfig());
+    }
 }
