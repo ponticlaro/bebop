@@ -290,7 +290,7 @@ class Bebop extends SingletonAbstract
 
         // Throw error if method to not exit
         if(!$name || !method_exists('\Ponticlaro\Bebop\Utils', $name)) 
-            throw new ErrorException("You need to select an existing utility name");
+            throw new \Exception("You need to select an existing utility name");
 
         // Call utility and return result
         return call_user_func_array(array('\Ponticlaro\Bebop\Utils', $name), $args);
