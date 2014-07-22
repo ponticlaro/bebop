@@ -81,7 +81,7 @@ class Taxonomy extends TrackableObjectAbstract
 
 			} elseif( is_object($post_types) && is_a($post_types, 'Ponticlaro\Bebop\PostType') ){
 
-				$key = $post_types->getConfig('key');
+				$key = $post_types->getId();
 				$this->__post_types->push($key);
 
 
@@ -94,7 +94,7 @@ class Taxonomy extends TrackableObjectAbstract
 
 					} elseif( is_object($post_type) && is_a($post_type, 'Ponticlaro\Bebop\PostType') ){
 
-						$key = $post_type->getConfig('key');
+						$key = $post_type->getId();
 						$this->__post_types->push($key);
 
 					}

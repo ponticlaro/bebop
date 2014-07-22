@@ -208,7 +208,7 @@ class Metabox extends TrackableObjectAbstract
 
         } elseif(is_object($post_type) && is_a($post_type, 'Ponticlaro\Bebop\PostType')) {
 
-            $this->post_types->push($post_type->getConfig('key'));
+            $this->post_types->push($post_type->getId());
         }
 
         return $this;
