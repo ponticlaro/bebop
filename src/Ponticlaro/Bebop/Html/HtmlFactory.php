@@ -7,7 +7,7 @@ class HtmlFactory {
     /**
      * Holds the class that manufacturables must extend
      */
-    const ELEMENT_CLASS = 'Ponticlaro\Bebop\ElementAbstract';
+    const ELEMENT_CLASS = 'Ponticlaro\Bebop\Html\ElementAbstract';
 
     /**
      * List of manufacturable classes
@@ -15,7 +15,17 @@ class HtmlFactory {
      * @var array
      */
     protected static $manufacturable = array(
-
+        'a'        => 'Ponticlaro\Bebop\Html\Elements\A',
+        'img'      => 'Ponticlaro\Bebop\Html\Elements\Img',
+        'input'    => 'Ponticlaro\Bebop\Html\Elements\Input',
+        'password' => 'Ponticlaro\Bebop\Html\Elements\Password',
+        'tel'      => 'Ponticlaro\Bebop\Html\Elements\Tel',
+        'select'   => 'Ponticlaro\Bebop\Html\Elements\Select',
+        'textarea' => 'Ponticlaro\Bebop\Html\Elements\Textarea',
+        'button'   => 'Ponticlaro\Bebop\Html\Elements\Button',
+        'fieldset' => 'Ponticlaro\Bebop\Html\Elements\Input',
+        'legend'   => 'Ponticlaro\Bebop\Html\Elements\Legend',
+        'label'    => 'Ponticlaro\Bebop\Html\Elements\Label',
     );
 
     /**

@@ -1,0 +1,29 @@
+<?php 
+
+namespace Ponticlaro\Bebop\Html\Elements;
+
+class Checkbox extends \Ponticlaro\Bebop\Html\ControlElement {
+
+	public function __construct($name = null)
+	{
+		$this->__init();
+
+		$this->tag = 'input';
+		
+		$this->attributes->set(array(
+			'type'  => 'checkbox',
+			'name'  => !is_null($name) && is_string($name) ? $name : '',
+			'value' => ''
+		));
+	}
+
+	/**
+	 * Making sure that tag cannot be changed
+	 * 
+	 * @param string $tag
+	 */
+	public function setTag($tag)
+	{
+		return $this;
+	}
+}

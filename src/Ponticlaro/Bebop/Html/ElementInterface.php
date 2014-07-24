@@ -24,10 +24,6 @@ interface ElementInterface
 
 	public function prepend($el);
 
-	public function setParent(ElementAbstract $el);
-
-	public function getParent();
-
 	public function getOpeningTag();
 
 	public function getClosingTag();

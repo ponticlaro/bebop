@@ -11,28 +11,28 @@ abstract class ElementAbstract implements ElementInterface
 	 * 
 	 * @var string
 	 */
-	private $tag;
+	protected $tag;
 
     /**
      * Attributes for this element 
      * 
      * @var Ponticlaro\Bebop\Common\Collection
      */
-	private $attributes;
+	protected $attributes;
 
     /**
      * Element children
      * 
      * @var Ponticlaro\Bebop\Common\Collection
      */
-	private $children;
+	protected $children;
 
     /**
      * Configuration for this element 
      * 
      * @var Ponticlaro\Bebop\Common\Collection
      */
-	private $config;
+	protected $config;
 
 	/**
 	 * Instantiates new HTML element object
@@ -41,9 +41,14 @@ abstract class ElementAbstract implements ElementInterface
 	 */
 	public function __construct($tag = null)
 	{	
+		$this->__init();
+
 		// Save element tag
 		$this->setTag(is_null($tag) ? 'div' : $tag);
+	}
 
+	protected function __init()
+	{
 		// Instantiate configuration object
 		$this->config = Bebop::Collection(array(
 			'self_closing' => false
@@ -177,7 +182,7 @@ abstract class ElementAbstract implements ElementInterface
 		return $this->attributes->get($name);
 	}
 
-	public function append($el)
+	public function prepend($el)
 	{
 		if (!is_string($el) && !$el instanceof ElementAbstract)
 			throw new \Exception('Element children must be either strings of children of \Ponticlaro\Bebop\Html\ElementAbstract.');
@@ -187,7 +192,7 @@ abstract class ElementAbstract implements ElementInterface
 		return $this;
 	}
 
-	public function prepend($el)
+	public function append($el)
 	{
 		if (!is_string($el) && !$el instanceof ElementAbstract)
 			throw new \Exception('Element children must be either strings of children of \Ponticlaro\Bebop\Html\ElementAbstract.');
@@ -200,18 +205,6 @@ abstract class ElementAbstract implements ElementInterface
 	public function getChildren()
 	{
 		return $this->children->getAll();
-	}
-
-	public function setParent(ElementAbstract $el)
-	{
-		$this->parent = $el;
-
-		return $this;
-	}
-
-	public function getParent()
-	{
-		return $this->parent;
 	}
 
 	public function isSelfClosing()
