@@ -450,7 +450,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	{
 		// Force default reorder view if in gallery mode
 		if ($this->isMode('gallery'))
-			$this->setItemView('reorder', __DIR__ .'/partials/items/gallery/reorder.mustache');
+			$this->setItemView('reorder', __DIR__ .'/views/partials/items/gallery/reorder.mustache');
 
 		// Render list
 		$this->__renderTemplate('default', $this);
