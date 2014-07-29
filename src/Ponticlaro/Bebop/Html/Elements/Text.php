@@ -2,7 +2,7 @@
 
 namespace Ponticlaro\Bebop\Html\Elements;
 
-class Password extends \Ponticlaro\Bebop\Html\ControlElement {
+class Text extends \Ponticlaro\Bebop\Html\ControlElement {
 
 	public function __construct($name = null)
 	{
@@ -10,7 +10,7 @@ class Password extends \Ponticlaro\Bebop\Html\ControlElement {
 
 		$this->setTag('input');
 		
-		$this->setAttr('type', 'password');
+		$this->setAttr('type', 'text');
 
 		if (!is_null($name))
 			$this->setName($name);

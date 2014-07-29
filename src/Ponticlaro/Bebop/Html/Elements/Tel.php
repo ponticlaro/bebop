@@ -4,26 +4,17 @@ namespace Ponticlaro\Bebop\Html\Elements;
 
 class Tel extends \Ponticlaro\Bebop\Html\ControlElement {
 
-	public function __construct()
+	public function __construct($name = null)
 	{
 		$this->__init();
 
-		$this->tag = 'input';
+		$this->setTag('input');
 		
-		$this->attributes->set(array(
-			'type'  => 'tel',
-			'name'  => !is_null($name) && is_string($name) ? $name : '',
-			'value' => ''
-		));
-	}
+		$this->setAttr('type', 'tel');
 
-	/**
-	 * Making sure that tag cannot be changed
-	 * 
-	 * @param string $tag
-	 */
-	public function setTag($tag)
-	{
-		return $this;
+		if (!is_null($name))
+			$this->setName($name);
+
+		$this->setConfig('self_closing', true);
 	}
 }

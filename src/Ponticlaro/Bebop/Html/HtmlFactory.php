@@ -15,15 +15,21 @@ class HtmlFactory {
      * @var array
      */
     protected static $manufacturable = array(
+        'form'     => 'Ponticlaro\Bebop\Html\Elements\Form',
         'a'        => 'Ponticlaro\Bebop\Html\Elements\A',
         'img'      => 'Ponticlaro\Bebop\Html\Elements\Img',
-        'input'    => 'Ponticlaro\Bebop\Html\Elements\Input',
+        'text'     => 'Ponticlaro\Bebop\Html\Elements\Text',
+        'hidden'   => 'Ponticlaro\Bebop\Html\Elements\Hidden',
+        'checkbox' => 'Ponticlaro\Bebop\Html\Elements\Checkbox',
+        'radio'    => 'Ponticlaro\Bebop\Html\Elements\Radio',
         'password' => 'Ponticlaro\Bebop\Html\Elements\Password',
         'tel'      => 'Ponticlaro\Bebop\Html\Elements\Tel',
         'select'   => 'Ponticlaro\Bebop\Html\Elements\Select',
         'textarea' => 'Ponticlaro\Bebop\Html\Elements\Textarea',
+        'submit'   => 'Ponticlaro\Bebop\Html\Elements\Submit',
         'button'   => 'Ponticlaro\Bebop\Html\Elements\Button',
-        'fieldset' => 'Ponticlaro\Bebop\Html\Elements\Input',
+        'form'     => 'Ponticlaro\Bebop\Html\Elements\Form',
+        'fieldset' => 'Ponticlaro\Bebop\Html\Elements\Fieldset',
         'legend'   => 'Ponticlaro\Bebop\Html\Elements\Legend',
         'label'    => 'Ponticlaro\Bebop\Html\Elements\Label',
     );

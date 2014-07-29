@@ -8,25 +8,15 @@ class Button extends \Ponticlaro\Bebop\Html\ControlElement {
 	{
 		$this->__init();
 
-		$this->tag = 'button';
+		$this->setTag('button');
 
 		if (is_string($text))
 			$this->append($text);
 
-		if (is_string($name))
-			$this->attributes->set('name', $name);
+		if (!is_null($name))
+			$this->setName($name);
 
 		if (is_string($value))
-			$this->attributes->set('value', $value);
-	}
-
-	/**
-	 * Making sure that tag cannot be changed
-	 * 
-	 * @param string $tag
-	 */
-	public function setTag($tag)
-	{
-		return $this;
+			$this->setValue($value);
 	}
 }

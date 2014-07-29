@@ -8,21 +8,11 @@ class Form extends \Ponticlaro\Bebop\Html\ElementAbstract {
 	{
 		$this->__init();
 
-		$this->tag = 'form';
+		$this->setTag('form');
 		
-		$this->attributes->set(array(
+		$this->setAttrs(array(
 			'method' => 'post',
 			'action' => ''
 		));
-	}
-
-	/**
-	 * Making sure that tag cannot be changed
-	 * 
-	 * @param string $tag
-	 */
-	public function setTag($tag)
-	{
-		return $this;
 	}
 }

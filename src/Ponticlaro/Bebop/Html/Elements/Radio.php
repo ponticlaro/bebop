@@ -2,7 +2,7 @@
 
 namespace Ponticlaro\Bebop\Html\Elements;
 
-class Checkbox extends \Ponticlaro\Bebop\Html\ControlElementWithOptions {
+class Radio extends \Ponticlaro\Bebop\Html\ControlElementWithOptions {
 
 	const SELECTED_OPTION_ATTRIBUTE = 'checked';
 
@@ -15,10 +15,13 @@ class Checkbox extends \Ponticlaro\Bebop\Html\ControlElementWithOptions {
 		$this->setTag('input');
 		
 		// Set default attributes
-		$this->setAttr('type', 'checkbox');
+		$this->setAttr('type', 'radio');
 
 		// Set default configuration
-		$this->setConfig('self_closing', true);
+		$this->setConfigs([
+			'self_closing'           => true,
+			'allows_multiple_values' => false
+		]);
 
 		// Set name property
 		if (!is_null($name))

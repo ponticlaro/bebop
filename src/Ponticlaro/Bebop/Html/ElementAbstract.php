@@ -3,6 +3,7 @@
 namespace Ponticlaro\Bebop\Html;
 
 use \Ponticlaro\Bebop;
+use \Ponticlaro\Bebop\Html\HtmlFactory;
 
 abstract class ElementAbstract implements ElementInterface
 {	
@@ -35,6 +36,20 @@ abstract class ElementAbstract implements ElementInterface
 	protected $config;
 
 	/**
+	 * Contains parent element
+	 * 
+	 * @var Ponticlaro\Bebop\Html\ElementAbstract
+	 */
+	protected $parent;
+
+	/**
+	 * Contains label for the element
+	 * 
+	 * @var string
+	 */
+	protected $label;
+
+	/**
 	 * Instantiates new HTML element object
 	 *
 	 * @param string $tag HTML element tag
@@ -51,7 +66,8 @@ abstract class ElementAbstract implements ElementInterface
 	{
 		// Instantiate configuration object
 		$this->config = Bebop::Collection(array(
-			'self_closing' => false
+			'self_closing'           => false,
+			'allows_multiple_values' => false
 		));
 
 		// Instantiate attributes object
@@ -61,12 +77,75 @@ abstract class ElementAbstract implements ElementInterface
 		$this->children = Bebop::Collection();
 	}
 
+	public function getFactoryId()
+	{
+		return HtmlFactory::getInstanceId($this);
+	}
+
+	public function setParent(ElementAbstract $el)
+	{
+		$this->parent = $el;
+	}
+
+	public function hasParent()
+	{
+		return is_null($this->parent) ? false : true;
+	}
+
+	public function getParent()
+	{
+		return $this->parent;
+	}
+
+	public function setLabel($label)
+	{
+		if (is_string($label))
+			$this->label = $label;
+
+		return $this;
+	}
+
+	public function hasLabel()
+	{
+		return is_null($this->label) ? false : true;
+	}
+
+	public function getLabel()
+	{
+		return $this->label;
+	}
+
+	public function setConfigs(array $config)
+	{
+		foreach ($config as $key => $value) {
+			
+			$this->setConfig($key, $value);
+		}
+
+		return $this;
+	}
+
+	public function setConfig($key, $value)
+	{
+		if (!is_string($key))
+			throw new \Exception('Config key name must be a string');
+
+		$this->config->set($key, $value);
+
+		return $this;
+	}
+
+	public function getConfig($key)
+	{
+		return $this->config->get($key);
+	}
+
 	public function setTag($tag)
 	{
 		if (!is_string($tag))
 			throw new \Exception('Element tag must be a string');
 
-		$this->tag = $tag;
+		$this->tag = Bebop::util('slugify', $tag);
 
 		return $this;
 	}
@@ -146,9 +225,6 @@ abstract class ElementAbstract implements ElementInterface
 		if (!is_string($name))
 			throw new \Exception('Element attribute name must be a string');
 
-		if (!is_null($value) && !is_bool($value) && !is_string($value))
-			throw new \Exception('Element attribute value must be either null, a boolean or a string');
-
 		$this->attributes->set($name, is_null($value) ? $name : $value);
 
 		return $this;
@@ -180,6 +256,39 @@ abstract class ElementAbstract implements ElementInterface
 	public function getAttr($name)
 	{
 		return $this->attributes->get($name);
+	}
+
+	public function setName($name)
+	{
+		if (is_string($name))
+			$this->attributes->set('name', Bebop::util('slugify', $name));
+
+		return $this;
+	}
+
+	public function getName()
+	{
+		return $this->attributes->get('name');
+	}
+
+	public function setValue($value)
+	{
+		if (is_string($value) || is_integer($value) || is_bool($value)) {
+			
+			$this->attributes->set('value', $value);
+		}
+
+		return $this;
+	}
+
+	public function getValue()
+	{
+		return $this->attributes->get('value');
+	}
+
+	public function allowsMultipleValues()
+	{
+		return $this->getConfig('allows_multiple_values');
 	}
 
 	public function prepend($el)
@@ -214,7 +323,7 @@ abstract class ElementAbstract implements ElementInterface
 
 	public function getOpeningTag()
 	{
-		return $this->isSelfClosing() ? '<' : '<'. $this->tag . $this->getAttrsHtml() .'>';
+		return '<'. $this->tag . $this->getAttrsHtml() . ($this->isSelfClosing() ? '' : '>');
 	}
 
 	public function getClosingTag()
@@ -228,6 +337,12 @@ abstract class ElementAbstract implements ElementInterface
 		$attributes = $this->attributes->get();
 
 		foreach ($attributes as $key => $value) {
+
+			if ($key == 'name' && $this->allowsMultipleValues()) {
+				
+				$value = $value . '[]';
+			}
+
 			$html .= ' ' . $key . '="' . $value . '"';
 		}
 

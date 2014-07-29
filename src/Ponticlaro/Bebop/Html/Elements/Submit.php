@@ -4,34 +4,20 @@ namespace Ponticlaro\Bebop\Html\Elements;
 
 class Submit extends \Ponticlaro\Bebop\Html\ControlElement {
 
-	public function __construct($text = null, $name = null, $value = null)
+	public function __construct($value = null, $name = null)
 	{
 		$this->__init();
 
-		$this->tag = 'input';
+		$this->setTag('input');
 		
-		$this->attributes->set(array(
-			'type'  => 'submit',
-			'value' => ''
-		));
+		$this->setAttr('type', 'submit');
 
-		if (is_string($text))
-			$this->append($text);
+		$this->setConfig('self_closing', true);
 
-		if (is_string($name))
-			$this->attributes->set('name', $name);
+		if (!is_null($name))
+			$this->setName($name);
 
 		if (is_string($value))
-			$this->attributes->set('value', $value);
-	}
-
-	/**
-	 * Making sure that tag cannot be changed
-	 * 
-	 * @param string $tag
-	 */
-	public function setTag($tag)
-	{
-		return $this;
+			$this->setValue($value);
 	}
 }

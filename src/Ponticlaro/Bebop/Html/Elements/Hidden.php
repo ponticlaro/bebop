@@ -8,22 +8,13 @@ class Hidden extends \Ponticlaro\Bebop\Html\ControlElement {
 	{
 		$this->__init();
 
-		$this->tag = 'input';
+		$this->setTag('input');
 		
-		$this->attributes->set(array(
-			'type'  => 'hidden',
-			'name'  => !is_null($name) && is_string($name) ? $name : '',
-			'value' => ''
-		));
-	}
+		$this->setAttr('type', 'hidden');
 
-	/**
-	 * Making sure that tag cannot be changed
-	 * 
-	 * @param string $tag
-	 */
-	public function setTag($tag)
-	{
-		return $this;
+		if (!is_null($name))
+			$this->setName($name);
+
+		$this->setConfig('self_closing', true);
 	}
 }
