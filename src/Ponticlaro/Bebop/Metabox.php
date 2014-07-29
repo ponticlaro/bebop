@@ -485,7 +485,7 @@ class Metabox extends TrackableObjectAbstract
         $id = $this->getId();
 
         // Check if $_POST is not empty and nonce is there 
-        if (!empty($_POST) && check_admin_referer('metabox_'. $id .'_saving_meta', 'metabox_'. $id .'_nonce')) {
+        if (!empty($_POST) && wp_verify_nonce('metabox_'. $id .'_nonce', 'metabox_'. $id .'_saving_meta')) {
 
             $post = get_post($post_id);
 
