@@ -482,11 +482,13 @@ class Metabox extends TrackableObjectAbstract
      */
     public function __saveMeta($post_id) 
     {
-        $id = $this->getId();
+        $id         = $this->getId();
+        $nonce_name = 'metabox_'. $id .'_nonce';
+        $nonce      = isset($_POST[$nonce_name]) ? $_POST[$nonce_name] : '';
 
         // Check if $_POST is not empty and nonce is there 
-        if (!empty($_POST) && wp_verify_nonce('metabox_'. $id .'_nonce', 'metabox_'. $id .'_saving_meta')) {
-
+        if (!empty($_POST) && wp_verify_nonce($nonce, 'metabox_'. $id .'_saving_meta')) {
+            
             $post = get_post($post_id);
 
             if (isset($_POST['post_type']) && $_POST['post_type'] == $post->post_type ) {
