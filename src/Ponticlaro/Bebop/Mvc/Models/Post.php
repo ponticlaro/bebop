@@ -1,19 +1,18 @@
 <?php
 
-namespace Ponticlaro\Bebop\Mvc;
+namespace Ponticlaro\Bebop\Mvc\Models;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\Db;
 use Ponticlaro\Bebop\Db\Query;
 
-abstract class Model {
+abstract class Post {
 
     /**
-     * Instance of the currently called class
+     * Holds child classes instances with their model customizations
      * 
-     * @var \Ponticlaro\Bebop\Mvc\Model
+     * @var array
      */
-    protected static $instance;
+    private static $instances = array();
 
     /**
      * Post type name
@@ -23,52 +22,52 @@ abstract class Model {
     protected static $__type = 'post';
 
     /**
-     * Function to execute for each model item
-     * 
-     * @var callable
-     */
-    protected static $init_mods;
-
-    /**
-     * Collection of functions for context modification
-     * 
-     * @var Ponticlaro\Bebop\Common\Collection
-     */
-    protected static $context_mods;
-
-    /**
-     * Collection of functions to load optional content or apply optional modifications
-     * 
-     * @var Ponticlaro\Bebop\Common\Collection
-     */
-    protected static $loadables;
-
-    /**
-     * Contains the current query instance
-     * 
-     * @var Ponticlaro\Bebop\Db\Query
-     */
-    protected static $query;
-
-    /**
-     * Contains the current query meta data
-     * 
-     * @var stdClass
-     */
-    protected static $query_meta;
-
-    /**
      * Instantiates new model by inheriting all the $post properties
      * 
      * @param WP_Post $post
      */
-    final public function __construct($post = null)
+    final public function __construct($post = null, $data_instance = true)
     {
-        if ($post instanceof \WP_Post) {
+        // Create data instance
+        if ($data_instance && $post instanceof \WP_Post) {
+
             foreach ((array) $post as $key => $value) {
+
                 $this->{$key} = $value;
             }
         }
+
+        // Create configuration instance
+        else {
+
+            $this->context_mods = Bebop::Collection();
+            $this->loadables    = Bebop::Collection();
+        }
+    }
+
+    /**
+     * Creates an instance of the currently called class
+     * 
+     * @return Ponticlaro\Bebop\Mvc\Model
+     */
+    public static function create(\WP_Post $post = null, $data_instance = true)
+    {
+        return new static($post, $data_instance);
+    }
+
+    /**
+     * Gets configuration instance for the current child model
+     * 
+     * @return Ponticlaro\Bebop\Mvc\Models\post
+     */
+    protected static function __getInstance()
+    {
+        $class = get_called_class();
+
+        if (!isset(self::$instances[$class]))
+            self::$instances[$class] = new static(null, false);
+
+        return self::$instances[$class];
     }
 
     /**
@@ -81,18 +80,6 @@ abstract class Model {
     public function getMeta($key, $single = false)
     {
         return get_post_meta($this->ID, $key, $single);
-    }
-
-    /**
-     * Creates an instance of the currently called class
-     * 
-     * @return Ponticlaro\Bebop\Mvc\Model
-     */
-    public static function create(\WP_Post $post = null)
-    {
-        $class = get_called_class();
-        
-        return new $class($post);    
     }
 
     /**
@@ -114,9 +101,7 @@ abstract class Model {
      */
     public static function addLoadable($id, $fn)
     {
-        if (is_null(static::$loadables)) static::$loadables = Bebop::Collection();
-        
-        static::$loadables->set($id, $fn);
+        static::__getInstance()->loadables->set($id, $fn);
     }
 
     /**
@@ -126,12 +111,15 @@ abstract class Model {
      */
     public function load(array $ids = array())
     {
-        if (!is_null(static::$loadables)) {
+        // Get model configuration instance
+        $instance = static::__getInstance();
+
+        if (!is_null($instance->loadables)) {
 
             foreach ($ids as $id) {
                 
-                if (static::$loadables->hasKey($id))        
-                    call_user_func_array(static::$loadables->get($id), array($this));
+                if ($instance->loadables->hasKey($id))        
+                    call_user_func_array($instance->loadables->get($id), array($this));
             }
         }
 
@@ -147,7 +135,7 @@ abstract class Model {
     public static function onInit($fn)
     {
         if (is_callable($fn))
-            static::$init_mods = $fn;
+            static::__getInstance()->init_mods = $fn;
 
         return $this;
     }
@@ -162,18 +150,19 @@ abstract class Model {
     {   
         if (is_callable($fn)) {
 
-            if (is_null(static::$context_mods)) static::$context_mods = Bebop::Collection();
+            // Get model configuration instance
+            $instance = static::__getInstance();
 
             if (is_string($context_keys)) {
                
-                static::$context_mods->set($context_keys, $fn);
+                $instance->context_mods->set($context_keys, $fn);
             }
 
             elseif (is_array($context_keys)) {
                 
                 foreach ($context_keys as $context_key) {
                    
-                    static::$context_mods->set($context_key, $fn);
+                    $instance->context_mods->set($context_key, $fn);
                 }
             }
         }
@@ -189,11 +178,10 @@ abstract class Model {
      */
     private static function __applyModelMods(\WP_Post $post)
     {   
-        $class = get_called_class();
-        $item  = new $class($post);
+        $item = new static($post);
         
-        self::__applyInitMods($item);
-        self::__applyContextMods($item);
+        static::__applyInitMods($item);
+        static::__applyContextMods($item);
 
         return $item;
     }
@@ -206,8 +194,11 @@ abstract class Model {
      */
     private static function __applyInitMods(&$item)
     {
-        if (!is_null(static::$init_mods))
-            call_user_func_array(static::$init_mods, array($item));
+        // Get model configuration instance
+        $instance = static::__getInstance();
+
+        if (!is_null($instance->init_mods))
+            call_user_func_array($instance->init_mods, array($item));
     }
 
     /**
@@ -218,22 +209,25 @@ abstract class Model {
      */
     protected function __applyContextMods(&$item)
     {
+        // Get model configuration instance
+        $instance = static::__getInstance();
+
         // Get current environment
         $context_key = Bebop::Context()->getCurrent();
 
         // Execute current environment function
-        if (!is_null(static::$context_mods)) {
+        if (!is_null($instance->context_mods)) {
 
             // Exact match for the current environment
-            if (static::$context_mods->hasKey($context_key)) {
+            if ($instance->context_mods->hasKey($context_key)) {
                 
-                call_user_func_array(static::$context_mods->get($context_key), array($item));
+                call_user_func_array($instance->context_mods->get($context_key), array($item));
             } 
 
             // Check for partial matches
             else {
 
-                foreach (static::$context_mods->get() as $key => $fn) {
+                foreach ($instance->context_mods->get() as $key => $fn) {
                 
                     if (Bebop::Context()->is($key))
                         call_user_func_array($fn, array($item));
@@ -270,8 +264,11 @@ abstract class Model {
 
         else {
 
+            // Get model configuration instance
+            $instance = static::__getInstance();
+
             // Get results
-            $data = static::$query->postType(static::$__type)->find($ids, $keep_order);
+            $data = $instance->query->postType(static::$__type)->find($ids, $keep_order);
 
             if ($data) {
                 
@@ -303,14 +300,17 @@ abstract class Model {
         // Make sure we have a query object to be used
         static::__enableQueryMode();
 
+        // Get model configuration instance
+        $instance = static::__getInstance();
+
         // Add post type as final argument
-        static::$query->postType(static::$__type);
+        $instance->query->postType(static::$__type);
 
         // Get query results
-        $items = static::$query->findAll($args);
+        $items = $instance->query->findAll($args);
 
         // Save query meta data
-        static::$instance->query_meta  = static::$query->getMeta();
+        $instance->query_meta = $instance->query->getMeta();
 
         // Apply model modifications
         if ($items) {
@@ -330,25 +330,15 @@ abstract class Model {
      */
     public static function query()
     {
+        // Get model configuration instance
+        $instance = static::__getInstance();
+
         // Make sure we have a query object to be used
-        if(is_null(static::$query))
+        if(is_null($instance->query))
             static::__enableQueryMode();
 
-        return static::$query;
-    } 
-
-    /**
-     * Returns called class instance
-     * 
-     * @return object Called class instance
-     */
-    private static function __getInstance()
-    {
-        if (is_null(static::$instance)) 
-            static::$instance = static::create();
-
-        return static::$instance;
-    } 
+        return $instance->query;
+    }
 
     /**
      * Enables query mode and creates a new query
@@ -357,8 +347,12 @@ abstract class Model {
      */
     private static function __enableQueryMode()
     {
-        if (is_null(static::$query) || static::$query->wasExecuted()) {
-            static::$query = new Query;
+        // Get model configuration instance
+        $instance = static::__getInstance();
+
+        if (is_null($instance->query) || $instance->query->wasExecuted()) {
+
+            $instance->query = new Query;
         }
     }
 
@@ -369,7 +363,8 @@ abstract class Model {
      */
     private static function __resetQuery()
     {
-        static::$query = new Query;
+        // Get model configuration instance
+        static::__getInstance()->query = new Query;
     }
 
     /**
@@ -383,9 +378,12 @@ abstract class Model {
     {
         static::__enableQueryMode();
 
-        call_user_method_array($name, static::$query, $args);
+        // Get model configuration instance
+        $instance = static::__getInstance();
 
-        return static::__getInstance();
+        call_user_method_array($name, $instance->query, $args);
+
+        return $instance;
     }
 
     /**
@@ -397,9 +395,12 @@ abstract class Model {
      */
     public function __call($name, $args)
     {
-        if (!is_null(static::$query))
-            call_user_method_array($name, static::$query, $args);
+        // Get model configuration instance
+        $instance = static::__getInstance();
 
-        return static::__getInstance();
+        if (!is_null($instance->query))
+            call_user_method_array($name, $instance->query, $args);
+
+        return $instance;
     }
 }
