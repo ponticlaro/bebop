@@ -48,8 +48,15 @@ abstract class Post {
         // Merge default options with input
         $options = array_merge($default_options, $options);
 
+        // Create configuration instance
+        if ($options['config_instance']) {
+
+            $this->context_mods = Bebop::Collection();
+            $this->loadables    = Bebop::Collection();
+        }
+
         // Create data instance
-        if (!$options['config_instance'] && $post instanceof \WP_Post) {
+        elseif ($post instanceof \WP_Post) {
 
             $this->raw = new \stdClass;
             $this->ID  = $post->ID;
@@ -90,13 +97,6 @@ abstract class Post {
             static::__applyContextMods($this, $post);
 
             unset($this->raw);
-        }
-
-        // Create configuration instance
-        else {
-
-            $this->context_mods = Bebop::Collection();
-            $this->loadables    = Bebop::Collection();
         }
     }
 
