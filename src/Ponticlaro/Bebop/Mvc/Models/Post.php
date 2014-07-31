@@ -22,19 +22,74 @@ abstract class Post {
     protected static $__type = 'post';
 
     /**
+     * Used to define which properties are exposed from the raw post object.
+     * It can be one of the following values:
+     * 
+     * - true: model WILL expose ALL raw properties of the original post
+     * - false: model WILL NOT expose ANY raw properties of the original post
+     * - array: model WILL expose properties listed on this array
+     * 
+     * @var mixed
+     */
+    protected static $__raw_properties = true;
+
+    /**
      * Instantiates new model by inheriting all the $post properties
      * 
      * @param WP_Post $post
      */
-    final public function __construct($post = null, $data_instance = true)
-    {
+    final public function __construct($post = null, array $options = array())
+    {   
+        // Set default options
+        $default_options = array(
+            'config_instance' => false
+        );
+
+        // Merge default options with input
+        $options = array_merge($default_options, $options);
+
         // Create data instance
-        if ($data_instance && $post instanceof \WP_Post) {
+        if (!$options['config_instance'] && $post instanceof \WP_Post) {
+
+            $this->raw = new \stdClass;
+            $this->ID  = $post->ID;
 
             foreach ((array) $post as $key => $value) {
 
-                $this->{$key} = $value;
+                if (static::$__raw_properties) {
+                    
+                    // Expose only whitelisted raw properties
+                    if (is_array(static::$__raw_properties)) {
+                        
+                        // Directly assign property name, if whitelisted
+                        if (in_array($key, static::$__raw_properties)) {
+
+                            $this->{$key} = $value;
+                        }
+
+                        // Use associative array key as property name, if whitelisted
+                        if (array_key_exists($key, static::$__raw_properties)) {
+
+                            $this->{static::$__raw_properties[$key]} = $value;
+                        }
+                    }
+
+                    // Expose all raw properties
+                    else {
+
+                        $this->{$key} = $value;
+                    }
+                }
+
+                // Add all properties to this instance raw property
+                if ($key != 'ID')
+                    $this->raw->{$key} = $value;
             }
+
+            static::__applyInitMods($this, $post);
+            static::__applyContextMods($this, $post);
+
+            unset($this->raw);
         }
 
         // Create configuration instance
@@ -50,9 +105,9 @@ abstract class Post {
      * 
      * @return Ponticlaro\Bebop\Mvc\Model
      */
-    public static function create(\WP_Post $post = null, $data_instance = true)
+    public static function create(\WP_Post $post = null, array $options = array())
     {
-        return new static($post, $data_instance);
+        return new static($post, $options);
     }
 
     /**
@@ -65,7 +120,7 @@ abstract class Post {
         $class = get_called_class();
 
         if (!isset(self::$instances[$class]))
-            self::$instances[$class] = new static(null, false);
+            self::$instances[$class] = new static(null, ['config_instance' => true]);
 
         return self::$instances[$class];
     }
@@ -178,12 +233,7 @@ abstract class Post {
      */
     private static function __applyModelMods(\WP_Post $post)
     {   
-        $item = new static($post);
-        
-        static::__applyInitMods($item);
-        static::__applyContextMods($item);
-
-        return $item;
+        return new static($post);
     }
 
     /**
@@ -192,13 +242,13 @@ abstract class Post {
      * @param  object $item Object to be modified
      * @return void
      */
-    private static function __applyInitMods(&$item)
+    private static function __applyInitMods(&$item, $raw_post)
     {
         // Get model configuration instance
         $instance = static::__getInstance();
 
         if (!is_null($instance->init_mods))
-            call_user_func_array($instance->init_mods, array($item));
+            call_user_func_array($instance->init_mods, array($item, $raw_post));
     }
 
     /**
@@ -207,7 +257,7 @@ abstract class Post {
      * 
      * @param class $item WP_Post instance converted into an instance of the current class
      */
-    protected function __applyContextMods(&$item)
+    protected function __applyContextMods(&$item, $raw_post)
     {
         // Get model configuration instance
         $instance = static::__getInstance();
@@ -221,7 +271,7 @@ abstract class Post {
             // Exact match for the current environment
             if ($instance->context_mods->hasKey($context_key)) {
                 
-                call_user_func_array($instance->context_mods->get($context_key), array($item));
+                call_user_func_array($instance->context_mods->get($context_key), array($item, $raw_post));
             } 
 
             // Check for partial matches
@@ -230,7 +280,7 @@ abstract class Post {
                 foreach ($instance->context_mods->get() as $key => $fn) {
                 
                     if (Bebop::Context()->is($key))
-                        call_user_func_array($fn, array($item));
+                        call_user_func_array($fn, array($item, $raw_post));
                 }
             }
         }
