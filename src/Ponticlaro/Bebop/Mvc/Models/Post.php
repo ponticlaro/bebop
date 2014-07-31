@@ -58,8 +58,9 @@ abstract class Post {
         // Create data instance
         elseif ($post instanceof \WP_Post) {
 
-            $this->raw = new \stdClass;
-            $this->ID  = $post->ID;
+            $this->raw       = new \stdClass;
+            $this->ID        = $post->ID;
+            $this->permalink = get_permalink($this->ID);
 
             foreach ((array) $post as $key => $value) {
 
