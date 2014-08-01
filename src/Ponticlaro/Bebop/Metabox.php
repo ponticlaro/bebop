@@ -386,31 +386,34 @@ class Metabox extends TrackableObjectAbstract
 
             ob_end_clean();
 
-            $doc = new \DOMDocument;
-            $doc->loadHTML($html);
+            if ($html) {
 
-            foreach ($doc->getElementsByTagname('input') as $el) {
+                $doc = new \DOMDocument;
+                $doc->loadHTML($html);
 
-                $name = $el->getAttribute('name');
+                foreach ($doc->getElementsByTagname('input') as $el) {
 
-                if ($name)
-                    $this->meta_fields->push(str_replace('[]', '', $name));
-            }
+                    $name = $el->getAttribute('name');
 
-            foreach ($doc->getElementsByTagname('select') as $el) {
+                    if ($name)
+                        $this->meta_fields->push(str_replace('[]', '', $name));
+                }
 
-                $name = $el->getAttribute('name');
+                foreach ($doc->getElementsByTagname('select') as $el) {
 
-                if ($name)
-                    $this->meta_fields->push(str_replace('[]', '', $name));
-            }
+                    $name = $el->getAttribute('name');
 
-            foreach ($doc->getElementsByTagname('textarea') as $el) {
+                    if ($name)
+                        $this->meta_fields->push(str_replace('[]', '', $name));
+                }
 
-                $name = $el->getAttribute('name');
+                foreach ($doc->getElementsByTagname('textarea') as $el) {
 
-                if ($name)
-                    $this->meta_fields->push(str_replace('[]', '', $name));
+                    $name = $el->getAttribute('name');
+
+                    if ($name)
+                        $this->meta_fields->push(str_replace('[]', '', $name));
+                }
             }
         }
     }
