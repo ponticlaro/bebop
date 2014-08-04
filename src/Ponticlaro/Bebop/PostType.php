@@ -579,7 +579,7 @@ class PostType extends TrackableObjectAbstract
         if (!is_string($capability))
             throw new \Exception('PostType capability must be a string.');
 
-        if (!$this->capabilities->hasValue($capability))
+        if ($this->capabilities->hasValue($capability))
             $this->capabilities->pop($capability);
 
         return $this;
@@ -680,7 +680,7 @@ class PostType extends TrackableObjectAbstract
         if (!is_string($feature))
              throw new \Exception('PostType feature must be a string.');
 
-        if (!$this->features->hasValue($feature))
+        if ($this->features->hasValue($feature))
             $this->features->pop($feature);
 
         return $this;
@@ -794,7 +794,7 @@ class PostType extends TrackableObjectAbstract
         if (!is_string($taxonomy))
              throw new \Exception('PostType taxonomy must be a string.');
 
-        if (!$this->taxonomies->hasValue($taxonomy))
+        if ($this->taxonomies->hasValue($taxonomy))
             $this->taxonomies->pop($taxonomy);
 
         return $this;
