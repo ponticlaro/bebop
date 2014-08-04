@@ -105,7 +105,8 @@ class PostType extends TrackableObjectAbstract
         // Instantiate features object with defaults
         $this->features = Bebop::Collection(array( 
             'title',
-            'editor'
+            'editor',
+            'revisions'
         )); 
 
         // Instantiate labels object
