@@ -305,7 +305,7 @@ class Taxonomy extends TrackableObjectAbstract
      */
     public function setPostTypes(array $post_types = array())
     {
-        $this->$post_types->set($post_types);
+        $this->post_types->set($post_types);
 
         return $this;
     }
