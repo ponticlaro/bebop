@@ -4,9 +4,24 @@ namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\AdminPage\Tab;
+use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
-class AdminPage
+class AdminPage extends TrackableObjectAbstract
 {
+    /**
+     * Required trackable object type
+     * 
+     * @var string
+     */
+    protected $__trackable_type = 'admin_page';
+
+    /**
+     * Required trackable object ID
+     * 
+     * @var string
+     */
+    protected $__trackable_id;
+
     /**
      * Configuration parameters
      * 
@@ -15,7 +30,21 @@ class AdminPage
     protected $config;
 
     /**
+     * Options collection
      * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $options;
+
+    /**
+     * Data collection
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $data;
+
+    /**
+     * Tabs collection
      * 
      * @var Ponticlaro\Bebop\Common\Collection
      */
@@ -42,6 +71,12 @@ class AdminPage
             'parent'     => ''
         ));
 
+        // Set options object
+        $this->options = Bebop::Collection();
+
+        // Set data object
+        $this->data = Bebop::Collection();
+
         // Set tabs object
         $this->tabs = Bebop::Collection();
 
@@ -53,8 +88,69 @@ class AdminPage
         if ($function)
             $this->setFunction($function);
 
+        // Register Settings
+        add_action('admin_init', array($this, '__handleSettingsRegistration'));
+
         // Register Admin Page
-        add_action('admin_menu', array($this, 'handleRegistration'));
+        add_action('admin_menu', array($this, '__handlePageRegistration'));
+    }
+
+    /**
+     * Sets data
+     * 
+     * @param array $data
+     */
+    public function setData(array $data)
+    {
+        $this->data->set($data);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single key/value data item
+     * 
+     * @param string $key   Data key
+     * @param string $value Data value
+     */
+    public function addDataItem($key, $value)
+    {
+        $this->data->set($key, $value);
+
+        return $this;
+    }
+
+    /**
+     * Returns all data
+     * 
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data->getAll();
+    }
+
+    /**
+     * Sets admin page ID
+     * 
+     * @param string $id
+     */
+    public function setId($id)
+    {
+        if (is_string($id))
+            $this->__trackable_id = Bebop::util('slugify', $id);
+
+        return $this;
+    }
+
+    /**
+     * Returns admin page ID
+     * 
+     * @return string     
+     */
+    public function getId()
+    {
+        return $this->__trackable_id;
     }
 
     /**
@@ -68,6 +164,9 @@ class AdminPage
             throw new \Exception('AdminPage title must be a string');
 
         $this->config->set('page_title', $title);
+
+        if (!$this->getId())
+            $this->setId($title);
 
         if (!$this->getMenuTitle())
             $this->setMenuTitle($title);
@@ -295,12 +394,56 @@ class AdminPage
     }
 
     /**
+     * Register single page settings based on page contents
+     * 
+     * @return void
+     */
+    public function __handleSettingsRegistration()
+    {
+        $tabs     = $this->getTabs();
+        $function = $this->getFunction();
+
+        if (!$tabs && $function) {
+            
+            $names = Bebop::util('getControlNamesFromCallable', $function, array($this->data));
+
+            if ($names) {
+
+                $this->options->push($names);
+
+                foreach ($names as $name) {
+                
+                    register_setting($this->getId(), $name);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets single page data
+     * 
+     * @return void  
+     */
+    private function __setData()
+    {
+        $options = $this->options->getAll();
+
+        if ($options) {
+            
+            foreach ($options as $option) {
+                
+                $this->data->set($option, get_option($option));
+            }
+        }
+    }
+
+    /**
      * Defines which function should be used based on the settings provided
      * See http://codex.wordpress.org/Administration_Menus
      * 
-     * @return [type] [description]
+     * @return void
      */
-    public function handleRegistration()
+    public function __handlePageRegistration()
     {
         $parent = $this->getParent();
 
@@ -430,41 +573,65 @@ class AdminPage
             <h2><?php echo $this->getPageTitle(); ?></h2>
             
             <form method="post" action="options.php">
-                <?php 
+                
+                <?php settings_errors();
 
-                settings_errors();
+                if ($this->getTabs()) { 
 
-                $tabs     = $this->tabs->getAll();
-                $function = $this->getFunction();
-
-                if ($tabs) { 
-
-                    $current_tab = isset($_GET['tab']) ? $_GET['tab'] : $tabs[0]->getId();
-
-                    ?>
-                    
-                    <h2 class="nav-tab-wrapper">
-                        <?php foreach ($tabs as $tab) { ?>
-                            <a href="<?php echo $this->config->get('url') . '&tab=' . $tab->getId(); ?>" class="nav-tab<?php if ($current_tab == $tab->getId()) echo ' nav-tab-active'; ?>">
-                                <?php echo $tab->getTitle(); ?>
-                            </a>
-                        <?php } ?>
-                    </h2>
-
-                    <?php foreach ($tabs as $tab) {
-                        
-                        if ($current_tab == $tab->getId())
-                            call_user_func_array($tab->getFunction(), array(array())); 
-                    }
+                    $this->renderTabs();
                 }
 
-                elseif ($function)
-                    call_user_func_array($function, array(array())); 
+                elseif ($this->getFunction()) {
 
-                ?>
+                    $this->renderSinglePage();
+                } ?>
+
             <form>
             
         </div><!-- /.wrap -->
         
     <?php }
+
+    /**
+     * Renders tabbed UI
+     * 
+     * @return void
+     */
+    protected function renderTabs()
+    {   
+        $tabs        = $this->getTabs();
+        $page_url    = $this->config->get('url');
+        $current_tab = isset($_GET['tab']) ? $_GET['tab'] : $tabs[0]->getId();
+
+        ?>
+        
+        <h2 class="nav-tab-wrapper">
+            <?php foreach ($tabs as $tab) { ?>
+                <a href="<?php echo $page_url . '&tab=' . $tab->getId(); ?>" class="nav-tab<?php if ($current_tab == $tab->getId()) echo ' nav-tab-active'; ?>">
+                    <?php echo $tab->getTitle(); ?>
+                </a>
+            <?php } ?>
+        </h2>
+
+        <?php foreach ($tabs as $tab) {
+            
+            if ($current_tab == $tab->getId()) {
+
+                settings_fields($tab->getId());
+                $tab->render();
+            }
+        }
+    }
+
+    /**
+     * Renders single page UI
+     * 
+     * @return void
+     */
+    protected function renderSinglePage()
+    {
+        settings_fields($this->getId());
+        $this->__setData();
+        call_user_func_array($this->getFunction(), array($this->data)); 
+    }
 }
