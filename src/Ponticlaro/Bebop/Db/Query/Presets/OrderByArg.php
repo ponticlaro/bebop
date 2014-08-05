@@ -40,6 +40,6 @@ class OrderByArg extends Arg {
 
     public function getValue()
     {
-        return $this->data->get() ?: null;
+        return $this->data->getAll() ?: null;
     }
 }

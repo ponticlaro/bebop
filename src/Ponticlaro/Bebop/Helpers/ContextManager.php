@@ -103,7 +103,7 @@ class ContextManager extends SingletonAbstract {
 	 */
 	public static function defineCurrent()
 	{
-		foreach (self::$contexts->get() as $context_container) {
+		foreach (self::$contexts->getAll() as $context_container) {
 			
 			$key = $context_container->run();
 
@@ -251,7 +251,7 @@ class ContextManager extends SingletonAbstract {
 	{
 		$target_context = null;
 
-		foreach (self::$contexts->get() as $context) {
+		foreach (self::$contexts->getAll() as $context) {
 			
 			if ($context->getId() == $id) {
 				

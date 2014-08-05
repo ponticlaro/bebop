@@ -6,7 +6,7 @@ use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
 
-class Factory {
+class BebopFactory {
 
 	/**
 	 * List of manufacturable classes

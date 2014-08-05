@@ -80,7 +80,7 @@ class Env {
 	 */
 	public function getHosts()
 	{
-		return $this->__hosts->get();
+		return $this->__hosts->getAll();
 	}
 
 	/**

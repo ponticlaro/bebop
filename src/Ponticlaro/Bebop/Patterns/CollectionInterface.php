@@ -10,7 +10,7 @@ interface CollectionInterface {
 	public function unshift($values, $key = null);
 	public function push($values, $key = null);
 	public function pop($value, $key = null);
-	public function get($key = null);
+	public function get($key);
 	public function getAll();
 	public function remove($key);
     public function clear();

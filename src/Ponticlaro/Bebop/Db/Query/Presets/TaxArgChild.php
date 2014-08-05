@@ -96,6 +96,6 @@ class TaxArgChild extends ArgChild {
 
     public function getValue()
     {   
-        return $this->isValid() ? $this->data->get() : null;
+        return $this->isValid() ? $this->data->getAll() : null;
     }
 }

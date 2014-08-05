@@ -147,7 +147,7 @@ class Query {
 
         $args = array();
 
-        foreach ($this->args->get() as $arg) {
+        foreach ($this->args->getAll() as $arg) {
 
             if ($arg->getValue()) {
 

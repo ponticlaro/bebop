@@ -5,7 +5,7 @@ namespace Ponticlaro\Bebop\Mvc\Models;
 use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\Db\Query;
 
-abstract class Post {
+class Post {
 
     /**
      * Holds child classes instances with their model customizations
@@ -278,7 +278,7 @@ abstract class Post {
             // Check for partial matches
             else {
 
-                foreach ($instance->context_mods->get() as $key => $fn) {
+                foreach ($instance->context_mods->getAll() as $key => $fn) {
                 
                     if (Bebop::Context()->is($key))
                         call_user_func_array($fn, array($item, $raw_post));

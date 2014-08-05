@@ -244,7 +244,7 @@ class Metabox extends TrackableObjectAbstract
      */
     public function getPostTypes()
     {
-        return $this->post_types->get();
+        return $this->post_types->getAll();
     }
 
     /**
@@ -366,55 +366,17 @@ class Metabox extends TrackableObjectAbstract
      * Gets field names from callback function
      * 
      */
-    private function __getFieldNamesFromCallback()
+    private function __setMetaFields()
     {   
         // Only execute if there are no manually defined meta fields
         if (empty($this->meta_fields->getAll())) {
 
-            ob_start();
+            $function = $this->getCallback();
+            $args     = array($this->data, new \WP_Post(new \stdClass), $this);
+            $names    = Bebop::util('getControlNamesFromCallable', $function, $args);
 
-            call_user_func_array(
-                $this->getCallback(), 
-                array(
-                    $this->data,
-                    new \WP_Post(new \stdClass),
-                    $this
-                )
-            );
-            
-            $html = ob_get_contents();
-
-            ob_end_clean();
-
-            if ($html) {
-
-                $doc = new \DOMDocument;
-                $doc->loadHTML($html);
-
-                foreach ($doc->getElementsByTagname('input') as $el) {
-
-                    $name = $el->getAttribute('name');
-
-                    if ($name)
-                        $this->meta_fields->push(str_replace('[]', '', $name));
-                }
-
-                foreach ($doc->getElementsByTagname('select') as $el) {
-
-                    $name = $el->getAttribute('name');
-
-                    if ($name)
-                        $this->meta_fields->push(str_replace('[]', '', $name));
-                }
-
-                foreach ($doc->getElementsByTagname('textarea') as $el) {
-
-                    $name = $el->getAttribute('name');
-
-                    if ($name)
-                        $this->meta_fields->push(str_replace('[]', '', $name));
-                }
-            }
+            if ($names)
+                $this->meta_fields->push($names);
         }
     }
 
@@ -437,9 +399,9 @@ class Metabox extends TrackableObjectAbstract
             wp_nonce_field('metabox_'. $id .'_saving_meta', 'metabox_'. $id .'_nonce');
 
             // Get fields from callback function
-            $this->__getFieldNamesFromCallback();
+            $this->__setMetaFields();
 
-            $meta_fields = $this->meta_fields->get();
+            $meta_fields = $this->meta_fields->getAll();
 
             if ($meta_fields) {
 
@@ -503,9 +465,9 @@ class Metabox extends TrackableObjectAbstract
                 if (!current_user_can('edit_post', $post_id)) return $post_id;
 
                 // Get fields from callback function
-                $this->__getFieldNamesFromCallback();
+                $this->__setMetaFields();
 
-                foreach($this->meta_fields->get() as $field) {
+                foreach($this->meta_fields->getAll() as $field) {
 
                     $value = isset($_POST[$field]) ? $_POST[$field] : '';
 

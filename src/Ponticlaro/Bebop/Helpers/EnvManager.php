@@ -117,7 +117,7 @@ class EnvManager extends SingletonAbstract {
 	 */
 	public function getCurrent()
 	{
-		$envs = self::$__environments->get();
+		$envs = self::$__environments->getAll();
 
 		foreach ($envs as $key => $env) {
 			

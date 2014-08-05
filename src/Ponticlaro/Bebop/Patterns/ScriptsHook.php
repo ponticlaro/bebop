@@ -241,7 +241,7 @@ class ScriptsHook {
      */
     protected function __deregisterScripts()
     {
-        foreach ($this->deregister_list->get() as $script_id) {
+        foreach ($this->deregister_list->getAll() as $script_id) {
 
             if ($this->scripts->hasKey($script_id)) {
                 
@@ -264,7 +264,7 @@ class ScriptsHook {
      */
     protected function __dequeueScripts()
     {
-        foreach ($this->dequeue_list->get() as $script_id) {
+        foreach ($this->dequeue_list->getAll() as $script_id) {
             
             if ($this->scripts->hasKey($script_id)) {
                 
@@ -287,7 +287,7 @@ class ScriptsHook {
      */
     protected function __registerScripts()
     {
-        foreach ($this->register_list->get() as $script_id) {
+        foreach ($this->register_list->getAll() as $script_id) {
 
             if ($this->scripts->hasKey($script_id)) {
 
@@ -309,7 +309,7 @@ class ScriptsHook {
      */
     protected function __enqueueScripts()
     {
-        foreach ($this->enqueue_list->get() as $script_id) {
+        foreach ($this->enqueue_list->getAll() as $script_id) {
             
             if ($this->scripts->hasKey($script_id)) {
                 

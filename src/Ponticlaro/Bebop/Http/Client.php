@@ -183,9 +183,9 @@ class Client {
         $this->__cookies->set($call_cookies);
 
         // Build final request configuration
-        $config = $this->__config->get();
-        $config['headers'] = $this->__headers->get();
-        $config['cookies'] = $this->__cookies->get();
+        $config = $this->__config->getAll();
+        $config['headers'] = $this->__headers->getAll();
+        $config['cookies'] = $this->__cookies->getAll();
 
         // Build args array
         $args = array(

@@ -89,4 +89,61 @@ class Utils
 		
 		return $relative ? $url : home_url() . $url; 
 	}
+
+	/**
+	 * Gets control elements name attribute from callback function
+	 * 
+	 * @param  callable $callable Callable to execute
+	 * @param  array    $args     Callabler arguments
+	 * @return array              List of control elements names
+	 */
+    public function getControlNamesFromCallable($callable, array $args = array())
+    {   
+    	$names = array();
+
+        ob_start();
+
+        call_user_func_array($callable, $args);
+        
+        $html = ob_get_contents();
+
+        ob_end_clean();
+
+        if ($html) {
+
+            $doc = new \DOMDocument;
+            $doc->loadHTML($html);
+
+            $patterns = array(
+            	"/\[\]/",       // e.g. items[]
+            	"/\[[^\]]+\]/", // e.g. parent[child]
+            );
+
+            foreach ($doc->getElementsByTagname('input') as $el) {
+
+                $name = $el->getAttribute('name');
+
+                if ($name)
+                    $names[] = preg_replace($patterns, '', $name);
+            }
+
+            foreach ($doc->getElementsByTagname('select') as $el) {
+
+                $name = $el->getAttribute('name');
+
+                if ($name)
+                    $names[] = preg_replace($patterns, '', $name);
+            }
+
+            foreach ($doc->getElementsByTagname('textarea') as $el) {
+
+                $name = $el->getAttribute('name');
+
+                if ($name)
+                    $names[] = preg_replace($patterns, '', $name);
+            }
+        }
+
+        return array_unique($names);
+    }
 }
