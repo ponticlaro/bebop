@@ -2,429 +2,520 @@
 
 namespace Ponticlaro\Bebop\Patterns;
 
-abstract class CollectionAbstract implements CollectionInterface {
-
-	/**
-	 * Array that contains all the data in this collection
-	 * 
-	 * @var   array
-	 */
-	private $data = array();
-	
-	/**
-	 * Initialize Collection with optionally 
-	 * passed array with initial data
-	 *
-	 * @param   array   $data    Optional initial data to be added
-	 */
-	public function __construct(array $data = array())
-	{
-		$this->set($data);
-	}
-
-	/**
-	 * Sets a value for a the given key
-	 *
-	 * By default it uses true as the value,
-	 * making it easier to mimic indexed arrays by
-	 * later calling getKeys() to get
-	 *
-	 * @param   string   $key     Key where the value should be stored
-	 * @param   mixed    $value   Value that should be stored
-	 */
-	public function set($key, $value = true)
-	{
-		if (!$key) return $this;
-
-		if (is_string($key)) $this->__set($key, $value);
-
-		if (is_array($key) && !empty($key)) {
-
-			$data_list = $key;
-
-			foreach ($data_list as $key => $value) {
-
-				$this->__set($key, $value);
-
-			}
-
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Removed the first value from the indexed array
-	 * with a given $key or directly from the $data indexed array
-	 * 
-	 * @param    string   $key   Target array key
-	 * @return   mixed           The removed value or null
-	 */
-	public function shift($key = null)
-	{
-		if($key) return isset($this->data[$key]) && is_array($this->data[$key]) ? array_shift($this->data[$key]) : null;
-
-		return isset($this->data[0]) ? array_shift($this->data) : null;
-	}
-
-	/**
-	 * Adds one or more items to the beginning 
-	 * of the target container array
-	 *  
-	 * @param    mixed    $value   Valuss to be inserted
-	 * @param    string   $key     Namespace where the target array lives 
-	 * @return   class             This collection
-	 */
-	public function unshift($values, $key = null)
-	{
-		if (is_array($values)) {
-
-			foreach ($values as $key => $value) {
-
-				$this->__unshiftItem($value, $key);
-			}
-		}
-
-		else {
-
-			$this->__unshiftItem($values, $key);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Adds an item to to beginning of the target array
-	 *
-	 * @param    mixed    $value   The valued to be inserted
-	 * @param    string   $key     Optional key to namespace the pushed value
-	 * @return   void        
-	 */
-	private function __unshiftItem($value, $key = null)
-	{
-		if ($key) {
-
-			if (!array_key_exists($key, $this->data)) {
-
-	            $this->data[$key] = $value;
-
-	        } elseif (is_array($this->data[$key])) {
-
-	            array_unshift($this->data[$key], $value);
-
-	        } else {
-
-	            $this->data[$key] = array($value);
-	        }
-
-		} else {
-
-			 array_unshift($this->data, $value);
-		}
-	}
-
-	/**
-	 * Adds a value to a given key or 
-	 * to the $data indexed array
-	 *
-	 * @param    mixed    $value   [description]
-	 * @param    string   $key     [description]
-	 * @return   class             This class instance
-	 */
-	public function push($values, $key = null)
-	{
-		if(is_array($values)) {
-
-			foreach ($values as $value) {
-				
-				$this->__pushItem($value, $key);
-
-			}
-
-		} else {
-
-			$this->__pushItem($values);
-		}
-
-		return $this;
-	}
-
-
-	/**
-	 * Push individual items to indexed arrays
-	 *
-	 * @param    mixed    $value   THe value to be inserted
-	 * @param    string   $key     Optional key to namespace the pushed value
-	 * @return   void        
-	 */
-	private function __pushItem($value, $key = null) 
-	{
-		if($key) {
-
-			if (!array_key_exists($key, $this->data)) {
-
-	            $this->data[$key] = $value;
-
-	        } elseif (is_array($this->data[$key])) {
-
-	            $this->data[$key][] = $value;
-
-	        } else {
-
-	            $this->data[$key] = array($this->data[$key], $value);
-
-	        }
-
-		} else {
-
-			 $this->data[] = $value;
-		}
-	}
-
-	/**
-	 * Removes a value from a given key or 
-	 * from the $data indexed array
-	 *
-	 * @param    string    $value   Value to be popped 
-	 * @param    string    $key     Optional key to pop the value from
-	 * @return   class              This class instance
-	 */
-	public function pop($value, $key = null)
-	{
-		if(!$key){
-
-			$value_key = array_search($value, $this->data);
-
-	        if ($value_key !== false) 
-	        	unset($this->data[$value_key]);
-
-		} else {
-
-			if (!array_key_exists($key, $this->data)) return $this;
-
-	        if (is_array($this->data[$key])) {
-
-	        	$value_key = array_search($value, $this->data[$key]);
-
-	        	if ($value_key !== false) 
-	        		unset($this->data[$key][$value_key]);
-
-	        } else {
-
-	            $this->remove($key);
-	        }
-	    }
-
-		return $this;
-	}
-
-	/**
-	 * Gets values for provide key, keys or
-	 * all the existing data if no key is passed
-	 *
-	 * @param    string|array   $key 
-	 * @return   mixed               
-	 */
-	public function get($key)
-	{
-		if (is_string($key)) return $this->__get($key);
-
-		if (is_array($key) && !empty($key)) {
-
-			$keys    = $key;
-			$results = array();
-
-			foreach ($keys as $key) {
-				$results[$key] = $this->__get($key);
-			}
-
-			return $results;
-
-		}
-	}
-
-	/**
-	 * Returns all data
-	 * 
-	 * @return array All data currently stored
-	 */
-	public function getAll()
-	{
-		return $this->data;
-	}
-
-	/**
-	 * Removes one key or mroe key
-	 * 
-	 * @param    string|array   $key Key or keys to be removed
-	 * @return   class          This class instance
-	 */
-	public function remove($key)
-	{
-		if (!$key) return $this;
-
-		if (is_string($key)) $this->__unset($key);
-
-		if (is_array($key) && !empty($key)){
-
-			$keys = $key;
-
-			foreach ($keys as $key) {
-
-				$this->__unset($key);
-
-			}
-
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Removes all data
-	 * 
-	 * @return   class   This class instance
-	 */
-    public function clear()
+abstract class CollectionAbstract implements CollectionInterface, \IteratorAggregate, \Countable {
+
+    /**
+     * Array that contains all the data
+     * 
+     * @var array
+     */
+    protected $data = array();
+
+    /**
+     * Separator for path keys
+     * 
+     * @var string
+     */
+    protected $path_separator = '.';
+    
+    /**
+     * Initialize Collection with optionally 
+     * passed array with initial data
+     *
+     * @param array $data Optional initial data to be added
+     */
+    public function __construct(array $data = array())
     {
+        $this->set($data);
+    }
+
+    /**
+     * Overrides the default path separator
+     * 
+     * @param string $separator
+     */
+    public function setPathSeparator($separator)
+    {
+        if (is_string($separator))
+            $this->path_separator = $separator;
+
+        return $this;
+    }
+
+    /**
+     * Sets a value for the given path
+     *
+     * @param string $path Path where the value should be stored
+     * @param mixed  value Value that should be stored
+     */
+    public function set($paths, $value = true)
+    {
+        if (is_string($paths)) 
+            $this->__set($paths, $value);
+
+        if (is_array($paths)) {
+
+            foreach ($paths as $path => $value) {
+
+                $this->__set($path, $value);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removed the first value from the indexed array
+     * with a given $path or directly from the $data indexed array
+     * 
+     * @param  string $path Target array path
+     * @return mixed        The removed value or null
+     */
+    public function shift($path = null)
+    {
+        if ($path) {
+            
+            $data = $this->__get($path);
+
+            if (is_array($data)) {
+                
+                $value = array_shift($data);
+
+                $this->__set($path, $data);
+            }
+        }
+
+        else {
+
+            $value = isset($this->data[0]) ? array_shift($this->data) : null;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Adds one or more items to the beginning 
+     * of the target container array
+     *  
+     * @param    mixed    $value   Valuss to be inserted
+     * @param    string   $path    Optional path to unshift the value to
+     * @return   class             This collection
+     */
+    public function unshift($values, $path = null)
+    {
+        if (is_array($values)) {
+
+            foreach ($values as $path => $value) {
+
+                $this->__unshiftItem($value, $path);
+            }
+        }
+
+        else {
+
+            $this->__unshiftItem($values, $path);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Adds an item to to beginning of the target array
+     *
+     * @param  mixed  $value The valued to be inserted
+     * @param  string $path  Optional path to unshift the value to
+     * @return void      
+     */
+    private function __unshiftItem($value, $path = null)
+    {
+        if ($path) {
+            
+            $data = $this->__get($path);
+
+            if (is_array($data)) {
+
+                array_unshift($data, $value);
+            } 
+
+            else {
+
+                $data = array($value);
+            }
+
+            $this->__set($path, $data);
+        }
+
+        else {
+
+            array_unshift($this->data, $value);
+        }
+    }
+
+    /**
+     * Adds a value to a given path or to the $data indexed array
+     *
+     * @param  mixed  $values Values to be inserted
+     * @param  string $path   Optional path to push the value to
+     * @return class          This class instance
+     */
+    public function push($values, $path = null)
+    {
+        if (is_array($values)) {
+
+            foreach ($values as $path => $value) {
+                
+                $this->__pushItem($value, $path);
+            }
+        } 
+
+        else {
+
+            $this->__pushItem($values, $path);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Push individual items to indexed arrays
+     *
+     * @param  mixed  $value The value to be inserted
+     * @param  string $path  Optional path to push the value to
+     * @return void        
+     */
+    private function __pushItem($value, $path = null) 
+    {
+        if ($path) {
+            
+            $data = $this->__get($path);
+
+            if (is_array($data)) {
+
+                $data[] = $value;
+                
+            } else {
+
+                $data = array($value);
+            }
+
+            $this->__set($path, $data);
+        }
+
+        else {
+
+            $this->data[] = $value;
+        }
+    }
+
+    /**
+     * Removes a value from a given path or 
+     * from the $data indexed array
+     *
+     * @param  string $value Value to be popped 
+     * @param  string $path  Optional path to pop the value from
+     * @return class         This class instance
+     */
+    public function pop($value, $path = null)
+    {
+        if ($path) {
+            
+            $data = $this->__get($path);
+
+            if (is_array($data)) {
+
+                $key = array_search($value, $data);
+
+                if ($key !== false) 
+                    $this->__unset($path . $this->path_separator . $key);
+            } 
+
+            else {
+
+                $this->__unset($path);
+            }
+        }
+
+        else {
+
+            $key = array_search($value, $this->data);
+
+            if ($key !== false) 
+                unset($this->data[$key]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes one key or more keys
+     * 
+     * @param  string|array $paths Path or paths to be removed
+     * @return class               This class instance
+     */
+    public function remove($paths)
+    {
+        if (is_string($paths)) 
+            $this->__unset($paths);
+
+        if (is_array($paths)) {
+
+            foreach ($paths as $path) {
+
+                $this->__unset($path);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes all data
+     *
+     * @return class This class instance
+     */
+    public function clear()
+    {   
         $this->data = array();
 
         return $this;
     }
 
-	/**
-	 * Get list of keys
-	 *
-	 * @param    boolean   $with_value   Optionally only return keys with value
-	 * @return   array                   Indexed array with keys
-	 */
-	public function getKeys($with_value = false)
-	{	
-		if(!$with_value) return array_keys($this->data);
-
-		$keys = array();
-
-		foreach ($this->data as $key => $value) {
-			
-			if($with_value && !$value) continue;
-
-			$keys[] = $key;
-		}
-
-		return $keys;
-	}
-
-	/**
-	 * Case insensitive $key search
-	 * 
-	 * @param    string   $key   Key to be searched
-	 * @return   mixed           The match for the searched key or false if not found
-	 */
-    public function keySearch($key)
+    /**
+     * Gets values for provide path or paths
+     *
+     * @param  string|array $paths 
+     * @return mixed               
+     */
+    public function get($paths)
     {
-        foreach (array_keys($this->data) as $k) {
+        if (is_string($paths)) 
+            return $this->__get($paths);
 
-            if (!strcasecmp($k, $key)) {
+        if (is_array($paths)) {
 
-                return $k;
+            $results = array();
 
+            foreach ($paths as $path) {
+
+                $results[$path] = $this->__get($path);
             }
 
+            return $results;
         }
 
-        return false;
+        return null;
     }
 
     /**
-     * Checks if the provided $key have an exact match
+     * Returns all data
      * 
-     * @param    string    $key   Key to search for
-     * @return   boolean          True if the $key exists and false if not
+     * @return array All data currently stored
      */
-	public function hasKey($key)
-	{
-		return array_key_exists($key, $this->data);
-	}
-
-	/**
-	 * Checks if the provided $value have an exact match
-	 * 
-	 * @param    mixed     $value   Value to be searched for
-	 * @param    string    $key     Optional key to be searched for the given $value
-	 * @return   boolean            True if the value was found and false if not
-	 */
-	public function hasValue($value, $key = null)
+    public function getAll()
     {
-    	if (!$key) {
+        return $this->data;
+    }
 
-			$key = array_search($value, $this->data);
+    /**
+     * Get list of keys
+     *
+     * @param  boolean $with_value Optionally only return keys with value
+     * @return array               Indexed array with keys
+     */
+    public function getKeys($path = null)
+    {   
+        $data = $path ? $this->__get($path) : $this->data;
 
-    	} else {
+        return is_array($data) ? array_keys($data) : null;
+    }
 
-			if (!array_key_exists($key, $this->data)) return false;
+    /**
+     * Checks if the provided $path have an exact match
+     * 
+     * @param  string  $path Path to search for
+     * @return boolean       True if the $key exists and false if not
+     */
+    public function hasKey($path)
+    {
+        return $this->__hasPath($path) ? true : false;
+    }
 
-	        if (is_array($this->data[$key])) {
+    /**
+     * Checks if the provided $value have an exact match
+     * 
+     * @param  mixed   $value Value to search for
+     * @param  string  $path  Optional path to be searched for the given $value
+     * @return boolean        True if the value was found and false if not
+     */
+    public function hasValue($value, $path = null)
+    {
+        if ($path) {
+            
+            $data = $this->__get($path);
 
-	            $key = array_search($value, $this->data[$key]);
+            if (is_array($data)) {
 
-	        } else {
+                $key = array_search($value, $data);
+            } 
 
-	            $key = $this->data[$key] == $value ? true : false;
+            else {
 
-	        }
+                $key = $data == $value ? true : false;
+            }
+        }
 
-    	}
+        else {
+
+            $key = array_search($value, $this->data);
+        }
 
         return $key === false ? false : true;
     }
 
     /**
-     * Counts the number of items in the target container
+     * Counts the number of items
      * 
-     * @param    boolean   $key   Optional key to look for and count items
-     * @return   integer          Number of items contained
+     * @param  boolean $path Optional path to look for and count items
+     * @return integer       Number of items contained
      */
-    public function count($key = false)
+    public function count($path = null)
     {
-        if($key && isset($this->data[$key])) return is_array($this->data[$key]) ? count($this->data[$key]) : (!empty($this->data[$key]) ? 1 : 0);
+        $data = $path ? $this->__get($path) : $this->data;
 
-        return count($this->data);
+        return $data && is_array($data) ? count($data) : null;
+    }
+
+    /**
+     * Returns data as an ArrayIterator instance
+     * 
+     * @return \ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->data);
     }
 
     /**
      * Taking control over the __set overloading magic method
      * 
-     * @param   string   $key     Key that will hold the $value
-     * @param   mixed    $value   Value to be stored
+     * @param string $path  Path that will hold the $value
+     * @param mixed  $value Value to be stored
      */
-	public function __set($key, $value)
-	{	
-		$this->data[$key] = $value;
-	}
+    public function __set($path, $value)
+    {   
+        // Get current data as reference
+        $data = &$this->data;
 
-	/**
-	 * Taking control over the __get overloading magic method
-	 * 
-	 * @param    string   $key   Key to lok for and return its value
-	 * @return   mixed           Value of the key or null
-	 */
-	public function __get($key)
-	{
-		$value = array_key_exists($key, $this->data) ? $this->data[$key] : null;
+        // Explode keys
+        $keys = explode($this->path_separator, $path);
 
-		return $value;
-	}
+        // Crawl though the keys
+        while (count($keys) > 1) {
 
-	/**
-	 * Taking control over the __unset overloading magic method
-	 * 
-	 * @param   string   $key   Key to be unset
-	 */
-	public function __unset($key)
-    {
-    	unset($this->data[$key]);
+            $key = array_shift($keys);
 
-    	return $this;
+            if (!isset($data[$key])) {
+
+                $data[$key] = array();
+            }
+            
+            $data =& $data[$key];
+        }
+
+        $data[array_shift($keys)] = $value;
+
+        return $this;
     }
 
+    /**
+     * Taking control over the __get overloading magic method
+     * 
+     * @param  string $path Path to look for and return its value
+     * @return mixed        Value of the key or null
+     */
+    public function __get($path)
+    {
+        // Get current data as reference
+        $data = &$this->data;
+
+        // Explode keys
+        $keys = explode($this->path_separator, $path);
+
+        // Crawl though the keys
+        while (count($keys) > 1) {
+
+            $key = array_shift($keys);
+
+            if (!isset($data[$key])) {
+
+                return null;
+            }
+            
+            $data =& $data[$key];
+        }
+
+        return $data[array_shift($keys)];
+    }
+
+    /**
+     * Taking control over the __unset overloading magic method
+     * 
+     * @param string $path Path to be unset
+     */
+    public function __unset($path)
+    {
+        // Get current data as reference
+        $data = &$this->data;
+
+        // Explode keys
+        $keys = explode($this->path_separator, $path);
+
+        // Crawl though the keys
+        while (count($keys) > 1) {
+
+            $key = array_shift($keys);
+
+            if (!isset($data[$key])) {
+
+                return $this;
+            }
+            
+            $data =& $data[$key];
+        }
+
+        unset($data[array_shift($keys)]);
+
+        return $this;
+    }
+
+    /**
+     * Checks if the target path exists
+     * 
+     * @param  sring   $path Target path to ve checked
+     * @return boolean       True if exists, false otherwise
+     */
+    protected function __hasPath($path)
+    {
+        // Get current data as reference
+        $data = &$this->data;
+
+        // Explode keys
+        $keys = explode($this->path_separator, $path);
+
+        // Crawl though the keys
+        while (count($keys) > 1) {
+
+            $key = array_shift($keys);
+
+            if (!isset($data[$key])) {
+
+                return false;
+            }
+            
+            $data =& $data[$key];
+        }
+
+        return isset($data[array_shift($keys)]) ? true : false;
+    }
 }
