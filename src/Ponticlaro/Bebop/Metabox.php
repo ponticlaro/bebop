@@ -244,7 +244,7 @@ class Metabox extends TrackableObjectAbstract
      */
     public function getPostTypes()
     {
-        return $this->post_types->get();
+        return $this->post_types->getAll();
     }
 
     /**
@@ -439,7 +439,7 @@ class Metabox extends TrackableObjectAbstract
             // Get fields from callback function
             $this->__getFieldNamesFromCallback();
 
-            $meta_fields = $this->meta_fields->get();
+            $meta_fields = $this->meta_fields->getAll();
 
             if ($meta_fields) {
 
@@ -505,7 +505,7 @@ class Metabox extends TrackableObjectAbstract
                 // Get fields from callback function
                 $this->__getFieldNamesFromCallback();
 
-                foreach($this->meta_fields->get() as $field) {
+                foreach($this->meta_fields->getAll() as $field) {
 
                     $value = isset($_POST[$field]) ? $_POST[$field] : '';
 

@@ -132,6 +132,11 @@ class Option
 		return $this->__data->get($key);
 	}
 
+	public function getAll()
+	{
+		return $this->__data->getAll();
+	}
+
 	public function remove($key)
 	{
 		$this->__data->remove($key);
@@ -144,10 +149,10 @@ class Option
 	public function save()
 	{
 		if( Bebop::util('isNetwork') ){
-			update_site_option( $this->getConfig('hook'), $this->get() );
+			update_site_option( $this->getConfig('hook'), $this->getAll() );
 
 		}else{
-			update_option( $this->getConfig('hook'), $this->get() );
+			update_option( $this->getConfig('hook'), $this->getAll() );
 
 		}		
 		return $this;

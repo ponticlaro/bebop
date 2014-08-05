@@ -102,7 +102,7 @@ class Routes extends SingletonAbstract {
      */
     public static function __setCachedRoutes()
     {
-        foreach (self::$pre_init_cache->get() as $item) {
+        foreach (self::$pre_init_cache->getAll() as $item) {
             
             switch ($item->position) {
 
@@ -161,7 +161,7 @@ class Routes extends SingletonAbstract {
 
         $target_route = null;
 
-        foreach (self::$routes->get() as $route) {
+        foreach (self::$routes->getAll() as $route) {
 
             if ($route->getId() == $id && $route->getMethod() == $method) {
                 

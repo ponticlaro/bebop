@@ -231,7 +231,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function getData()
 	{
-		return $this->data->get();
+		return $this->data->getAll();
 	}
 
 	public function setTitle($title)
@@ -331,7 +331,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	public function getAllItemViews()
 	{
-		return $this->views->get();
+		return $this->views->getAll();
 	}
 
 	public function clearForm()
@@ -403,7 +403,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	public function getForm()
 	{
 		$html     = '';
-		$elements = $this->form_elements->get();
+		$elements = $this->form_elements->getAll();
 
 		if ($elements) {
 			

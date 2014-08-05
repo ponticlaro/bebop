@@ -68,7 +68,7 @@ class TaxArg extends Arg {
 
         $args = array();
 
-        foreach ($this->items->get() as $item) {
+        foreach ($this->items->getAll() as $item) {
             
             if ($item->getValue())
                 $args[] = $item->getValue();

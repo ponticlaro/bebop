@@ -380,7 +380,7 @@ class Bebop extends SingletonAbstract
      */
     public static function getUrls()
     {
-        return self::Urls()->get();
+        return self::Urls()->getAll();
     }
 
     /**
@@ -452,7 +452,7 @@ class Bebop extends SingletonAbstract
      */
     public static function getPaths()
     {
-        return self::Paths()->get();
+        return self::Paths()->getAll();
     }
 
     /**

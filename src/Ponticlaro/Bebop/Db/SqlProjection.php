@@ -67,7 +67,7 @@ class SqlProjection {
 
 	public function getSql()
 	{
-		$columns = $this->columns->get();
+		$columns = $this->columns->getAll();
 
 		if (!$columns) return $this->table ? "$this->table.*" : '*';
 

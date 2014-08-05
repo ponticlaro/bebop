@@ -1099,7 +1099,7 @@ class PostType extends TrackableObjectAbstract
      */
     public function getFullConfig()
     {
-        $config                 = $this->config->get();
+        $config                 = $this->config->getAll();
         $config['labels']       = $this->getLabels();
         $config['supports']     = $this->getFeatures();
         $config['capabilities'] = $this->getCapabilities();

@@ -1,4 +1,4 @@
-<div bebop-media--el="container" bebop-media--config='<?php echo json_encode($data->get()); ?>'>
+<div bebop-media--el="container" bebop-media--config='<?php echo json_encode($data->getAll()); ?>'>
 
 	<div bebop-media--el="previewer"></div>
 	

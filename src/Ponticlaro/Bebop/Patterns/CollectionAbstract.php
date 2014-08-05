@@ -226,10 +226,8 @@ abstract class CollectionAbstract implements CollectionInterface {
 	 * @param    string|array   $key 
 	 * @return   mixed               
 	 */
-	public function get($key = null)
+	public function get($key)
 	{
-		if (!$key) return $this->data;
-
 		if (is_string($key)) return $this->__get($key);
 
 		if (is_array($key) && !empty($key)) {

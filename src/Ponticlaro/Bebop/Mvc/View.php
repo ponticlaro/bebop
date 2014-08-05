@@ -77,7 +77,7 @@ class View {
      */
     public function getAllVars()
     {
-        return $this->vars->get();
+        return $this->vars->getAll();
     }
 
     /**
@@ -137,7 +137,7 @@ class View {
         if ($merge) {
 
             // Get current vars
-            $current_vars = $this->vars->get();
+            $current_vars = $this->vars->getAll();
 
             // Merge with new vars
             $vars = array_merge($current_vars, $vars);
@@ -210,7 +210,7 @@ class View {
         $this->setVars($vars, $merge);
 
         // Expose variables to template
-        foreach ($this->vars->get() as $key => $value) {
+        foreach ($this->vars->getAll() as $key => $value) {
             ${$key} = $value;
         }
 

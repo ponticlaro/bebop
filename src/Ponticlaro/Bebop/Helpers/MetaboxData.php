@@ -32,7 +32,7 @@ class MetaboxData {
 	public function setDataContainer(CollectionAbstract $container)
 	{
 		// Get currently stored data
-		$current_data = $this->__data->get();
+		$current_data = $this->__data->getAll();
 
 		// Set container and pass current data
 		$this->__data = new $container($current_data);

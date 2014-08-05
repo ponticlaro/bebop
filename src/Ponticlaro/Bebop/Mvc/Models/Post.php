@@ -278,7 +278,7 @@ abstract class Post {
             // Check for partial matches
             else {
 
-                foreach ($instance->context_mods->get() as $key => $fn) {
+                foreach ($instance->context_mods->getAll() as $key => $fn) {
                 
                     if (Bebop::Context()->is($key))
                         call_user_func_array($fn, array($item, $raw_post));
