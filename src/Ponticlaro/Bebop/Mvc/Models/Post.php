@@ -5,7 +5,7 @@ namespace Ponticlaro\Bebop\Mvc\Models;
 use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\Db\Query;
 
-abstract class Post {
+class Post {
 
     /**
      * Holds child classes instances with their model customizations
