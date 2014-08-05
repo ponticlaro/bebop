@@ -114,14 +114,17 @@ class Utils
             $doc = new \DOMDocument;
             $doc->loadHTML($html);
 
-            $pattern = "/\[[^\]]+\]/";
+            $patterns = array(
+            	"/\[\]/",       // e.g. items[]
+            	"/\[[^\]]+\]/", // e.g. parent[child]
+            );
 
             foreach ($doc->getElementsByTagname('input') as $el) {
 
                 $name = $el->getAttribute('name');
 
                 if ($name)
-                    $names[] = preg_replace($pattern, '', $name);
+                    $names[] = preg_replace($patterns, '', $name);
             }
 
             foreach ($doc->getElementsByTagname('select') as $el) {
@@ -129,7 +132,7 @@ class Utils
                 $name = $el->getAttribute('name');
 
                 if ($name)
-                    $names[] = preg_replace($pattern, '', $name);
+                    $names[] = preg_replace($patterns, '', $name);
             }
 
             foreach ($doc->getElementsByTagname('textarea') as $el) {
@@ -137,7 +140,7 @@ class Utils
                 $name = $el->getAttribute('name');
 
                 if ($name)
-                    $names[] = preg_replace($pattern, '', $name);
+                    $names[] = preg_replace($patterns, '', $name);
             }
         }
 
