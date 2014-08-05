@@ -4,7 +4,7 @@ namespace Ponticlaro;
 
 use Ponticlaro\Bebop\DB\ObjectMeta;
 use Ponticlaro\Bebop\Common\Collection;
-use Ponticlaro\Bebop\Helpers\Factory;
+use Ponticlaro\Bebop\Helpers\BebopFactory;
 use Ponticlaro\Bebop\Mvc\View;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
@@ -548,7 +548,7 @@ class Bebop extends SingletonAbstract
         //////////////////////////
         else {
 
-            return call_user_func_array(array('\Ponticlaro\Bebop\Helpers\Factory', 'create'), array($name, $args));
+            return call_user_func_array(array('\Ponticlaro\Bebop\Helpers\BebopFactory', 'create'), array($name, $args));
         }
     }
 }
