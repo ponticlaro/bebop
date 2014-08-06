@@ -17,7 +17,7 @@ class BebopFactory {
 		'AdminPage'  => '\Ponticlaro\Bebop\AdminPage',
 		'Collection' => '\Ponticlaro\Bebop\Common\Collection',
 		'Metabox'    => '\Ponticlaro\Bebop\Metabox',
-		'Option'     => '\Ponticlaro\Bebop\Database\Option',
+		'Option'     => '\Ponticlaro\Bebop\Db\Option',
 		'PostType'   => '\Ponticlaro\Bebop\PostType',
 		'Taxonomy'   => '\Ponticlaro\Bebop\Taxonomy'
 	);
