@@ -375,8 +375,12 @@ class Metabox extends TrackableObjectAbstract
             $args     = array($this->data, new \WP_Post(new \stdClass), $this);
             $names    = Bebop::util('getControlNamesFromCallable', $function, $args);
 
-            if ($names)
-                $this->meta_fields->push($names);
+            if ($names) {
+                foreach ($names as $name) {
+                    
+                    $this->meta_fields->push($name);
+                }
+            }
         }
     }
 
@@ -402,6 +406,8 @@ class Metabox extends TrackableObjectAbstract
             $this->__setMetaFields();
 
             $meta_fields = $this->meta_fields->getAll();
+
+            var_dump($meta_fields);
 
             if ($meta_fields) {
 

@@ -409,10 +409,9 @@ class AdminPage extends TrackableObjectAbstract
 
             if ($names) {
 
-                $this->options->push($names);
-
                 foreach ($names as $name) {
-                
+                    
+                    $this->options->push($name);
                     register_setting($this->getId(), $name);
                 }
             }
