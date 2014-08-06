@@ -1,5 +1,9 @@
 Bebop
 ==================
+[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop)
+[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop)
+[![License](https://poser.pugx.org/ponticlaro/bebop/license.png)](https://packagist.org/packages/ponticlaro/bebop)
+[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop/downloads.png)](https://packagist.org/packages/ponticlaro/bebop)
 
 ## Boot Bebop
 You should call `Bebop::boot()` before using any of its features. This is needed to generate defaults and initialize several useful objects.  
