@@ -65,6 +65,39 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     }
 
     /**
+     * Adds items to the target path
+     * 
+     * @param string $path   Target path
+     * @param mixed  $values Key/Values pairs to be added
+     */
+    public function add($path, $values)
+    {
+        $data = $this->__get($path);
+
+        if (is_array($values)) {
+
+            if (is_array($data)) {
+                
+                $data = array_merge($data, $values);
+            }
+
+            else {
+
+                $data = $values;
+            }
+        } 
+
+        else {
+
+            $data[] = $values;
+        }
+
+        $this->__set($path, $data);
+
+        return $this;
+    }
+
+    /**
      * Removed the first value from the indexed array
      * with a given $path or directly from the $data indexed array
      * 
