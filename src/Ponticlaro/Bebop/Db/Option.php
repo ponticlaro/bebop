@@ -1,6 +1,6 @@
 <?php
 
-namespace Ponticlaro\Bebop\DB;
+namespace Ponticlaro\Bebop\Db;
 
 use Ponticlaro\Bebop;
 
