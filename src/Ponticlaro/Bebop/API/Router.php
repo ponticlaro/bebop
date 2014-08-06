@@ -7,7 +7,7 @@ use Ponticlaro\Bebop\API\Exceptions\DefaultException AS ApiException;
 use Ponticlaro\Bebop\Db;
 use Ponticlaro\Bebop\Db\SqlProjection;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
-use Ponticlaro\Bebop\Resources\Models\Attachment;
+use Ponticlaro\Bebop\Mvc\ModelFactory;
 use Respect\Validation\Validator as v;
 
 class Router extends SingletonAbstract {
@@ -286,19 +286,25 @@ class Router extends SingletonAbstract {
 
                     if (is_numeric($id)) {
 
+                        // Override context
+                        Bebop::Context()->overrideCurrent('api/single/'. $resource_name);
+
                         $post = get_post($id);
 
                         if ($post instanceof \WP_Post) {
 
-                            if ($post->post_type == 'attachment') {
+                            if (ModelFactory::canManufacture($post->post_type)) {
                                 
-                                $post = new Attachment($post);
+                                $post = ModelFactory::create($post->post_type, array($post));
                             }
 
                             $response = $post;
                         }
 
                     } else {
+
+                        // Override context
+                        Bebop::Context()->overrideCurrent('api/archive/'. $resource_name);
 
                         if($resource_name != 'posts') {
 
@@ -318,6 +324,17 @@ class Router extends SingletonAbstract {
                         }
 
                         $response = Db::queryPosts($_GET, array('with_meta' => true));
+
+                        if ($response['items']) {
+
+                            foreach ($response['items'] as $index => $post) {
+                                
+                                if (ModelFactory::canManufacture($post->post_type)) {
+
+                                    $response['items'][$index] = ModelFactory::create($post->post_type, array($post));
+                                }
+                            }
+                        }
                     }
 
                     // Enable developers to modify response for target resource

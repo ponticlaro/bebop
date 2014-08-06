@@ -5,6 +5,7 @@ namespace Ponticlaro;
 use Ponticlaro\Bebop\DB\ObjectMeta;
 use Ponticlaro\Bebop\Common\Collection;
 use Ponticlaro\Bebop\Helpers\BebopFactory;
+use Ponticlaro\Bebop\Mvc\Models\Media;
 use Ponticlaro\Bebop\Mvc\View;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 use Ponticlaro\Bebop\Patterns\TrackableObjectAbstract;
@@ -42,6 +43,27 @@ class Bebop extends SingletonAbstract
         // Instantiate Paths Manager
         self::Paths();
 
+        // Set default Media Mvc Model modifications
+        Media::onInit(function($media) {
+
+            $media->sizes = array();
+            
+            foreach (get_intermediate_image_sizes() as $size) {
+                
+                $image_data = wp_get_attachment_image_src($media->ID, $size);
+
+                if ($image_data) {
+
+                    $media->sizes[$size] = (object) array(
+                        'url'     => $image_data[0],
+                        'width'   => $image_data[1],
+                        'height'  => $image_data[2],
+                        'resized' => $image_data[3],
+                    );
+                }
+            }
+        });
+
         // Set default views directory
         View::setViewsDir(self::getPath('theme', 'views'));
  
@@ -68,9 +90,14 @@ class Bebop extends SingletonAbstract
      */
     public static function boot()
     {
-        self::getInstance();
+        return self::getInstance();
     }
 
+    /**
+     * Sets development environment status
+     * 
+     * @param boolean $enabled True to enable, false otherwise
+     */
     public static function setDevEnv($enabled) 
     {
         self::$__dev_env_enabled = $enabled;

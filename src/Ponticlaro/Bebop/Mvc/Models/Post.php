@@ -4,6 +4,7 @@ namespace Ponticlaro\Bebop\Mvc\Models;
 
 use Ponticlaro\Bebop;
 use Ponticlaro\Bebop\Db\Query;
+use Ponticlaro\Bebop\Mvc\ModelFactory;
 
 class Post {
 
@@ -34,6 +35,41 @@ class Post {
     protected static $__raw_properties = true;
 
     /**
+     * Modifications for all models
+     *
+     * @var callable
+     */
+    protected $init_mods;
+
+    /**
+     * Context modifications
+     *
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $context_mods;
+
+    /**
+     * Loadable content
+     *
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $loadables;
+
+    /**
+     * Current query 
+     * 
+     * @var Ponticlaro\Bebop\Db\Query
+     */
+    protected $query;
+
+    /**
+     * Meta data for the last query that got executed
+     * 
+     * @var stdClass
+     */
+    protected $query_meta;
+
+    /**
      * Instantiates new model by inheriting all the $post properties
      * 
      * @param WP_Post $post
@@ -53,6 +89,12 @@ class Post {
 
             $this->context_mods = Bebop::Collection();
             $this->loadables    = Bebop::Collection();
+
+            // Add class to factory if not already there
+            if (!ModelFactory::canManufacture(static::$__type)) {
+
+                ModelFactory::set(static::$__type, get_called_class());
+            }
         }
 
         // Create data instance
