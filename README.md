@@ -10,22 +10,22 @@ Bebop::boot();
 ```
 
 ## Custom Features
-- [RESTful API](docs/API.md)
-- [MVC Architecture](docs/MVC.md)
+- [RESTful API](readme/API.md)
+- [MVC Architecture](readme/MVC.md)
 - Admin UI Widgets
 
 ## Utilities
-- [Environment Manager](docs/ENVIRONMENT_MANAGER.md)
-- [Context Manager](docs/CONTEXT_MANAGER.md)
-- [Paths Manager](docs/PATHS_MANAGER.md)
-- [URLs Manager](docs/URLS_MANAGER.md)
+- [Environment Manager](readme/ENVIRONMENT_MANAGER.md)
+- [Context Manager](readme/CONTEXT_MANAGER.md)
+- [Paths Manager](readme/PATHS_MANAGER.md)
+- [URLs Manager](readme/URLS_MANAGER.md)
 
 ## WordPress API Wrappers
-- [CSS Registration](docs/CSS.md)
-- [JS Registration](docs/JS.md)
-- [Custom Post Types](docs/CUSTOM_POST_TYPES.md)
-- [Custom Taxonomies](docs/CUSTOM_TAXONOMIES.md)
-- [Custom Metaboxes](docs/CUSTOM_METABOXES.md)
-- [Administration Menus](docs/ADMINISTRATION_MENUS.md)
-- [Options](docs/OPTIONS.md)
-- [HTTP Client](docs/HTTP_CLIENT.md)
+- [CSS Registration](readme/CSS.md)
+- [JS Registration](readme/JS.md)
+- [Custom Post Types](readme/CUSTOM_POST_TYPES.md)
+- [Custom Taxonomies](readme/CUSTOM_TAXONOMIES.md)
+- [Custom Metaboxes](readme/CUSTOM_METABOXES.md)
+- [Administration Menus](readme/ADMINISTRATION_MENUS.md)
+- [Options](readme/OPTIONS.md)
+- [HTTP Client](readme/HTTP_CLIENT.md)
