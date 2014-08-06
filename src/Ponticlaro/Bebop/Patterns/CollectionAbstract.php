@@ -437,26 +437,29 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
      */
     public function __set($path, $value)
     {   
-        // Get current data as reference
-        $data = &$this->data;
+        if (is_string($path)) {
 
-        // Explode keys
-        $keys = explode($this->path_separator, $path);
+            // Get current data as reference
+            $data = &$this->data;
 
-        // Crawl though the keys
-        while (count($keys) > 1) {
+            // Explode keys
+            $keys = explode($this->path_separator, $path);
 
-            $key = array_shift($keys);
+            // Crawl though the keys
+            while (count($keys) > 1) {
 
-            if (!isset($data[$key])) {
+                $key = array_shift($keys);
 
-                $data[$key] = array();
+                if (!isset($data[$key])) {
+
+                    $data[$key] = array();
+                }
+                
+                $data =& $data[$key];
             }
-            
-            $data =& $data[$key];
-        }
 
-        $data[array_shift($keys)] = $value;
+            $data[array_shift($keys)] = $value;
+        }
 
         return $this;
     }
@@ -469,6 +472,8 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
      */
     public function __get($path)
     {
+        if (!is_string($path)) return null;
+
         // Get current data as reference
         $data = &$this->data;
 
@@ -498,26 +503,29 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
      */
     public function __unset($path)
     {
-        // Get current data as reference
-        $data = &$this->data;
+        if (is_string($path)) {
 
-        // Explode keys
-        $keys = explode($this->path_separator, $path);
+            // Get current data as reference
+            $data = &$this->data;
 
-        // Crawl though the keys
-        while (count($keys) > 1) {
+            // Explode keys
+            $keys = explode($this->path_separator, $path);
 
-            $key = array_shift($keys);
+            // Crawl though the keys
+            while (count($keys) > 1) {
 
-            if (!isset($data[$key])) {
+                $key = array_shift($keys);
 
-                return $this;
+                if (!isset($data[$key])) {
+
+                    return $this;
+                }
+                
+                $data =& $data[$key];
             }
-            
-            $data =& $data[$key];
-        }
 
-        unset($data[array_shift($keys)]);
+            unset($data[array_shift($keys)]);
+        }
 
         return $this;
     }
@@ -529,7 +537,9 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
      * @return boolean       True if exists, false otherwise
      */
     protected function __hasPath($path)
-    {
+    {   
+        if (!is_string($path)) return false;
+
         // Get current data as reference
         $data = &$this->data;
 
