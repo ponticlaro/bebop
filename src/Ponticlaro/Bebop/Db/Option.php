@@ -6,176 +6,233 @@ use Ponticlaro\Bebop;
 
 class Option
 {	
-	private $__config;
+    /**
+     * Configuration
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+	private $config;
 
-	private $__config_defaults = array(
-		"autosave" => false
-	);
+    /**
+     * Data
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+	private $data;
 
-	private $__data;
-
-	public function __construct()
+	/**
+	 * Creates new option instance 
+	 * 
+	 * @param string  $name      Option name
+	 * @param array   $data      Option data
+	 * @param boolean $auto_save True to enable autosave, false to keep it disabled
+	 */
+	public function __construct($name, array $data = array(), $auto_save = false)
 	{	
-		// Take any necessary actions to make this object usable
-		$this->__requiredInitConfig();
+		// Instantiated configuration object
+		$this->config = Bebop::Collection(array(
+			"autosave" => $auto_save
+		));
 
-		// Set configuration if arguments are passed
-		$args = func_get_args();
-		if($args) call_user_func_array( array($this, 'initConfig'), $args );
+		// Instantiated data object
+		$this->data = Bebop::Collection();
 
-	}
+		// Set input name
+		if ($name)
+			$this->setName($name);
 
-	private function __requiredInitConfig()
-	{
-		$this->__config = Bebop::Collection( $this->__config_defaults );
-		$this->__data   = Bebop::Collection();
-	}
+		// Set input data
+		if ($data) {
 
-	public function initConfig()
-	{	
-		$args = func_get_args();
-
-		if($args){
-			$this->__handleInitConfig($args);
+			$this->data->set($data);
+			
+			$this->__autosave();
 		}
+
+		// Fetch existing data from database, if any
+		else {
+
+			$this->fetch();
+		}
+	}
+
+	/**
+	 * Sets option name
+	 * 
+	 * @param string $name
+	 */
+	public function setName($name)
+	{
+		if (!is_string($name))
+			throw new \Exception("Option name must be a string");
+			
+		$this->setConfig('name', $name);
 
 		return $this;
 	}
 
-	private function __handleInitConfig($args)
+	/**
+	 * Checks if current WordPress installation is a network
+	 * 
+	 * @return boolean True if it is a network, false otherwise
+	 */
+	protected function isNetwork()
 	{
-
-		// handle configuration parameter
-		if( !isset($args[0]) )
-			throw new \ErrorException('You must pass a configuration parameter');
-
-		if( !is_string($args[0]) && !is_array($args[0]) )
-			throw new \ErrorException('Configuration parameter must be a string or array');
-
-		if( is_string($args[0])) {
-
-			$this->setConfig('hook', $args[0]);
-
-		} elseif( is_array($args[0])){
-
-			$this->setConfig($args[0]);
-
-		}
-
-		// Fetch existing data in database, if any
-		$this->set( $this->fetch() );
-
-		// Handle data OR autosave parameter
-		if( isset($args[1]) ) {
-
-			if ( is_bool($args[1]) ){
-
-				$this->setConfig('autosave', $args[1]);
-
-			} elseif( is_array($args[1]) ){
-
-				$this->set($args[1]);
-
-			}
-
-		}
-
-		// Handle autosave parameter
-		if( isset($args[2]) && is_bool($args[2])) {
-
-			$this->setConfig('autosave', $args[2]);
-
-		}
-
+		return Bebop::util('isNetwork');
 	}
 
+	/**
+	 * Fetches all data from databas using option name
+	 * 
+	 * @return [type] [description]
+	 */
 	public function fetch()
 	{
-		if( Bebop::util('isNetwork') ){
-			return get_site_option( $this->getConfig('hook') );
+		$name = $this->getConfig('name');
+		$data = $this->isNetwork() ? get_site_option($name) : get_option($name);
 
-		}else{
-			return get_option( $this->getConfig('hook') );
+		$this->data->set($data);
 
-		}	
-		
+		return $this;
 	}
 
+	/**
+	 * Sets a single configuration key/value pair
+	 * 
+	 * @param string $key
+	 * @param mixed  $value
+	 */
 	public function setConfig($key, $value = null)
 	{
-		$this->__config->set($key, $value);
+		if (is_string($key))
+			$this->config->set($key, $value);
+
 		return $this;
 	}
 
-	public function getConfig($key = null)
-	{
-		return $this->__config->get($key);
-	}
-
+	/**
+	 * Removes a single configuration value
+	 * 
+	 * @param  string $key
+	 * @return class       This class instance
+	 */
 	public function removeConfig($key)
 	{
-		$this->__config->remove($key);
+		if (is_string($key))
+			$this->config->remove($key);
+
 		return $this;
 	}
 
-	public function set($key, $value = null)
+	/**
+	 * Returns single configuration value
+	 * 
+	 * @param  string $key
+	 * @return mixed
+	 */
+	public function getConfig($key)
 	{
-		$this->__data->set($key, $value);
+		return $this->config->get($key);
+	}
+
+	/**
+	 * Sets a single key/value pair
+	 * 
+	 * @param string $key   
+	 * @param mixed  $value 
+	 */
+	public function set($keys, $value = true)
+	{
+		if (is_array($keys)) {
+			
+			foreach ($keys as $key => $value) {
+				
+				$this->data->set($key, $value);
+			}
+		}
+
+		if (is_string($keys)) {
+
+			$this->data->set($keys, $value);
+		}
 
 		$this->__autosave();
 
 		return $this;
 	}
 
-	public function get($key = null)
-	{
-		return $this->__data->get($key);
-	}
-
-	public function getAll()
-	{
-		return $this->__data->getAll();
-	}
-
+	/**
+	 * Removes data stored on the target key
+	 * 
+	 * @param  string $key
+	 * @return class       This class instance
+	 */
 	public function remove($key)
 	{
-		$this->__data->remove($key);
+		$this->data->remove($key);
 
 		$this->__autosave();
 
 		return $this;
 	}
 
+	/**
+	 * Returns data stored on target key
+	 * 
+	 * @param  string $key
+	 * @return mixed      
+	 */
+	public function get($key)
+	{
+		return $this->data->get($key);
+	}
+
+	/**
+	 * Returns all data
+	 * 
+	 * @return array
+	 */
+	public function getAll()
+	{
+		return $this->data->getAll();
+	}
+
+	/**
+	 * Saves current data
+	 * 
+	 * @return void
+	 */
 	public function save()
 	{
-		if( Bebop::util('isNetwork') ){
-			update_site_option( $this->getConfig('hook'), $this->getAll() );
+		$name = $this->getConfig('name');
+		$data = $this->getAll();
 
-		}else{
-			update_option( $this->getConfig('hook'), $this->getAll() );
+		$this->isNetwork() ? update_site_option($name, $data) : update_option($name, $data);
 
-		}		
 		return $this;
 	}
 	
+	/**
+	 * Destroys this option
+	 * 
+	 * @return void
+	 */
 	public function destroy()
 	{
-		if( Bebop::util('isNetwork') ){
-			delete_site_option( $this->getConfig('hook') );
+		$name = $this->getConfig('name');
 
-		}else{
-			delete_option( $this->getConfig('hook') );
-
-		}		
+		$this->isNetwork() ? delete_site_option($name) : delete_option($name);	
 	}
 
-	private function __autosave()
+	/**
+	 * Autosaves current data
+	 * 
+	 * @return void
+	 */
+	protected function __autosave()
 	{
-		if( $this->getConfig('autosave') ) $this->save();
+		if ($this->getConfig('autosave')) $this->save();
 
 		return $this;
 	}
-
-
-
 }
