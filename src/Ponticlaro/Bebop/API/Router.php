@@ -58,9 +58,6 @@ class Router extends SingletonAbstract {
             'debug' => false
         ));
 
-        // Set Response content-type header
-        self::$slim->response()->header('Content-Type', 'application/json');
-
         // Set post meta projection
         $postmeta_projection = new SqlProjection();
         $postmeta_projection->addColumn('meta_id', '__id')
@@ -306,21 +303,20 @@ class Router extends SingletonAbstract {
                         // Override context
                         Bebop::Context()->overrideCurrent('api/archive/'. $resource_name);
 
-                        if($resource_name != 'posts') {
+                        if (isset($_GET['type'])) 
+                            unset($_GET['type']);
 
-                            if (isset($_GET['type'])) unset($_GET['type']);
+                        if ($resource_name == 'media') {
 
-                            if ($resource_name == 'media') {
+                            if (isset($_GET['status'])) 
+                                unset($_GET['status']);
 
-                                if (isset($_GET['status'])) unset($_GET['status']);
+                            $_GET['post_type']   = 'attachment';
+                            $_GET['post_status'] = 'inherit';
 
-                                $_GET['post_type']   = 'attachment';
-                                $_GET['post_status'] = 'inherit';
+                        } else {
 
-                            } else {
-
-                                $_GET['post_type'] = $post_type->query_var;
-                            }
+                            $_GET['post_type'] = $post_type->name;
                         }
 
                         $response = Db::queryPosts($_GET, array('with_meta' => true));
@@ -525,6 +521,9 @@ class Router extends SingletonAbstract {
     {
         // Remove WordPress Content-Type header
         header_remove('Content-Type');
+        
+        // Set Response content-type header
+        self::$slim->response()->header('Content-Type', 'application/json');
 
         $router = self::getInstance();
         $router->handleErrors()
