@@ -164,6 +164,51 @@ class Db {
 					}
 				}
 
+			} elseif (preg_match('/^year\:/', $key) || 
+					  preg_match('/^month\:/', $key) || 
+					  preg_match('/^day\:/', $key) || 
+					  preg_match('/^week\:/', $key) || 
+					  preg_match('/^hour\:/', $key) || 
+					  preg_match('/^minute\:/', $key) || 
+					  preg_match('/^second\:/', $key)) {
+					
+				$data    = explode(':', $key);
+				$key     = isset($data[0]) ? $data[0] : null;
+				$compare = isset($data[1]) ? $data[1] : '=';
+
+				$compare_map = array(
+					'gt'         => '>',
+					'gte'        => '>=',
+					'lt'         => '<',
+					'lte'        => '<=',
+					'in'         => 'IN',
+					'notIn'      => 'NOT IN',
+					'between'    => 'BETWEEN',
+					'notBetween' => 'NOT BETWEEN'
+				);
+
+				if (array_key_exists($compare, $compare_map)) {
+					
+					$compare = $compare_map[$compare];
+					$values  = explode(',', $value);
+					$value   = count($values) == 1 && !in_array($compare, array('IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN')) ? $values[0] : $values;
+
+					$data = array(
+						$key      => $value,
+						'compare' => $compare
+					);
+
+					if (!isset($filtered_params['date_query'])) {
+						
+						$filtered_params['date_query'] = array(
+
+							'relation' => isset($raw_params['date_relation']) ? $raw_params['date_relation'] : 'AND'
+						);
+					}
+
+					$filtered_params['date_query'][] = $data;
+				}
+
 			} else {
 
 				// Check if we should map a query parameter to a built-in query parameter
