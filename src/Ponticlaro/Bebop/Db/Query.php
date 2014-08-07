@@ -69,7 +69,7 @@ class Query {
 
         // Check current arg for method
         if (!is_null($this->current_arg) && method_exists($this->current_arg, $name)) {
-            
+
             call_user_method_array($name, $this->current_arg, $args);
         }
 

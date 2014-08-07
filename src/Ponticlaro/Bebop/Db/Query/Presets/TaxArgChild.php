@@ -73,7 +73,7 @@ class TaxArgChild extends ArgChild {
             switch ($name) {
 
                 case 'in':
-                case 'noIn':
+                case 'notIn':
                 case 'allOf':
                     
                     return $this->data->hasKey('field') && $this->data->hasKey('operator') && $this->data->hasKey('terms') ? false : true;
