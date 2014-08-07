@@ -35,41 +35,6 @@ class Post {
     protected static $__raw_properties = true;
 
     /**
-     * Modifications for all models
-     *
-     * @var callable
-     */
-    protected $init_mods;
-
-    /**
-     * Context modifications
-     *
-     * @var Ponticlaro\Bebop\Common\Collection
-     */
-    protected $context_mods;
-
-    /**
-     * Loadable content
-     *
-     * @var Ponticlaro\Bebop\Common\Collection
-     */
-    protected $loadables;
-
-    /**
-     * Current query 
-     * 
-     * @var Ponticlaro\Bebop\Db\Query
-     */
-    protected $query;
-
-    /**
-     * Meta data for the last query that got executed
-     * 
-     * @var stdClass
-     */
-    protected $query_meta;
-
-    /**
      * Instantiates new model by inheriting all the $post properties
      * 
      * @param WP_Post $post
