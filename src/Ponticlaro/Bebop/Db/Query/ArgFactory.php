@@ -48,7 +48,6 @@ class ArgFactory extends FactoryAbstract {
         'taxonomy'     => 'Ponticlaro\Bebop\Db\Query\Presets\TaxArg',
         'week'         => 'Ponticlaro\Bebop\Db\Query\Presets\WeekArg',
         'year'         => 'Ponticlaro\Bebop\Db\Query\Presets\YearArg',
-        'yearmonth'    => 'Ponticlaro\Bebop\Db\Query\Presets\YearMonthArg',
     );
 
     /**
