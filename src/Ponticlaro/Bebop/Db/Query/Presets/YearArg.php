@@ -2,21 +2,7 @@
 
 namespace Ponticlaro\Bebop\Db\Query\Presets;
 
-class YearArg extends \Ponticlaro\Bebop\Db\Query\Arg {
-    
+class YearArg extends DateArgAbstract {
+
     protected $key = 'year';
-
-    public function __construct($value = null)
-    {
-        if ($value) 
-            $this->is($value);
-    }
-
-    public function is($value)
-    {
-        if ($value)
-            $this->value = $value;
-
-        return $this;
-    }
 }

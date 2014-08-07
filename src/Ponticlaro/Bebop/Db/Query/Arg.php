@@ -9,6 +9,10 @@ class Arg implements ArgInterface {
     protected $value;
 
     protected $is_parent = false;
+    
+    protected $is_child = false;
+
+    protected $parent_key;
 
     protected $has_multiple_keys = false;
 
@@ -17,6 +21,16 @@ class Arg implements ArgInterface {
     public function isParent()
     {
         return $this->is_parent;
+    }
+
+    public function isChild()
+    {
+        return $this->is_child;
+    }
+
+    public function getParentKey()
+    {
+        return $this->parent_key;
     }
 
     public function addChild()

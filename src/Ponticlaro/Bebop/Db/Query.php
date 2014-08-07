@@ -164,6 +164,16 @@ class Query {
                     }
                 }
 
+                elseif ($arg->isChild()) {
+
+                    $parent_key = $arg->getParentKey(); 
+
+                    if (!isset($args[$parent_key])) 
+                        $args[$parent_key] = array();
+
+                    $args[$parent_key][] = $arg->getValue();
+                }
+
                 else {
 
                     $args[$arg->getKey()] = $value;

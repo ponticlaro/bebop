@@ -21,6 +21,7 @@ class ArgFactory extends FactoryAbstract {
         'cat'          => 'Ponticlaro\Bebop\Db\Query\Presets\CatArg',
         'date'         => 'Ponticlaro\Bebop\Db\Query\Presets\DateArg',
         'day'          => 'Ponticlaro\Bebop\Db\Query\Presets\DayArg',
+        'hour'         => 'Ponticlaro\Bebop\Db\Query\Presets\HourArg',
         'ignoresticky' => 'Ponticlaro\Bebop\Db\Query\Presets\IgnoreStickyArg',
         'limit'        => 'Ponticlaro\Bebop\Db\Query\Presets\PostsPerPageArg',
         'maxresults'   => 'Ponticlaro\Bebop\Db\Query\Presets\PostsPerPageArg',
