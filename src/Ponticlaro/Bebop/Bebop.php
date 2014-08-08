@@ -2,7 +2,8 @@
 
 namespace Ponticlaro;
 
-use Ponticlaro\Bebop\DB\ObjectMeta;
+use Ponticlaro\Bebop\Db;
+use Ponticlaro\Bebop\Db\ObjectMeta;
 use Ponticlaro\Bebop\Common\Collection;
 use Ponticlaro\Bebop\Helpers\BebopFactory;
 use Ponticlaro\Bebop\Mvc\Models\Media;
@@ -142,6 +143,22 @@ class Bebop extends SingletonAbstract
         $env_manager = Bebop\Helpers\EnvManager::getInstance();
 
         return is_string($key) && $env_manager->exists($key) ? $env_manager->get($key) : $env_manager;
+    }
+
+    /**
+     * Returns Db class instance
+     * 
+     * @param  PDO                 $pdo Optional PDO instance
+     * @return Ponticlaro\Bebop\Db 
+     */
+    public static function Db(\PDO $pdo = null)
+    {
+        $db = Db::getInstance();
+
+        if ($pdo)
+            $db->setConnection($pdo);
+
+        return $db;
     }
 
     /**

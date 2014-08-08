@@ -12,7 +12,7 @@ class ModelFactory extends FactoryAbstract {
 	 * @var array
 	 */
 	protected static $manufacturable = array(
-		'post'       => '\Ponticlaro\Bebop\Mvc\Models\Post',
-		'attachment' => '\Ponticlaro\Bebop\Mvc\Models\Media'
+		'post'       => 'Ponticlaro\Bebop\Mvc\Models\Post',
+		'attachment' => 'Ponticlaro\Bebop\Mvc\Models\Media'
 	);
 }

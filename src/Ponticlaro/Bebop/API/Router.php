@@ -319,7 +319,7 @@ class Router extends SingletonAbstract {
                             $_GET['post_type'] = $post_type->name;
                         }
 
-                        $response = Db::queryPosts($_GET, array('with_meta' => true));
+                        $response = Db::wpQuery($_GET)->setOption('with_meta', true)->execute();
 
                         if ($response['items']) {
 

@@ -3,19 +3,65 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
+use Ponticlaro\Bebop\Db\Query;
+use Ponticlaro\Bebop\Db\WpQueryEnhanced;
 
 class Db {
 
+	/**
+	 * Current and only instance of this class
+	 * 
+	 * @var Ponticlaro\Bebop\Db
+	 */
+	private static $instance;
+
+	/**
+	 * Current PDO instance 
+	 * 
+	 * @var PDO
+	 */
 	protected static $pdo;
 
+	/**
+	 * Returns a new instance of this class
+	 * 
+	 * @return Ponticlaro\Bebop\Db
+	 */
+	public static function getInstance()
+	{	
+		if (is_null(static::$instance)) static::$instance = new static;
+
+		return static::$instance;
+	}
+
+	/**
+	 * Sets PDO connection
+	 * 
+	 * @param PDO $pdo
+	 */
+	public static function setConnection(\PDO $pdo)
+	{
+		self::$pdo = $pdo;
+	}
+
+	/**
+	 * Returns current pdo connection
+	 * 
+	 * @return PDO
+	 */
 	public static function getConnection()
 	{
-		if (is_null(self::$pdo)) self::$pdo = self::getPDO();
+		if (is_null(self::$pdo)) self::$pdo = self::__getPDO();
 
 		return self::$pdo;
 	}
 
-	protected static function getPDO()
+	/**
+	 * Returns PDO connection with wp-config.php database configuration
+	 *  
+	 * @return PDO
+	 */
+	protected static function __getPDO()
 	{
 		// Get connection details
 		$dsn      = 'mysql:dbname=' . DB_NAME . ";host=" . DB_HOST .';charset='. DB_CHARSET;
@@ -52,276 +98,33 @@ class Db {
 		return $pdo;
 	}
 
-	public static function queryPosts(array $params = array(), array $options = array())
+	/**
+	 * Returns a query object for the target subject
+	 * 
+	 * @param  string $subject 
+	 * @return mixed
+	 */
+	public static function query($subject = 'posts')
 	{
-		// Set default options
-		$default_options = array(
-			'with_meta' => false
-		);
+		switch ($subject) {
 
-		// Merge default options with user input
-		$options = array_merge($default_options, $options);
+			case 'posts':
+			default:
 
-		// Map short references to full query argument key
-		$params_map = array(
-			'type'           => 'post_type',
-			'status'         => 'post_status',
-			'parent'         => 'post_parent',
-			'mime_type'      => 'post_mime_type',
-			'max_results'    => 'posts_per_page',
-			'sort_by'        => 'orderby',
-			'sort_direction' => 'order',
-			'page'           => 'paged',
-			'include'        => 'post__in',
-			'exclude'        => 'post__not_in'
-		);
-
-		// Get raw parameters
-		$raw_params = $params;
-		
-		// Defined variable for clean parameters for query
-		$filtered_params = array();
-
-		foreach ($raw_params as $key => $value) {
-
-			// Check for tax query params
-			if (preg_match('/^tax\:/', $key)) {
-
-				$data_string = str_replace('tax:', '', $key);
-
-				if ($data_string) {
-					
-					$data = null;
-					
-					if (Bebop::util('isJson', $data_string)) {
-						
-						$data = $data_string ? json_decode($data_string, true) : null;
-						
-					} else {
-
-						$data = array('taxonomy' => $data_string);
-					}
-
-					if ($data) {
-
-						if (!isset($filtered_params['tax_query'])) {
-							
-							$filtered_params['tax_query'] = array(
-
-								'relation' => isset($raw_params['tax_relation']) ? $raw_params['tax_relation'] : 'AND'
-							);
-						}
-
-						if (!isset($data['operator'])) $data['operator'] = 'IN';
-						if (!isset($data['field'])) $data['field'] = 'slug';
-
-						$data['terms'] = array();
-
-						$values = explode(',', $value);
-
-						foreach ($values as $value) {
-							$data['terms'][] = $value;
-						}
-
-						$filtered_params['tax_query'][] = $data;
-					}
-				}
-
-			// Check for meta query params
-			} elseif (preg_match('/^meta\:/', $key)) {
-
-				$data_string = str_replace('meta:', '', $key);
-
-				if ($data_string) {
-					
-					$data = null;
-					
-					if (Bebop::util('isJson', $data_string)) {
-						
-						$data = $data_string ? json_decode($data_string, true) : null;
-						
-					} else {
-
-						$data = array('key' => $data_string);
-					}
-
-					if ($data) {
-
-						if (!isset($filtered_params['meta_query'])) {
-							
-							$filtered_params['meta_query'] = array(
-
-								'relation' => isset($raw_params['meta_relation']) ? $raw_params['meta_relation'] : 'AND'
-							);
-						}
-
-						if (!isset($data['compare'])) $data['compare'] = '=';
-						if (!isset($data['type'])) $data['type'] = 'CHAR';
-		
-						$data['value'] = $value;
-
-						$filtered_params['meta_query'][] = $data;
-					}
-				}
-
-			} elseif (preg_match('/^year\:/', $key) || 
-					  preg_match('/^month\:/', $key) || 
-					  preg_match('/^day\:/', $key) || 
-					  preg_match('/^week\:/', $key) || 
-					  preg_match('/^hour\:/', $key) || 
-					  preg_match('/^minute\:/', $key) || 
-					  preg_match('/^second\:/', $key)) {
-					
-				$data    = explode(':', $key);
-				$key     = isset($data[0]) ? $data[0] : null;
-				$compare = isset($data[1]) ? $data[1] : '=';
-
-				$compare_map = array(
-					'gt'         => '>',
-					'gte'        => '>=',
-					'lt'         => '<',
-					'lte'        => '<=',
-					'in'         => 'IN',
-					'notIn'      => 'NOT IN',
-					'between'    => 'BETWEEN',
-					'notBetween' => 'NOT BETWEEN'
-				);
-
-				if (array_key_exists($compare, $compare_map)) {
-					
-					$compare = $compare_map[$compare];
-					$values  = explode(',', $value);
-					$value   = count($values) == 1 && !in_array($compare, array('IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN')) ? $values[0] : $values;
-
-					$data = array(
-						$key      => $value,
-						'compare' => $compare
-					);
-
-					if (!isset($filtered_params['date_query'])) {
-						
-						$filtered_params['date_query'] = array(
-
-							'relation' => isset($raw_params['date_relation']) ? $raw_params['date_relation'] : 'AND'
-						);
-					}
-
-					$filtered_params['date_query'][] = $data;
-				}
-
-			} else {
-
-				// Check if we should map a query parameter to a built-in query parameter
-				if (array_key_exists($key, $params_map)) $key = $params_map[$key];
-
-				// Make sure comma delimited values are converted to arrays
-				// on parameters that require or admit arrays as the value
-				$parameters_requiring_arrays = array(
-					'author__in',
-					'author__not_in',
-					'category__and',
-					'category__in',
-					'category__not_in',
-					'tag__and',
-					'tag__in',
-					'tag__not_in',
-					'tag_slug__and',
-					'tag_slug__in',
-					'post_parent__in',
-					'post_parent__not_in',
-					'post__in',
-					'post__not_in',
-				);
-
-				$parameters_admitting_arrays = array(
-					'post_type',
-					'post_status'
-				);
-
-				if (in_array($key, $parameters_requiring_arrays) && is_string($value)) {
-					
-					$value = explode(',', $value);
-				}
-
-				if (in_array($key, $parameters_admitting_arrays) && is_string($value)) {
-					
-					$value = explode(',', $value);
-
-					if (count($value) == 1) $value = $value[0];
-				}
-
-				$filtered_params[$key] = $value;
-			}
+				return new Query();
+				break;
 		}
-
-		// Build new query
-		$query = new \WP_Query($filtered_params);
-
-		// If we should return meta, build response structure accordingly
-		if ($options['with_meta']) {
-
-			$meta = self::__getPaginationMeta($query, $resource_name);
-			$data = array(
-				'meta'  => $meta,
-				'items' => $query->posts
-			);
-		}
-
-		// No meta needed, just return entries
-		else {
-
-			$data = $query->posts;
-		}
-
-		// Return data
-		return $data;
 	}
 
-	protected static function __getPaginationMeta(\WP_Query $query, $resource_name)
+	/**
+	 * Returns an instance of WpQueryEnhanced
+	 * 
+	 * @param  array                               $args    Query Arguments
+	 * @param  array                               $options WpQueryEnhanced options
+	 * @return Ponticlaro\Bebop\Db\WpQueryEnhanced
+	 */
+	public static function wpQuery(array $args = array(), array $options = array())
 	{
-		$meta  = array();
-		$posts = $query->posts;
-
-		$meta['items_total']    = (int) $query->found_posts;
-		$meta['items_returned'] = (int) $query->post_count;
-		$meta['total_pages']    = (int) $query->max_num_pages;
-		$meta['current_page']   = (int) max(1, $query->query_vars['paged']);
-		$meta['has_more']       = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? false : true;
-
-		$params = $_GET;
-
-		// Remove post_type parameter when not querying the /posts resource
-		if ($resource_name != 'posts' && isset($params['post_type'])) {
-
-			unset($params['post_type']);
-		} 
-
-		$meta['previous_page'] = $meta['current_page'] == 1 ? null : self::__buildPreviousPageUrl($params);
-		$meta['next_page']     = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? null : self::__buildNextPageUrl($params);
-
-		return $meta;
-	}
-
-	protected static function __buildPreviousPageUrl(array $params = array())
-	{
-		$params['page'] = isset($params['page']) ? $params['page'] - 1 : 1; 
-
-		return '?'. self::__buildQuery($params);
-	}
-
-	protected static function __buildNextPageUrl(array $params = array())
-	{
-		$params['page'] = isset($params['page']) ? $params['page'] + 1 : 2;
-
-		return '?'. self::__buildQuery($params);
-	}
-
-	protected static function __buildQuery(array $params = array())
-	{
-		array_walk($params, function(&$value, $key) {
-			$value = urldecode($value);
-		});
-
-		return http_build_query($params);
+		return new WpQueryEnhanced($args, $options);
 	}
 }

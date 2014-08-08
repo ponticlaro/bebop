@@ -247,7 +247,7 @@ class Query {
             $query_args = array_merge($query_args, $args);
 
         // Execute query
-        $data = Db::queryPosts($query_args, array('with_meta' => true));
+        $data = Db::wpQuery($query_args)->setOption('with_meta', true)->execute();
 
         // Save query items
         if (isset($data['items']))
