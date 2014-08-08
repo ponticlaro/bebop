@@ -191,33 +191,7 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
      * @param  string $path   Optional path to push the value to
      * @return class          This class instance
      */
-    public function push($values, $path = null)
-    {
-        if (is_array($values)) {
-
-            foreach ($values as $path => $value) {
-                
-                $this->__pushItem($value, $path);
-            }
-        } 
-
-        else {
-
-            $this->__pushItem($values, $path);
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * Push individual items to indexed arrays
-     *
-     * @param  mixed  $value The value to be inserted
-     * @param  string $path  Optional path to push the value to
-     * @return void        
-     */
-    private function __pushItem($value, $path = null) 
+    public function push($value, $path = null)
     {
         if ($path) {
             
@@ -239,6 +213,8 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
 
             $this->data[] = $value;
         }
+
+        return $this;
     }
 
     /**
