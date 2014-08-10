@@ -335,7 +335,7 @@ class Taxonomy extends TrackableObjectAbstract
     public function addPostType($post_type)
     {
         if (is_a($post_type, 'Ponticlaro\Bebop\PostType'))
-            $post_type = static::__getNameFromPostTypeObject($post_type);
+            $post_type = $post_type->getId();
 
         if (!is_string($post_type))
             throw new \Exception('Taxonomy post type must be either a string or a \Ponticlaro\Bebop\PostType instance.');          
@@ -370,7 +370,7 @@ class Taxonomy extends TrackableObjectAbstract
     public function removePostType($post_type)
     {
         if (is_a($post_type, 'Ponticlaro\Bebop\PostType'))
-            $post_type = static::__getNameFromPostTypeObject($post_type);
+            $post_type = $post_type->getId();
 
         if (!is_string($post_type))
             throw new \Exception('Taxonomy post type must be either a string or a \Ponticlaro\Bebop\PostType instance.');          
@@ -792,17 +792,6 @@ class Taxonomy extends TrackableObjectAbstract
         );
 
         $this->setLabels($labels);
-    }
-
-    /**
-     * Returns post type name, from post type object
-     * 
-     * @param  \Ponticlaro\Bebop\PostType $post_type 
-     * @return string
-     */
-    protected static function __getNameFromPostTypeObject(\Ponticlaro\Bebop\PostType $post_type)
-    {
-        return $post_type->getId();
     }
 
     /**
