@@ -41,7 +41,7 @@ class API extends SingletonAbstract {
 		add_action('rewrite_rules_array', array($this, 'rewriteRules'), 99);
 
 		// Handle template includes
-		add_action('template_redirect', array($this, 'templateRedirects'));
+		add_action('template_redirect', array($this, 'templateRedirects'), 1);
 
 		// Instantiate HTTP Client for the Bebop API
 		$url          = Bebop::getUrl('home') .'/'. static::$config->get('base_url');
