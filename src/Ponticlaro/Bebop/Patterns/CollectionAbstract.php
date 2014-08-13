@@ -12,6 +12,13 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     protected $data = array();
 
     /**
+     * Status of multidimensional arrays access through dotted notation
+     * 
+     * @var boolean
+     */
+    protected $dotted_notation_enabled = true;
+
+    /**
      * Separator for path keys
      * 
      * @var string
@@ -30,9 +37,44 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     }
 
     /**
+     * Enables dotted notation to access multidimensional arrays
+     * 
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract This class instance
+     */
+    public function enableDottedNotation()
+    {
+        $this->dotted_notation_enabled = true;
+
+        return $this;
+    }
+
+    /**
+     * Disables dotted notation
+     * 
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract This class instance
+     */
+    public function disableDottedNotation()
+    {
+        $this->dotted_notation_enabled = false;
+
+        return $this;
+    }
+
+    /**
+     * Checks if dotted notation is enabled
+     * 
+     * @return boolean True if enabled, false otherwise
+     */
+    protected function isDottedNotationEnabled()
+    {
+        return $this->dotted_notation_enabled;
+    }
+
+    /**
      * Overrides the default path separator
      * 
-     * @param string $separator
+     * @param  string                                       $separator
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract            This class instance
      */
     public function setPathSeparator($separator)
     {
@@ -43,21 +85,57 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     }
 
     /**
+     * Removes all data
+     *
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract This class instance
+     */
+    public function clear()
+    {   
+        $this->data = array();
+
+        return $this;
+    }
+
+    /**
      * Sets a value for the given path
      *
-     * @param string $path Path where the value should be stored
-     * @param mixed  value Value that should be stored
+     * @param  string                                       $path Path where the value should be stored
+     * @param  mixed                                        value Value that should be stored
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract       This class instance
      */
-    public function set($paths, $value = true)
+    public function set($path, $value = true)
     {
-        if (is_string($paths)) 
-            $this->__set($paths, $value);
+        if (is_string($path) || is_numeric($path)) {
 
-        if (is_array($paths)) {
+            $this->__set($path, $value);
+        }
 
-            foreach ($paths as $path => $value) {
+        elseif (is_array($path)) {
+
+            $this->setList($path);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Sets a list of values
+     * 
+     * @param  array                                        $values
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract         This class instance
+     */
+    public function setList(array $values)
+    {
+        foreach ($values as $path => $value) {
+
+            if (is_string($path)){
 
                 $this->__set($path, $value);
+            }
+
+            elseif (is_numeric($path)) {
+                
+                $this->push($value);
             }
         }
 
@@ -67,8 +145,9 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     /**
      * Adds items to the target path
      * 
-     * @param string $path   Target path
-     * @param mixed  $values Key/Values pairs to be added
+     * @param  string                                       $path   Target path
+     * @param  mixed                                        $values Key/Values pairs to be added
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract         This class instance
      */
     public function add($path, $values)
     {
@@ -127,29 +206,40 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     }
 
     /**
-     * Adds one or more items to the beginning 
-     * of the target container array
+     * Adds a single item to the beginning of the target container array
      *  
-     * @param    mixed    $value   Valuss to be inserted
-     * @param    string   $path    Optional path to unshift the value to
-     * @return   class             This collection
+     * @param  mixed                                        $value Value to be inserted
+     * @param  string                                       $path  Optional path to unshift the value to
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract        This class instance
      */
-    public function unshift($values, $path = null)
+    public function unshift($value, $path = null)
     {
-        if (is_array($values)) {
+        if (is_array($value)) {
 
-            foreach ($values as $path => $value) {
-
-                $this->__unshiftItem($value, $path);
-            }
+            $this->unshiftList($value, $path);
         }
 
         else {
-
-            $this->__unshiftItem($values, $path);
+            
+            $this->__unshiftItem($value, $path);
         }
 
         return $this;
+    }
+
+    /**
+     * Adds a list of values to the beginning of the target container array
+     * 
+     * @param  array                                        $values List of valus to be inserted
+     * @param  string                                       $path   Optional path to unshift values to
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract         This class instance
+     */
+    public function unshiftList(array $values, $path = null)
+    {
+        foreach (array_reverse($values) as $value) {
+            
+            $this->unshift($value, $path);
+        }
     }
 
     /**
@@ -187,9 +277,9 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     /**
      * Adds a value to a given path or to the $data indexed array
      *
-     * @param  mixed  $values Values to be inserted
-     * @param  string $path   Optional path to push the value to
-     * @return class          This class instance
+     * @param  mixed                                        $values Values to be inserted
+     * @param  string                                       $path   Optional path to push the value to
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract         This class instance
      */
     public function push($value, $path = null)
     {
@@ -218,12 +308,29 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     }
 
     /**
+     * Pushes list of values to target path
+     * 
+     * @param  array                                        $values List of values to be pushed
+     * @param  string                                       $path   Optional path to push values to
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract         This class instance
+     */
+    public function pushList(array $values, $path = null)
+    {
+        foreach ($values as $value) {
+            
+            $this->push($value, $path);
+        }
+
+        return $this;
+    }
+
+    /**
      * Removes a value from a given path or 
      * from the $data indexed array
      *
-     * @param  string $value Value to be popped 
-     * @param  string $path  Optional path to pop the value from
-     * @return class         This class instance
+     * @param  string                                       $value Value to be popped 
+     * @param  string                                       $path  Optional path to pop the value from
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract        This class instance
      */
     public function pop($value, $path = null)
     {
@@ -257,63 +364,120 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     }
 
     /**
-     * Removes one key or more keys
+     * Pops a list of values
      * 
-     * @param  string|array $paths Path or paths to be removed
-     * @return class               This class instance
+     * @param  array                                        $values List of values to be popped
+     * @param  string                                       $path   Optional path to pop values from
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract         This class instance
      */
-    public function remove($paths)
+    public function popList(array $values, $path = null)
     {
-        if (is_string($paths)) 
-            $this->__unset($paths);
-
-        if (is_array($paths)) {
-
-            foreach ($paths as $path) {
-
-                $this->__unset($path);
-            }
+        foreach ($values as $value) {
+            
+            $this->pop($value, $path);
         }
 
         return $this;
     }
 
     /**
-     * Removes all data
-     *
-     * @return class This class instance
+     * Removes a single path
+     * 
+     * @param  string|array                                 $path Path to be removed
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract       This class instance
      */
-    public function clear()
-    {   
-        $this->data = array();
+    public function remove($path)
+    {
+        if (is_string($path)) {
+            
+            $this->__unset($path);
+        }
+
+        elseif (is_array($path)) {
+
+            $this->removeList($path);
+        }
 
         return $this;
     }
 
+   /**
+     * Removes a list of paths
+     * 
+     * @param  array                                        $paths List of paths to be removed
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract        This class instance
+     */
+    public function removeList(array $paths)
+    {
+        foreach ($paths as $path) {
+            
+            $this->remove($path);
+        }
+    }
+
     /**
-     * Gets values for provide path or paths
+     * Gets value for target path
      *
-     * @param  string|array $paths 
+     * @param  string|array $path 
      * @return mixed               
      */
-    public function get($paths)
+    public function get($path)
     {
-        if (is_string($paths)) 
-            return $this->__get($paths);
+        if (is_string($path)) {
 
-        if (is_array($paths)) {
+            return $this->__get($path);
+        }
 
-            $results = array();
+        elseif (is_array($path)) {
 
-            foreach ($paths as $path) {
-
-                $results[$path] = $this->__get($path);
-            }
-
-            return $results;
+            return $this->getList($path);
         }
 
         return null;
+    }
+
+    /**
+     * Returns values for target paths
+     * 
+     * @param  array $paths Target paths
+     * @return array        List of existing results
+     */
+    public function getList(array $paths)
+    {
+        $results = array();
+
+        foreach ($paths as $path) {
+
+            if (is_string($path)) {
+
+                if ($this->isDottedNotationEnabled()) {
+
+                    $data  = &$results;
+                    $paths = explode($this->path_separator, $path);
+
+                    while (count($paths) > 1) {
+                            
+                        $key = array_shift($paths);
+
+                        if (!isset($data[$key]) || !is_array($data[$key])) {
+
+                            $data[$key] = array(); 
+                        }
+                        
+                        $data = &$data[$key];
+                    }
+
+                    $data[array_shift($paths)] = $this->__get($path);
+                }
+
+                else {
+
+                    $results[$path] = $this->__get($path);
+                }
+            }
+        }
+
+        return $results;
     }
 
     /**
@@ -408,33 +572,55 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     /**
      * Taking control over the __set overloading magic method
      * 
-     * @param string $path  Path that will hold the $value
-     * @param mixed  $value Value to be stored
+     * @param  string                                       $path  Path that will hold the $value
+     * @param  mixed                                        $value Value to be stored
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract        This class instance
      */
     public function __set($path, $value)
     {   
         if (is_string($path)) {
 
-            // Get current data as reference
-            $data = &$this->data;
+            if ($this->isDottedNotationEnabled()) {
 
-            // Explode keys
-            $keys = explode($this->path_separator, $path);
+                // Get current data as reference
+                $data = &$this->data;
+                    
+                // Explode keys
+                $keys = explode($this->path_separator, $path);
 
-            // Crawl though the keys
-            while (count($keys) > 1) {
+                // Crawl though the keys
+                while (count($keys) > 1) {
 
-                $key = array_shift($keys);
+                    $key = array_shift($keys);
 
-                if (!isset($data[$key])) {
+                    if (!isset($data[$key])) {
 
-                    $data[$key] = array();
+                        $data[$key] = array();
+                    }
+                    
+                    $data =& $data[$key];
                 }
-                
-                $data =& $data[$key];
+
+                if (is_array($data)) {
+                    
+                    $data[array_shift($keys)] = $value;
+                }
+
+                else {
+
+                    $data = $value;
+                }
             }
 
-            $data[array_shift($keys)] = $value;
+            else {
+
+                $this->data[$path] = $value;
+            }
+        }
+
+        elseif (is_numeric($path)) {
+            
+            $this->push($value);
         }
 
         return $this;
@@ -450,36 +636,7 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     {
         if (!is_string($path)) return null;
 
-        // Get current data as reference
-        $data = &$this->data;
-
-        // Explode keys
-        $keys = explode($this->path_separator, $path);
-
-        // Crawl though the keys
-        while (count($keys) > 1) {
-
-            $key = array_shift($keys);
-
-            if (!isset($data[$key])) {
-
-                return null;
-            }
-            
-            $data =& $data[$key];
-        }
-
-        return $data[array_shift($keys)];
-    }
-
-    /**
-     * Taking control over the __unset overloading magic method
-     * 
-     * @param string $path Path to be unset
-     */
-    public function __unset($path)
-    {
-        if (is_string($path)) {
+        if ($this->isDottedNotationEnabled()) {
 
             // Get current data as reference
             $data = &$this->data;
@@ -494,13 +651,60 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
 
                 if (!isset($data[$key])) {
 
-                    return $this;
+                    return null;
                 }
                 
                 $data =& $data[$key];
             }
 
-            unset($data[array_shift($keys)]);
+            return $data[array_shift($keys)];
+        }
+
+        else {
+
+            return $this->data[$path];
+        }
+    }
+
+    /**
+     * Taking control over the __unset overloading magic method
+     * 
+     * @param  string                                       $path Path to be unset
+     * @return Ponticlaro\Bebop\Patterns\CollectionAbstract       This class instance
+     */
+    public function __unset($path)
+    {
+        if (is_string($path)) {
+
+            if ($this->isDottedNotationEnabled()) {
+
+                // Get current data as reference
+                $data = &$this->data;
+
+                // Explode keys
+                $keys = explode($this->path_separator, $path);
+
+                // Crawl though the keys
+                while (count($keys) > 1) {
+
+                    $key = array_shift($keys);
+
+                    if (!isset($data[$key])) {
+
+                        return $this;
+                    }
+                    
+                    $data =& $data[$key];
+                }
+
+                unset($data[array_shift($keys)]);
+            }
+
+            else {
+
+                if (isset($this->data[$path]))
+                    unset($this->data[$path]);
+            }
         }
 
         return $this;
@@ -516,25 +720,33 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
     {   
         if (!is_string($path)) return false;
 
-        // Get current data as reference
-        $data = &$this->data;
+        if ($this->isDottedNotationEnabled()) {
 
-        // Explode keys
-        $keys = explode($this->path_separator, $path);
+            // Get current data as reference
+            $data = &$this->data;
 
-        // Crawl though the keys
-        while (count($keys) > 1) {
+            // Explode keys
+            $keys = explode($this->path_separator, $path);
 
-            $key = array_shift($keys);
+            // Crawl though the keys
+            while (count($keys) > 1) {
 
-            if (!isset($data[$key])) {
+                $key = array_shift($keys);
 
-                return false;
+                if (!isset($data[$key])) {
+
+                    return false;
+                }
+                
+                $data =& $data[$key];
             }
-            
-            $data =& $data[$key];
+
+            return isset($data[array_shift($keys)]) ? true : false;
         }
 
-        return isset($data[array_shift($keys)]) ? true : false;
+        else {
+
+            return isset($this->data[$path]) ? true : false;
+        }
     }
 }
