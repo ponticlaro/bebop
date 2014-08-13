@@ -35,6 +35,9 @@ class Bebop extends SingletonAbstract
      */
     protected function __construct()
     {   
+        // Instantiate Feature Manager
+        self::Feature();
+
         // Instantiate Context Manager
         self::Context();
 
@@ -124,6 +127,18 @@ class Bebop extends SingletonAbstract
         global $wp_version;
 
         return self::$wp_version;
+    }
+
+    /**
+     * Returns feature manager OR optionaly a feature configuration object
+     * 
+     * @param string $id Id of the target feature
+     */
+    public static function Feature($id = null)
+    {
+        $feature_manager = Bebop\Helpers\FeatureManager::getInstance();
+
+        return $id && is_string($id) ? $feature_manager->get($id) : $feature_manager;
     }
 
     /**

@@ -11,10 +11,11 @@ use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 class API extends SingletonAbstract {
 
 	/**
-	 * API base URL
+	 * API configuration
 	 * 
+	 * @var Ponticlaro\Bebop\Helpers\Feature
 	 */
-	private static $base_url;
+	protected static $config;
 
 	/**
 	 * API HTTP client
@@ -27,8 +28,11 @@ class API extends SingletonAbstract {
 	 */
 	protected function __construct()
 	{
-		// Set API base URL
-		self::$base_url = '_bebop/api/';
+		// Set default configuration & enable by default
+		static::$config = Bebop::Feature()->add('api', array(
+			'base_url'    => '_bebop/api/',
+			'rewrite_tag' => 'bebop_api'
+		))->enable();
 
 		// Register stuff on the init hook
 		add_action('init', array($this, 'initRegister'), 1);
@@ -40,7 +44,7 @@ class API extends SingletonAbstract {
 		add_action('template_redirect', array($this, 'templateRedirects'));
 
 		// Instantiate HTTP Client for the Bebop API
-		$url          = Bebop::getUrl('home') .'/'. self::$base_url;
+		$url          = Bebop::getUrl('home') .'/'. static::$config->get('base_url');
 		$this->client = new HttpClient($url);
 
 		// Initialize Router
@@ -79,7 +83,7 @@ class API extends SingletonAbstract {
 	 */
 	public function initRegister()
 	{
-		add_rewrite_tag('%bebop_api%','([^&]+)');
+		add_rewrite_tag('%'. static::$config->get('rewrite_tag') .'%','([^&]+)');
 	}
 
 	/**
@@ -90,11 +94,16 @@ class API extends SingletonAbstract {
 	 */
 	public function rewriteRules($wp_rules) 
 	{
-		$bebop_rules = array(
-			self::$base_url ."?(.*)?$" => 'index.php?bebop_api=1'
-		);
+		if (static::$config->isEnabled()) {
 
-		return array_merge($bebop_rules, $wp_rules);
+			$bebop_rules = array(
+				static::$config->get('base_url') ."?(.*)?$" => 'index.php?'. static::$config->get('rewrite_tag') .'=1'
+			);
+
+			$wp_rules = array_merge($bebop_rules, $wp_rules);
+		}
+
+		return $wp_rules;
 	}
 
 	/**
@@ -104,13 +113,16 @@ class API extends SingletonAbstract {
 	 */
 	public function templateRedirects() 
 	{
-		global $wp_query;
+		if (static::$config->isEnabled()) {
 
-		if($wp_query->get('bebop_api')) {
-			
-			$router = self::Router();
-			$router->run();
-			exit;
+			global $wp_query;
+
+			if ($wp_query->get(static::$config->get('rewrite_tag'))) {
+				
+				$router = self::Router();
+				$router->run();
+				exit;
+			}
 		}
 	}
 
@@ -121,7 +133,7 @@ class API extends SingletonAbstract {
 	public static function setBaseUrl($url)
 	{
 		if (is_string($url))
-			self::$base_url = ltrim(rtrim($url ,'/'), '/') .'/';
+			static::$config->set('base_url', ltrim(rtrim($url ,'/'), '/') .'/');
 
 		return $this;
 	}
@@ -133,7 +145,7 @@ class API extends SingletonAbstract {
 	 */
 	public static function getBaseUrl()
 	{
-		return Bebop::getUrl('home') .'/'. self::$base_url;
+		return Bebop::getUrl('home') .'/'. ltrim(rtrim($url ,'/'), '/'). '/';
 	}
 
 	/**

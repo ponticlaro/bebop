@@ -13,11 +13,6 @@ use Respect\Validation\Validator as v;
 class Router extends SingletonAbstract {
 
     /**
-     * Sets the base URL for all resources
-     */
-    const BASE_URL = '/_bebop/api/';
-
-    /**
      * Slim instance
      * 
      * @var object Slim\Slim
@@ -494,13 +489,15 @@ class Router extends SingletonAbstract {
                     exit;
                 }
 
+                $base_url = '/'. Bebop::Feature('api')->get('base_url');
+
                 // Loop through all defined routes
                 foreach (Routes::getAll() as $route) {
 
                     $resources[] = array(
                         'id'       => $route->getId() .':'. $route->getMethod(), 
                         'method'   => strtoupper($route->getMethod()),
-                        'endpoint' => '/_bebop/api/'. ltrim($route->getPath(), '/')
+                        'endpoint' => $base_url . ltrim($route->getPath(), '/')
                     );
                 }
 
@@ -534,7 +531,9 @@ class Router extends SingletonAbstract {
         // Loop through all defined routes
         foreach (Routes::getAll() as $route) {
 
-            self::$slim->{$route->getMethod()} (self::BASE_URL . rtrim(ltrim($route->getPath(), '/'), '/') .'/', function () use ($route) {
+            $base_url = '/'. Bebop::Feature('api')->get('base_url');
+
+            self::$slim->{$route->getMethod()} ($base_url. rtrim(ltrim($route->getPath(), '/'), '/') .'/', function () use ($route) {
 
                 // Get data from route function
                 $data = call_user_func_array($route->getFunction(), func_get_args());
