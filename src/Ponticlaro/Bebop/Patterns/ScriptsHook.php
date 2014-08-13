@@ -83,12 +83,12 @@ class ScriptsHook {
 
         $this->id              = $id;
         $this->hook            = $hook;
-        $this->scripts         = Bebop::Collection();
-        $this->deregister_list = Bebop::Collection();
-        $this->dequeue_list    = Bebop::Collection();
-        $this->register_list   = Bebop::Collection();
-        $this->enqueue_list    = Bebop::Collection();
-        $this->env_configs     = Bebop::Collection();
+        $this->scripts         = Bebop::Collection()->disableDottedNotation();
+        $this->deregister_list = Bebop::Collection()->disableDottedNotation();
+        $this->dequeue_list    = Bebop::Collection()->disableDottedNotation();
+        $this->register_list   = Bebop::Collection()->disableDottedNotation();
+        $this->enqueue_list    = Bebop::Collection()->disableDottedNotation();
+        $this->env_configs     = Bebop::Collection()->disableDottedNotation();
 
         // Register and enqueue scripts on target hook
         add_action($hook, array($this, 'run'));

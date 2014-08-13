@@ -27,7 +27,10 @@ class JsScript extends \Ponticlaro\Bebop\Patterns\Script {
             'base_url'     => null
         ));
 
-        $this->dependencies->push($dependencies);
+        foreach ($dependencies as $dependency) {
+            
+            $this->dependencies->push($dependency);
+        }
     }
 
     /**

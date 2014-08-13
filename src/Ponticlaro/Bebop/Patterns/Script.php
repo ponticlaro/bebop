@@ -41,10 +41,10 @@ abstract class Script implements ScriptInterface {
     public function __construct()
     {
         // Create dependencies collection
-        $this->dependencies = Bebop::Collection();
+        $this->dependencies = Bebop::Collection()->disableDottedNotation();
 
         // Create environment configuration collection
-        $this->env_configs = Bebop::Collection();
+        $this->env_configs = Bebop::Collection()->disableDottedNotation();
     }
 
     /**
@@ -168,7 +168,10 @@ abstract class Script implements ScriptInterface {
      */
     public function setDependencies(array $dependencies = array())
     {
-        $this->dependencies->push($dependencies);
+        foreach ($dependencies as $dependency) {
+            
+            $this->dependencies->push($dependency);
+        }
 
         return $this;
     }
@@ -195,7 +198,12 @@ abstract class Script implements ScriptInterface {
      */
     public function replaceDependencies(array $dependencies = array())
     {
-        $this->dependencies->clear()->push($dependencies);
+        $this->dependencies->clear();
+
+        foreach ($dependencies as $dependency) {
+            
+            $this->dependencies->push($dependency);
+        }
 
         return $this;
     }
