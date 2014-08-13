@@ -52,8 +52,8 @@ class Post {
         // Create configuration instance
         if ($options['config_instance']) {
 
-            $this->context_mods = Bebop::Collection();
-            $this->loadables    = Bebop::Collection();
+            $this->context_mods = Bebop::Collection()->disableDottedNotation();
+            $this->loadables    = Bebop::Collection()->disableDottedNotation();
 
             // Add class to factory if not already there
             if (!ModelFactory::canManufacture(static::$__type)) {

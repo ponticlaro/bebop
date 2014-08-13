@@ -25,7 +25,7 @@ class EnvManager extends SingletonAbstract {
 			'development' => new Env('development'),
 			'staging'     => new Env('staging'),
 			'production'  => new Env('production')
-		));
+		))->disableDottedNotation();
 	}
 
 	/**

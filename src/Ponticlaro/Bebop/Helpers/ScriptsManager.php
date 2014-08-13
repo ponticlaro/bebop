@@ -19,7 +19,7 @@ class ScriptsManager {
      */
     public function __construct()
     {   
-        $this->hooks = Bebop::Collection();
+        $this->hooks = Bebop::Collection()->disableDottedNotation();
     }
 
     /**

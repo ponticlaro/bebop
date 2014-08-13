@@ -68,8 +68,8 @@ class Metabox extends TrackableObjectAbstract
 
         // Set basic structures
         $this->config      = Bebop::Collection($default_config);
-        $this->post_types  = Bebop::Collection();
-        $this->meta_fields = Bebop::Collection();
+        $this->post_types  = Bebop::Collection()->disableDottedNotation();
+        $this->meta_fields = Bebop::Collection()->disableDottedNotation();
         $this->data        = new MetaboxData;
 
         // Set Title
@@ -327,7 +327,7 @@ class Metabox extends TrackableObjectAbstract
      */
     public function setMetaFields(array $fields = array())
     {
-        $this->meta_fields->push($fields);
+        $this->meta_fields->pushList($fields);
 
         return $this;
     }
@@ -375,12 +375,8 @@ class Metabox extends TrackableObjectAbstract
             $args     = array($this->data, new \WP_Post(new \stdClass), $this);
             $names    = Bebop::util('getControlNamesFromCallable', $function, $args);
 
-            if ($names) {
-                foreach ($names as $name) {
-                    
-                    $this->meta_fields->push($name);
-                }
-            }
+            if ($names)
+                $this->meta_fields->pushList($names);
         }
     }
 

@@ -43,7 +43,7 @@ class ContextManager extends SingletonAbstract {
 	protected function __construct()
 	{
 		// Instantiate contexts collection
-		self::$contexts = Bebop::Collection();
+		self::$contexts = Bebop::Collection()->disableDottedNotation();
 
 		// Add default context rules
 		self::add('default', function($query) {

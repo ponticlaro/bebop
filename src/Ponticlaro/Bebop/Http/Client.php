@@ -67,9 +67,9 @@ class Client {
         );
 
         // Instantiate configuration collections
-        $this->__config  = Bebop::Collection($default_config);
-        $this->__headers = Bebop::Collection();
-        $this->__cookies = Bebop::Collection();
+        $this->__config  = Bebop::Collection($default_config)->disableDottedNotation();
+        $this->__headers = Bebop::Collection()->disableDottedNotation();
+        $this->__cookies = Bebop::Collection()->disableDottedNotation();
     }
 
     /**

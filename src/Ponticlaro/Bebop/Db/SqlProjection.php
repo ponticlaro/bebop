@@ -30,7 +30,7 @@ class SqlProjection {
 	public function __construct($table = '')
 	{
 		$this->table   = $table;
-		$this->columns = Bebop::Collection();
+		$this->columns = Bebop::Collection()->disableDottedNotation();
 	}
 
 	public function addColumn($name, $alias = null, $table = null)

@@ -27,10 +27,12 @@ class ObjectTracker extends SingletonAbstract {
 		$type = $object->getObjectType();
 
 		// Add object type collection if not already present
-		if ($type && !isset(self::$lists[$type])) self::$lists[$type] = Bebop::Collection();
+		if ($type && !isset(self::$lists[$type])) 
+			self::$lists[$type] = Bebop::Collection()->disableDottedNotation();
 
 		// Add object to its type collection
-		if($type && $id) self::$lists[$type]->set($id, $object);
+		if($type && $id) 
+			self::$lists[$type]->set($id, $object);
 
 		return $this;
 	}

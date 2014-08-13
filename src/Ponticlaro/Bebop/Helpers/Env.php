@@ -33,7 +33,7 @@ class Env {
 		$this->__key = $key;
 
 		// Instantiate hosts collection
-		$this->__hosts = Bebop::Collection();
+		$this->__hosts = Bebop::Collection()->disableDottedNotation();
 	}
 
 	/**
