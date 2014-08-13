@@ -306,7 +306,7 @@ class WpQueryEnhanced {
 							$data['terms'][] = $value;
 						}
 
-						$this->clean_args->pushList($data, 'tax_query');
+						$this->clean_args->push($data, 'tax_query');
 					}
 				}
 
@@ -365,7 +365,7 @@ class WpQueryEnhanced {
 		
 						$data['value'] = $value;
 
-						$this->clean_args->pushList($data, 'meta_query');
+						$this->clean_args->push($data, 'meta_query');
 					}
 				}
 
@@ -434,7 +434,7 @@ class WpQueryEnhanced {
 						$this->clean_args->set('date_query.relation', $relation);
 					}
 
-					$this->clean_args->pushList($data, 'date_query');
+					$this->clean_args->push($data, 'date_query');
 				}
 			}
 		}
