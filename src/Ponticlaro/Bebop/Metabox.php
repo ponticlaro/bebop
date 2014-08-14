@@ -469,31 +469,34 @@ class Metabox extends TrackableObjectAbstract
 
                 foreach($this->meta_fields->getAll() as $field) {
 
-                    $value = isset($_POST[$field]) ? $_POST[$field] : '';
+                    if (isset($_POST[$field])) {
 
-                    // Empty values
-                    if (!$value) {
-                        
-                        delete_post_meta($post_id, $field);
-                    }
+                        $value = $_POST[$field] ?: '';
 
-                    // Arrays
-                    elseif (is_array($value)) {
-                        
-                        // Delete all entries
-                        delete_post_meta($post_id, $field);
-
-                        foreach ($value as $v) {
-
-                            // Add single entry with same meta_key
-                            add_post_meta($post_id, $field, $v);
+                        // Empty values
+                        if (!$value) {
+                            
+                            delete_post_meta($post_id, $field);
                         }
-                    }
 
-                    // Strings, booleans, etc
-                    else {
+                        // Arrays
+                        elseif (is_array($value)) {
+                            
+                            // Delete all entries
+                            delete_post_meta($post_id, $field);
 
-                        update_post_meta($post_id, $field, $value);
+                            foreach ($value as $v) {
+
+                                // Add single entry with same meta_key
+                                add_post_meta($post_id, $field, $v);
+                            }
+                        }
+
+                        // Strings, booleans, etc
+                        else {
+
+                            update_post_meta($post_id, $field, $value);
+                        }
                     }
                 }
             }
