@@ -496,8 +496,8 @@ class AdminPage extends TrackableObjectAbstract
 
                 $fn(
                     $this->getParent(),
-                    $this->getPage_title(), 
-                    $this->getMenu_title(), 
+                    $this->getPageTitle(), 
+                    $this->getMenuTitle(), 
                     $this->getCapability(), 
                     $this->getMenuSlug(), 
                     array($this, 'baseHtml')
