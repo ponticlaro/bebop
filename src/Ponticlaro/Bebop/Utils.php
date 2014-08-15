@@ -109,7 +109,7 @@ class Utils
 
         ob_end_clean();
 
-        if ($html) {
+        if (trim($html)) {
 
             $doc = new \DOMDocument;
             $doc->loadHTML($html);
