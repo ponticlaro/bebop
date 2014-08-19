@@ -1,40 +1,39 @@
 <?php
 
-namespace Ponticlaro\Bebop\API;
+namespace Ponticlaro\Bebop\Api;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
-class Routes extends SingletonAbstract {
+class Routes {
 
     /**
      * Pre init hook cache for routes
      * 
      * @var \Ponticlaro\Bebop\Common\Collection
      */
-    protected static $pre_init_cache;
+    protected $pre_init_cache;
 
     /**
      * Routes list
      * 
      * @var \Ponticlaro\Bebop\Common\Collection
      */
-    protected static $routes;
+    protected $routes;
 
     /**
-     * Initializes the Routes singleton instance
+     * Initializes a Routes instance
      * 
      */
-    protected function __construct()
+    public function __construct()
     {
         // Pre initialization cache with the list of all routes
-        self::$pre_init_cache = Bebop::Collection();
+        $this->pre_init_cache = Bebop::Collection();
 
         // Routes list
-        self::$routes = Bebop::Collection();
+        $this->routes = Bebop::Collection();
 
         // Register cached routes on the init hook, after having all custom post types registered
-        add_action('init', array('\Ponticlaro\Bebop\Api\Routes', '__setCachedRoutes'), 3);
+        add_action('init', array($this, '__setCachedRoutes'), 3);
     }
 
     /**
@@ -62,7 +61,7 @@ class Routes extends SingletonAbstract {
     {
         $route = new Route($id, $method, $path, $fn);
 
-        self::__addRouteToCache($route, 'top');
+        $this->__addRouteToCache($route, 'top');
     }
 
     /**
@@ -77,7 +76,7 @@ class Routes extends SingletonAbstract {
     {
         $route = new Route($id, $method, $path, $fn);
 
-        self::__addRouteToCache($route, 'bottom');
+        $this->__addRouteToCache($route, 'bottom');
     }
 
     /**
@@ -87,9 +86,9 @@ class Routes extends SingletonAbstract {
      * @param  string                      $position Route position on the list: 'top' or 'bottom'
      * @return void
      */
-    protected static function __addRouteToCache(\Ponticlaro\Bebop\Api\Route $route, $position)
+    protected function __addRouteToCache(\Ponticlaro\Bebop\Api\Route $route, $position)
     {
-        self::$pre_init_cache->push((object) array(
+        $this->pre_init_cache->push((object) array(
             'position' => $position,
             'route'    => $route
         ));
@@ -100,9 +99,9 @@ class Routes extends SingletonAbstract {
      * 
      * @return void
      */
-    public static function __setCachedRoutes()
+    public function __setCachedRoutes()
     {
-        foreach (self::$pre_init_cache->getAll() as $item) {
+        foreach ($this->pre_init_cache->getAll() as $item) {
             
             switch ($item->position) {
 
@@ -125,9 +124,9 @@ class Routes extends SingletonAbstract {
      * @param  \Ponticlaro\Bebop\Api\Route $route Route instance
      * @return void
      */
-    protected static function __prependRoute(\Ponticlaro\Bebop\Api\Route $route)
+    protected function __prependRoute(\Ponticlaro\Bebop\Api\Route $route)
     {
-        self::$routes->unshift($route);
+        $this->routes->unshift($route);
     }
 
     /**
@@ -136,9 +135,9 @@ class Routes extends SingletonAbstract {
      * @param  \Ponticlaro\Bebop\Api\Route $route Route instance
      * @return void
      */
-    protected static function __appendRoute(\Ponticlaro\Bebop\Api\Route $route)
+    protected function __appendRoute(\Ponticlaro\Bebop\Api\Route $route)
     {
-        self::$routes->push($route);
+        $this->routes->push($route);
     }
 
     /**
@@ -147,7 +146,7 @@ class Routes extends SingletonAbstract {
      * @param  string                      $key   ID + method of the target route
      * @return \Ponticlaro\Bebop\Api\Route $route Route instance
      */
-    public static function get($key)
+    public function get($key)
     {   
         if (!is_string($key)) 
             throw new \UnexpectedValueException('Route $key must be a string');
@@ -161,7 +160,7 @@ class Routes extends SingletonAbstract {
 
         $target_route = null;
 
-        foreach (self::$routes->getAll() as $route) {
+        foreach ($this->routes->getAll() as $route) {
 
             if ($route->getId() == $id && $route->getMethod() == $method) {
                 
@@ -178,8 +177,8 @@ class Routes extends SingletonAbstract {
      * 
      * @return array Routes list
      */
-    public static function getAll()
+    public function getAll()
     {
-        return self::$routes->getAll();
+        return $this->routes->getAll();
     }
 }

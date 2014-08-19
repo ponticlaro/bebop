@@ -3,7 +3,6 @@
 namespace Ponticlaro\Bebop\Api;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\Api;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
 class Route extends SingletonAbstract {
@@ -143,7 +142,7 @@ class Route extends SingletonAbstract {
             }
         }
 
-        // Return full URL with trailing slash
-        return Api::getBaseUrl() .'/'. rtrim($path, '/') .'/';
+        // Return relative URL with trailing slash
+        return '/'. rtrim($path, '/') .'/';
     }
 }
