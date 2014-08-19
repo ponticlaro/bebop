@@ -11,12 +11,12 @@ use Ponticlaro\Bebop\Mvc\ModelFactory;
 
 class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
 
-	/**
-	 * Api Instance
-	 * 
-	 * @var Ponticlaro\Bebop\Api\Api
-	 */
-	protected static $api;
+    /**
+     * Api Instance
+     * 
+     * @var Ponticlaro\Bebop\Api\Api
+     */
+    protected static $api;
 
     /**
      * Projection for post meta columns
@@ -25,12 +25,18 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
      */
     protected static $postmeta_projection;
 
-	protected function __construct()
-	{
-		// Instantiate new Api
-		static::$api = new WpApi('bebop_api', '_bebop/api/');
+    /**
+     * Instantiates the Bebop Api
+     */
+    protected function __construct()
+    {
+        // Instantiate new Api
+        static::$api = new WpApi(array(
+            'rewrite_tag' => 'bebop_api', 
+            'base_url'    => '_bebop/api/'
+        ));
 
-		// Set post meta projection
+        // Set post meta projection
         $postmeta_projection = new SqlProjection();
         $postmeta_projection->addColumn('meta_id', '__id')
                             ->addColumn('post_id', '__post_id')
@@ -40,9 +46,9 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
 
         self::$postmeta_projection = $postmeta_projection;
 
-		// Set default routes ONLY after registering custom post types 
-		add_action('init', array($this, 'setDefaultRoutes'), 2);
-	}
+        // Set default routes ONLY after registering custom post types 
+        add_action('init', array($this, 'setDefaultRoutes'), 2);
+    }
 
    /**
      * Sets default Api routes
@@ -134,7 +140,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////////////
                 // Get all or individual post meta //
                 /////////////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'GET', "$resource_name/:post_id/meta/:meta_key(/:meta_id)", function($post_id, $meta_key, $meta_id = null) use($post_type, $resource_name) {
+                static::$api->routes()->append("$resource_name/meta", 'GET', "$resource_name/:post_id/meta/:meta_key(/)(:meta_id)", function($post_id, $meta_key, $meta_id = null) use($post_type, $resource_name) {
 
                     // Throw error if post do not exist
                     if (!get_post($post_id) instanceof \WP_Post)
@@ -160,7 +166,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////
                 // Create single post meta //
                 /////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'POST', "$resource_name/:post_id/meta/:meta_key", function($post_id, $meta_key) {
+                static::$api->routes()->append("$resource_name/meta", 'POST', "$resource_name/:post_id/meta/:meta_key(/)", function($post_id, $meta_key) {
 
                     // Check if current user can edit the target post
                     if (!current_user_can('edit_post', $post_id))
@@ -203,7 +209,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////
                 // Update single post meta //
                 /////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'PUT', "$resource_name/:post_id/meta/:meta_key/:meta_id", function($post_id, $meta_key, $meta_id) {
+                static::$api->routes()->append("$resource_name/meta", 'PUT', "$resource_name/:post_id/meta/:meta_key/:meta_id(/)", function($post_id, $meta_key, $meta_id) {
 
                     // Check if current user can edit the target post
                     if (!current_user_can('edit_post', $post_id))
@@ -246,7 +252,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////
                 // Delete single post meta //
                 /////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'DELETE', "$resource_name/:post_id/meta/:meta_key/:meta_id", function($post_id, $meta_key, $meta_id) use($post_type, $resource_name) {
+                static::$api->routes()->append("$resource_name/meta", 'DELETE', "$resource_name/:post_id/meta/:meta_key/:meta_id(/)", function($post_id, $meta_key, $meta_id) use($post_type, $resource_name) {
 
                     // Check if current user can edit the target post
                     if (!current_user_can('edit_post', $post_id))
@@ -269,38 +275,38 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 });
 
             }
-
-            // Add endpoint to inform about available endpoints
-            static::$api->routes()->append('resources', 'GET', "_resources(/)", function() use($post_types) {
-
-                if (!current_user_can('manage_options')) {
-            
-                    static::$api->router()->slim()->halt(403, json_encode(array(
-                        'error' => array(
-                            'status'  => 403,
-                            'message' => "You're not an authorized user."
-                        )
-                    )));
-
-                    exit;
-                }
-
-                $base_url = '/'. static::$api->getBaseUrl();
-
-                // Loop through all defined routes
-                foreach (static::$api->routes()->getAll() as $route) {
-
-                    $resources[] = array(
-                        'id'       => $route->getId() .':'. $route->getMethod(), 
-                        'method'   => strtoupper($route->getMethod()),
-                        'endpoint' => $base_url . ltrim($route->getPath(), '/')
-                    );
-                }
-
-                // Return resources
-                return $resources;
-            });
         }
+
+        // Add endpoint to inform about available endpoints
+        static::$api->routes()->append('resources', 'GET', "_resources(/)", function() use($post_types) {
+
+            if (!current_user_can('manage_options')) {
+        
+                static::$api->router()->slim()->halt(403, json_encode(array(
+                    'error' => array(
+                        'status'  => 403,
+                        'message' => "You're not an authorized user."
+                    )
+                )));
+
+                exit;
+            }
+
+            $base_url = '/'. static::$api->getBaseUrl();
+
+            // Loop through all defined routes
+            foreach (static::$api->routes()->getAll() as $route) {
+
+                $resources[] = array(
+                    'id'       => $route->getId() .':'. $route->getMethod(), 
+                    'method'   => strtoupper($route->getMethod()),
+                    'endpoint' => $base_url . ltrim($route->getPath(), '/')
+                );
+            }
+
+            // Return resources
+            return $resources;
+        });
 
         return $this;
     }
@@ -312,7 +318,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
      */
     public function routes()
     {
-    	return static::$api->router()->routes();
+        return static::$api->router()->routes();
     }
 
     /**
@@ -324,9 +330,9 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
      */
     public function __call($name, $args)
     {
-    	if (method_exists(static::$api, 'name'))
-    		return call_user_method_array($name, static::$api, $args);
+        if (method_exists(static::$api, 'name'))
+            return call_user_method_array($name, static::$api, $args);
 
-    	throw new \Exception("Bebop::Api method do not exist");
+        throw new \Exception("Bebop::Api method do not exist");
     }
 }

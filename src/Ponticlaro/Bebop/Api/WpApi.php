@@ -28,16 +28,15 @@ class WpApi {
 	 * @param string $rewrite_tag Rewrite Tag. Must not match any WordPress built-in query vars
 	 * @param string $base_url    Base URL for all Api routes
 	 */
-	public function __construct($rewrite_tag, $base_url)
+	public function __construct(array $config)
 	{
-		if (!is_string($rewrite_tag) || !is_string($base_url))
-			throw new \Exception("Both rewrite_tag and base_url must be strings");
+		$this->config = Bebop::Collection($config);
 
-		$this->config = Bebop::Collection(array(
-			'rewrite_tag' => $rewrite_tag
-		));
+		if (!$this->config->get('rewrite_tag'))
+			throw new \Exception("WpApi: rewrite_tag must be a string");
 
-		$this->setBaseUrl($base_url);
+		if (!$this->config->get('base_url'))
+			throw new \Exception("WpApi: base_url must be a string");
 
 		// Register stuff on the init hook
 		add_action('init', array($this, '__initRegister'), 1);
@@ -49,7 +48,7 @@ class WpApi {
 		add_action('template_redirect', array($this, '__templateRedirects'), 1);
 
 		// Initialize Router
-		$this->router = new Router($rewrite_tag, $this->config->get('base_url'));
+		$this->router = new Router($this->config->get('rewrite_tag'), $this->config->get('base_url'));
 	}
 
 	/**
@@ -71,7 +70,7 @@ class WpApi {
 	 */
 	public function getBaseUrl()
 	{
-		return $this->config->get('base_url');
+		return ltrim(rtrim($this->config->get('base_url') ,'/'), '/') .'/';
 	}
 
 	/**
@@ -114,7 +113,7 @@ class WpApi {
 	{
 		return array_merge(
 			array(
-				$this->config->get('base_url') ."?(.*)?$" => 'index.php?'. $this->config->get('rewrite_tag') .'=1'
+				$this->getBaseUrl() ."?(.*)?$" => 'index.php?'. $this->config->get('rewrite_tag') .'=1'
 			), 
 			$rules
 		);

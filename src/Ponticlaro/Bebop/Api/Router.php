@@ -47,7 +47,7 @@ class Router {
         $this->rewrite_tag = $rewrite_tag;
 
         // Save base URL
-        $this->base_url = '/' . ltrim($base_url, '/');
+        $this->base_url = '/' . rtrim(ltrim($base_url, '/'), '/') .'/';
 
         // Instantiate Routes object
         $this->routes = new Routes;
@@ -90,11 +90,6 @@ class Router {
             $resource_uri = $request->getResourceUri();
             $content_type = $request->headers->get('CONTENT_TYPE');
             $request_body = $request->getBody();
-
-            // var_dump($method);
-            // var_dump($resource_uri);
-            // var_dump($this->slim->router);
-            // die;
 
             if (in_array($method, array('POST', 'PUT', 'PATCH'))) {
                 
@@ -246,7 +241,7 @@ class Router {
 
         return $this;
     }
-
+    
     public function __call($name, $args)
     {
         if (method_exists($this->slim, $name))
