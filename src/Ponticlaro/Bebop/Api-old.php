@@ -3,22 +3,25 @@
 namespace Ponticlaro\Bebop;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\API\Client;
-use Ponticlaro\Bebop\API\Router;
+use Ponticlaro\Bebop\Api\Router;
 use Ponticlaro\Bebop\Http\Client as HttpClient;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
-class API extends SingletonAbstract {
+class Api extends SingletonAbstract {
 
 	/**
-	 * API configuration
+	 * Api configuration
 	 * 
 	 * @var Ponticlaro\Bebop\Helpers\Feature
 	 */
 	protected static $config;
 
+
+	protected $router;
+
 	/**
 	 * API HTTP client
+	 * 
 	 * @var Ponticlaro\Bebop\Http\Client
 	 */
 	private $client;
@@ -48,10 +51,10 @@ class API extends SingletonAbstract {
 		$this->client = new HttpClient($url);
 
 		// Initialize Router
-		$router = self::Router();
+		static::Router();
 
 		// Set default routes after registering custom post types 
-		add_action('init', array($router, 'setDefaultRoutes'), 2);
+		add_action('init', array(static::Router(), 'setDefaultRoutes'), 2);
 	}
 
 	/**
