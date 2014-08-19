@@ -37,61 +37,120 @@ class Routes {
     }
 
     /**
-     * Adds single route to the top of routes list.
+     * Adds a single route with GET as the method
      * 
-     * @param string $id     ID of the route
-     * @param string $method HTTP method of the route
-     * @param string $path   Relative URL of the route
-     * @param string $fn     Function to execute
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
      */
-    public function add($id, $method, $path, $fn)
+    public function get($path, $callable)
     {
-        $this->prepend($id, $method, $path, $fn);
+        $this->__addRoute('get', $path, $callable);
+
+        return $this;
     }
 
     /**
-     * Adds single route to the top of routes list.
+     * Adds a single route with POST as the method
      * 
-     * @param string $id     ID of the route
-     * @param string $method HTTP method of the route
-     * @param string $path   Relative URL of the route
-     * @param string $fn     Function to execute
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
      */
-    public function prepend($id, $method, $path, $fn)
+    public function post($path, $callable)
     {
-        $route = new Route($id, $method, $path, $fn);
+        $this->__addRoute('post', $path, $callable);
 
-        $this->__addRouteToCache($route, 'top');
+        return $this;
     }
 
     /**
-     * Adds single route to the bottom of routes list.
+     * Adds a single route with PUT as the method
      * 
-     * @param string $id     ID of the route
-     * @param string $method HTTP method of the route
-     * @param string $path   Relative URL of the route
-     * @param string $fn     Function to execute
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
      */
-    public function append($id, $method, $path, $fn)
+    public function put($path, $callable)
     {
-        $route = new Route($id, $method, $path, $fn);
+        $this->__addRoute('put', $path, $callable);
 
-        $this->__addRouteToCache($route, 'bottom');
+        return $this;
+    }
+
+    /**
+     * Adds a single route with PATCH as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function patch($path, $callable)
+    {
+        $this->__addRoute('patch', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single route with DELETE as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function delete($path, $callable)
+    {
+        $this->__addRoute('delete', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single route with OPTIONS as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function options($path, $callable)
+    {
+        $this->__addRoute('options', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Internal method to add a route
+     * 
+     * @param  string $method   Route method
+     * @param  string $path     Route path
+     * @param  string $callable Route function
+     * @return void
+     */
+    public function __addRoute($method, $path, $callable)
+    {
+        if (!is_string($method))
+            throw new \Exception("Routes: route method must be a string");
+
+        if (!is_string($path))
+            throw new \Exception("Routes: route path must be a string");
+            
+        if (!is_callable($callable))
+            throw new \Exception("Routes: route callable must be callable");
+        
+        $this->__addRouteToCache(new Route($method, $path, $callable));
     }
 
     /**
      * Adds single route to pre init cache
      *
      * @param  \Ponticlaro\Bebop\Api\Route $route    Route to cache
-     * @param  string                      $position Route position on the list: 'top' or 'bottom'
      * @return void
      */
-    protected function __addRouteToCache(\Ponticlaro\Bebop\Api\Route $route, $position)
+    protected function __addRouteToCache(\Ponticlaro\Bebop\Api\Route $route)
     {
-        $this->pre_init_cache->push((object) array(
-            'position' => $position,
-            'route'    => $route
-        ));
+        $this->pre_init_cache->push($route);
     }
 
     /**
@@ -101,75 +160,21 @@ class Routes {
      */
     public function __setCachedRoutes()
     {
-        foreach ($this->pre_init_cache->getAll() as $item) {
+        foreach ($this->pre_init_cache->getAll() as $route) {
             
-            switch ($item->position) {
-
-                case 'top':
-
-                    self::__prependRoute($item->route);
-                    break;
-                
-                case 'bottom':
-                    
-                    self::__appendRoute($item->route);
-                    break;
-            }
+            self::__pushRoute($route);
         }
     }
 
     /**
-     * Internal function to add route instance to the top of the list
+     * Internal function to add route instance to routes list
      * 
      * @param  \Ponticlaro\Bebop\Api\Route $route Route instance
      * @return void
      */
-    protected function __prependRoute(\Ponticlaro\Bebop\Api\Route $route)
-    {
-        $this->routes->unshift($route);
-    }
-
-    /**
-     * Internal function to add route instance to the bottom of the list
-     * 
-     * @param  \Ponticlaro\Bebop\Api\Route $route Route instance
-     * @return void
-     */
-    protected function __appendRoute(\Ponticlaro\Bebop\Api\Route $route)
+    protected function __pushRoute(\Ponticlaro\Bebop\Api\Route $route)
     {
         $this->routes->push($route);
-    }
-
-    /**
-     * Returns single route using its 
-     * 
-     * @param  string                      $key   ID + method of the target route
-     * @return \Ponticlaro\Bebop\Api\Route $route Route instance
-     */
-    public function get($key)
-    {   
-        if (!is_string($key)) 
-            throw new \UnexpectedValueException('Route $key must be a string');
-
-        $key_data = explode(':', strtolower($key));
-        $id       = isset($key_data[0]) ? $key_data[0] : null;
-        $method   = isset($key_data[1]) ? $key_data[1] : null;
-
-        if (!$id || !$method)
-            throw new \UnexpectedValueException('Route $key must have both an "id" and "method: e.g. posts/meta:get');
-
-        $target_route = null;
-
-        foreach ($this->routes->getAll() as $route) {
-
-            if ($route->getId() == $id && $route->getMethod() == $method) {
-                
-                $target_route = $route;
-                break;
-            }
-        }
-
-        return $target_route;
     }
 
     /**

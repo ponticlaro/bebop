@@ -26,17 +26,19 @@ class WpApi {
 	 * Instantiates new Api
 	 * 
 	 * @param string $rewrite_tag Rewrite Tag. Must not match any WordPress built-in query vars
-	 * @param string $base_url    Base URL for all Api routes
 	 */
-	public function __construct(array $config)
+	public function __construct($rewrite_tag)
 	{
-		$this->config = Bebop::Collection($config);
+		// Initialize Config
+		$this->config = Bebop::Collection();
 
-		if (!$this->config->get('rewrite_tag'))
+		// Initialize Router
+		$this->router = new Router();
+
+		if (!$rewrite_tag)
 			throw new \Exception("WpApi: rewrite_tag must be a string");
 
-		if (!$this->config->get('base_url'))
-			throw new \Exception("WpApi: base_url must be a string");
+		$this->setRewriteTag($rewrite_tag);
 
 		// Register stuff on the init hook
 		add_action('init', array($this, '__initRegister'), 1);
@@ -46,25 +48,51 @@ class WpApi {
 
 		// Handle template includes
 		add_action('template_redirect', array($this, '__templateRedirects'), 1);
-
-		// Initialize Router
-		$this->router = new Router($this->config->get('rewrite_tag'), $this->config->get('base_url'));
 	}
 
 	/**
-	 * Sets API URL prefix
+	 * Sets Api rewrite tag
 	 * 
 	 */
-	public function setBaseUrl($url)
+	public function setRewriteTag($rewrite_tag)
 	{
-		if (is_string($url))
-			$this->config->set('base_url', ltrim(rtrim($url ,'/'), '/') .'/');
+		if (is_string($rewrite_tag)) {
+
+			$this->config->set('rewrite_tag', $rewrite_tag);
+			$this->router->setRewriteTag($rewrite_tag);
+		}
 
 		return $this;
 	}
 
 	/**
-	 * Returns API URL prefix
+	 * Returns Api rewrite tag
+	 * 
+	 * @return string
+	 */
+	public function getRewriteTag()
+	{
+		return $this->config->get('rewrite_tag');
+	}
+
+	/**
+	 * Sets Api URL prefix
+	 * 
+	 */
+	public function setBaseUrl($url)
+	{
+		if (is_string($url)) {
+
+			$url = ltrim(rtrim($url ,'/'), '/') .'/';
+			$this->config->set('base_url', $url);
+			$this->router->setBaseUrl($url);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Returns Api URL prefix
 	 * 
 	 * @return string
 	 */
@@ -100,7 +128,7 @@ class WpApi {
 	 */
 	public function __initRegister()
 	{
-		add_rewrite_tag('%'. $this->config->get('rewrite_tag') .'%','([^&]+)');
+		add_rewrite_tag('%'. $this->getRewriteTag() .'%','([^&]+)');
 	}
 
 	/**
@@ -113,7 +141,7 @@ class WpApi {
 	{
 		return array_merge(
 			array(
-				$this->getBaseUrl() ."?(.*)?$" => 'index.php?'. $this->config->get('rewrite_tag') .'=1'
+				$this->getBaseUrl() ."?(.*)?$" => 'index.php?'. $this->getRewriteTag() .'=1'
 			), 
 			$rules
 		);
@@ -128,10 +156,130 @@ class WpApi {
 	{
 		global $wp_query;
 
-		if ($wp_query->get($this->config->get('rewrite_tag'))) {
+		if ($wp_query->get($this->getRewriteTag())) {
 
 			$this->router->run();
 			exit;
 		}
+	}
+
+    /**
+     * Adds a single route with GET as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function get($path, $callable)
+    {
+        $this->__addRoute('get', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single route with POST as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function post($path, $callable)
+    {
+        $this->__addRoute('post', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single route with PUT as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function put($path, $callable)
+    {
+        $this->__addRoute('put', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single route with PATCH as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function patch($path, $callable)
+    {
+        $this->__addRoute('patch', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single route with DELETE as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function delete($path, $callable)
+    {
+        $this->__addRoute('delete', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Adds a single route with OPTIONS as the method
+     * 
+     * @param  string                      $path     Route path
+     * @param  string                      $callable Route function
+     * @return Ponticlaro\Bebop\Api\Routes           This class instance
+     */
+    public function options($path, $callable)
+    {
+        $this->__addRoute('options', $path, $callable);
+
+        return $this;
+    }
+
+    /**
+     * Internal method to add a route
+     * 
+     * @param  string $method   Route method
+     * @param  string $path     Route path
+     * @param  string $callable Route function
+     * @return void
+     */
+	protected function __addRoute($method, $path, $callable)
+	{
+		if (!is_string($method))
+			throw new \Exception("WpApi: route method must be a string");
+
+		if (!is_string($path))
+			throw new \Exception("WpApi: route path must be a string");
+			
+		if (!is_callable($callable))
+			throw new \Exception("WpApi: route callable must be callable");
+		
+		call_user_method_array($method, $this->routes(), array($path, $callable));
+	}
+
+	/**
+	 * Used to add Slim routes to Api
+	 * 
+	 * @param  string 					  $name Route method
+	 * @param  srray  					  $args Route args
+	 * @return Ponticlaro\Bebop\Api\WpApi       This class instance
+	 */
+	public function __call($name, $args)
+	{
+		call_user_method_array($name, $this->routes(), $args);
+
+		return $this;
 	}
 }

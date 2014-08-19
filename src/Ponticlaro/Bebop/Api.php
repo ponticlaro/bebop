@@ -27,14 +27,13 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
 
     /**
      * Instantiates the Bebop Api
+     * 
      */
     protected function __construct()
     {
         // Instantiate new Api
-        static::$api = new WpApi(array(
-            'rewrite_tag' => 'bebop_api', 
-            'base_url'    => '_bebop/api/'
-        ));
+        static::$api = new WpApi('bebop_api');
+        static::$api->setBaseUrl('_bebop/api/');
 
         // Set post meta projection
         $postmeta_projection = new SqlProjection();
@@ -58,7 +57,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
     public function setDefaultRoutes()
     {
         // Hello World route
-        static::$api->routes()->append('status', 'GET', '/', function() {
+        static::$api->get('/', function() {
             
             return array('Hello World');
         });
@@ -76,7 +75,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 $resource_name = Bebop::util('slugify', $post_type->labels->name);
 
                 // Add post resource
-                static::$api->routes()->append($resource_name, 'GET', "$resource_name(/)(:id)", function($id = null) use($post_type, $resource_name) {
+                static::$api->get("$resource_name(/)(:id)", function($id = null) use($post_type, $resource_name) {
 
                     if (is_numeric($id)) {
 
@@ -140,7 +139,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////////////
                 // Get all or individual post meta //
                 /////////////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'GET', "$resource_name/:post_id/meta/:meta_key(/)(:meta_id)", function($post_id, $meta_key, $meta_id = null) use($post_type, $resource_name) {
+                static::$api->get("$resource_name/:post_id/meta/:meta_key(/)(:meta_id)", function($post_id, $meta_key, $meta_id = null) use($post_type, $resource_name) {
 
                     // Throw error if post do not exist
                     if (!get_post($post_id) instanceof \WP_Post)
@@ -166,7 +165,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////
                 // Create single post meta //
                 /////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'POST', "$resource_name/:post_id/meta/:meta_key(/)", function($post_id, $meta_key) {
+                static::$api->post("$resource_name/:post_id/meta/:meta_key(/)", function($post_id, $meta_key) {
 
                     // Check if current user can edit the target post
                     if (!current_user_can('edit_post', $post_id))
@@ -209,7 +208,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////
                 // Update single post meta //
                 /////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'PUT', "$resource_name/:post_id/meta/:meta_key/:meta_id(/)", function($post_id, $meta_key, $meta_id) {
+                static::$api->put("$resource_name/:post_id/meta/:meta_key/:meta_id(/)", function($post_id, $meta_key, $meta_id) {
 
                     // Check if current user can edit the target post
                     if (!current_user_can('edit_post', $post_id))
@@ -252,7 +251,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
                 /////////////////////////////
                 // Delete single post meta //
                 /////////////////////////////
-                static::$api->routes()->append("$resource_name/meta", 'DELETE', "$resource_name/:post_id/meta/:meta_key/:meta_id(/)", function($post_id, $meta_key, $meta_id) use($post_type, $resource_name) {
+                static::$api->delete("$resource_name/:post_id/meta/:meta_key/:meta_id(/)", function($post_id, $meta_key, $meta_id) use($post_type, $resource_name) {
 
                     // Check if current user can edit the target post
                     if (!current_user_can('edit_post', $post_id))
@@ -278,7 +277,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
         }
 
         // Add endpoint to inform about available endpoints
-        static::$api->routes()->append('resources', 'GET', "_resources(/)", function() use($post_types) {
+        static::$api->get("_resources(/)", function() use($post_types) {
 
             if (!current_user_can('manage_options')) {
         
@@ -298,7 +297,6 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
             foreach (static::$api->routes()->getAll() as $route) {
 
                 $resources[] = array(
-                    'id'       => $route->getId() .':'. $route->getMethod(), 
                     'method'   => strtoupper($route->getMethod()),
                     'endpoint' => $base_url . ltrim($route->getPath(), '/')
                 );
@@ -312,16 +310,6 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
     }
 
     /**
-     * Returns the routes object for the Api instance
-     * 
-     * @return Ponticlaro\Bebop\Api\Routes
-     */
-    public function routes()
-    {
-        return static::$api->router()->routes();
-    }
-
-    /**
      * Calls the Api instance on undefined methods
      * 
      * @param  string $name Method name
@@ -330,7 +318,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
      */
     public function __call($name, $args)
     {
-        if (method_exists(static::$api, 'name'))
+        if (method_exists(static::$api, $name))
             return call_user_method_array($name, static::$api, $args);
 
         throw new \Exception("Bebop::Api method do not exist");

@@ -2,17 +2,7 @@
 
 namespace Ponticlaro\Bebop\Api;
 
-use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\Patterns\SingletonAbstract;
-
-class Route extends SingletonAbstract {
-
-    /**
-     * Used to identify this route
-     * 
-     * @var string
-     */
-    protected $id;
+class Route {
 
     /**
      * Route HTTP method
@@ -38,15 +28,14 @@ class Route extends SingletonAbstract {
     /**
      * Instantiates new route
      * 
-     * @param string  $id     Route ID
      * @param string  $method Route HTTP method
      * @param string  $path   Route relative path
      * @param string  $fn     Route function
      */
-    public function __construct($id, $method, $path, $fn)
+    public function __construct($method, $path, $fn)
     {
-        // Validate ID, method and path
-        if (!is_string($id) || !is_string($method) || !is_string($path)) 
+        // Validate method and path
+        if (!is_string($method) || !is_string($path)) 
             throw new \UnexpectedValueException('Both $method and $paht need to be a string');
 
         // Validate function
@@ -54,20 +43,9 @@ class Route extends SingletonAbstract {
             throw new \UnexpectedValueException('$fn needs to be callable');
 
         // Save route data
-        $this->id     = $id;
         $this->method = strtolower($method);
         $this->path   = $path;
         $this->fn     = $fn;
-    }
-
-    /**
-     * Returns route ID
-     * 
-     * @return string
-     */
-    public function getId()
-    {
-        return $this->id;
     }
 
     /**

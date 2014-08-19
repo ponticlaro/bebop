@@ -10,18 +10,11 @@ use Respect\Validation\Validator as v;
 class Router {
 
     /**
-     * Rewrite tag
+     * Router configuration
      * 
-     * @var string
+     * @var Ponticlaro\Bebop\Common\Collection
      */
-    protected $rewrite_tag;
-
-    /**
-     * Base URL for all routes
-     * 
-     * @var string
-     */
-    protected $base_url;
+    protected $config;
 
     /**
      * Slim instance
@@ -41,13 +34,10 @@ class Router {
      * Instantiates Router
      * 
      */
-    public function __construct($rewrite_tag, $base_url)
+    public function __construct()
     {
-        // Save rewrite tag
-        $this->rewrite_tag = $rewrite_tag;
-
-        // Save base URL
-        $this->base_url = '/' . rtrim(ltrim($base_url, '/'), '/') .'/';
+        // Initialize config
+        $this->config = Bebop::Collection();
 
         // Instantiate Routes object
         $this->routes = new Routes;
@@ -56,6 +46,50 @@ class Router {
         $this->slim = new \Slim\Slim(array(
             'debug' => true
         ));
+    }
+
+    /**
+     * Sets Api rewrite tag
+     * 
+     */
+    public function setRewriteTag($rewrite_tag)
+    {
+        if (is_string($rewrite_tag))
+            $this->config->set('rewrite_tag', $rewrite_tag);
+
+        return $this;
+    }
+
+    /**
+     * Returns Api rewrite tag
+     * 
+     * @return string
+     */
+    public function getRewriteTag()
+    {
+        return $this->config->get('rewrite_tag');
+    }
+
+    /**
+     * Sets Api URL prefix
+     * 
+     */
+    public function setBaseUrl($url)
+    {
+        if (is_string($url))
+            $this->config->set('base_url', ltrim(rtrim($url ,'/'), '/') .'/');
+
+        return $this;
+    }
+
+    /**
+     * Returns Api URL prefix
+     * 
+     * @return string
+     */
+    public function getBaseUrl()
+    {
+        return ltrim(rtrim($this->config->get('base_url') ,'/'), '/') .'/';
     }
 
     /**
@@ -84,7 +118,7 @@ class Router {
     public function preFlightCheck()
     {
         $this->slim->hook('slim.before', function() {        
-        
+
             $request      = $this->slim->request();
             $method       = $request->getMethod();
             $resource_uri = $request->getResourceUri();
@@ -266,13 +300,13 @@ class Router {
              ->handleNotFound()
              ->handleResponse();
 
-        $rewrite_tag = $this->rewrite_tag;
-        $base_url    = $this->base_url;
+        $rewrite_tag = $this->getRewriteTag();
+        $base_url    = $this->getBaseUrl();
 
         // Loop through all defined routes
         foreach ($this->routes->getAll() as $route) {
 
-            $this->slim->{$route->getMethod()} ($base_url . rtrim(ltrim($route->getPath(), '/'), '/'), function () use ($route, $rewrite_tag) {
+            $this->slim->{$route->getMethod()} ('/'. $base_url . rtrim(ltrim($route->getPath(), '/'), '/'), function () use ($route, $rewrite_tag) {
 
                 // Get data from route function
                 $data = call_user_func_array($route->getFunction(), func_get_args());
