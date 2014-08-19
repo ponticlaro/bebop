@@ -56,4 +56,17 @@ class CssManager extends SingletonAbstract {
     {
         return self::$manager->getHook($id);
     }
+
+    /**
+     * Sets base url for all hooks
+     * 
+     * @param string $url Base URL
+     */
+    public function setBaseUrl($url)
+    {
+        if (is_string($url))
+            static::$manager->setBaseUrl($url);
+
+        return $this;
+    } 
 }

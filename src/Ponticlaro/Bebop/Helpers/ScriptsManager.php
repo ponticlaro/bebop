@@ -14,6 +14,13 @@ class ScriptsManager {
     protected $hooks;
 
     /**
+     * Base URL for all hooks
+     * 
+     * @var string
+     */
+    protected $base_url;
+
+    /**
      * Instantiates a Scripts Manager
      * 
      */
@@ -23,12 +30,38 @@ class ScriptsManager {
     }
 
     /**
+     * Sets base url for all hooks
+     * 
+     * @param string $url Base URL
+     */
+    public function setBaseUrl($url)
+    {
+        if (is_string($url)) {
+
+            $this->base_url = $url;
+            
+            foreach ($this->hooks as $hook) {
+                
+                if (!$hook->getBaseUrl())
+                    $hook->setBaseUrl($url);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Adds a script registration hook
      * 
      * @param \Ponticlaro\Bebop\Patterns\ScriptsHook $hook
      */
     public function addHook(\Ponticlaro\Bebop\Patterns\ScriptsHook $hook)
     {
+        if (!$hook->getBaseUrl() && !is_null($this->base_url)) {
+            
+            $hook->setBaseUrl($this->base_url);
+        }
+
         $this->hooks->set($hook->getId(), $hook);
 
         return $this;
