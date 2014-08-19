@@ -80,8 +80,8 @@ class Bebop extends SingletonAbstract
         // Instantiate UI
         if (is_admin()) self::UI();
         
-        // Instantiate API
-        self::API();
+        // Instantiate Api
+        self::Api();
 
         // Shortcode support for in editor use 
         add_shortcode('Bebop', array($this, 'shortcode'));
@@ -269,15 +269,15 @@ class Bebop extends SingletonAbstract
     }
 
     /**
-     * Returns the API class instance
+     * Returns the Api class instance
      */
-    public static function API()
+    public static function Api()
     {
-        return Bebop\API::getInstance();
+        return Bebop\Api::getInstance();
     }
 
     /**
-     * Returns the API class instance
+     * Returns the object tracker class instance
      */
     public static function ObjectTracker()
     {
