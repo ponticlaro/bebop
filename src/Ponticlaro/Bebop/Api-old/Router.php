@@ -1,9 +1,9 @@
 <?php
 
-namespace Ponticlaro\Bebop\API;
+namespace Ponticlaro\Bebop\Api;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\API\Exceptions\DefaultException AS ApiException;
+use Ponticlaro\Bebop\Api\Exceptions\DefaultException AS ApiException;
 use Ponticlaro\Bebop\Db;
 use Ponticlaro\Bebop\Db\SqlProjection;
 use Ponticlaro\Bebop\Patterns\SingletonAbstract;
@@ -198,7 +198,7 @@ class Router extends SingletonAbstract {
                 self::$slim->response()->body(json_encode($response));
                 self::$slim->response()->status(400);
 
-            } elseif (is_a($e, '\Ponticlaro\Bebop\API\Exceptions\DefaultException')) {
+            } elseif (is_a($e, '\Ponticlaro\Bebop\Api\Exceptions\DefaultException')) {
 
                 $response = array(
                     'errors' => array(
@@ -249,7 +249,7 @@ class Router extends SingletonAbstract {
     }
 
     /**
-     * Sets default API routes
+     * Sets default Api routes
      *
      * @return void
      */

@@ -1,11 +1,12 @@
 <?php
 
-namespace Ponticlaro\Bebop\API;
+namespace Ponticlaro\Bebop\Api;
 
 use Ponticlaro\Bebop;
-use Ponticlaro\Bebop\API;
+use Ponticlaro\Bebop\Api;
+use Ponticlaro\Bebop\Patterns\SingletonAbstract;
 
-class Route {
+class Route extends SingletonAbstract {
 
     /**
      * Used to identify this route
@@ -103,7 +104,7 @@ class Route {
     /**
      * Returns parsed path using provided arguments to replace placeholders
      * 
-     * @return string Full URL for the API endpoint
+     * @return string Full URL for the Api endpoint
      */
     public function parsePath()
     {
@@ -143,6 +144,6 @@ class Route {
         }
 
         // Return full URL with trailing slash
-        return API::getBaseUrl() .'/'. rtrim($path, '/') .'/';
+        return Api::getBaseUrl() .'/'. rtrim($path, '/') .'/';
     }
 }

@@ -34,7 +34,7 @@ class Routes extends SingletonAbstract {
         self::$routes = Bebop::Collection();
 
         // Register cached routes on the init hook, after having all custom post types registered
-        add_action('init', array('\Ponticlaro\Bebop\API\Routes', '__setCachedRoutes'), 3);
+        add_action('init', array('\Ponticlaro\Bebop\Api\Routes', '__setCachedRoutes'), 3);
     }
 
     /**
@@ -83,11 +83,11 @@ class Routes extends SingletonAbstract {
     /**
      * Adds single route to pre init cache
      *
-     * @param  \Ponticlaro\Bebop\API\Route $route    Route to cache
+     * @param  \Ponticlaro\Bebop\Api\Route $route    Route to cache
      * @param  string                      $position Route position on the list: 'top' or 'bottom'
      * @return void
      */
-    protected static function __addRouteToCache(\Ponticlaro\Bebop\API\Route $route, $position)
+    protected static function __addRouteToCache(\Ponticlaro\Bebop\Api\Route $route, $position)
     {
         self::$pre_init_cache->push((object) array(
             'position' => $position,
@@ -122,10 +122,10 @@ class Routes extends SingletonAbstract {
     /**
      * Internal function to add route instance to the top of the list
      * 
-     * @param  \Ponticlaro\Bebop\API\Route $route Route instance
+     * @param  \Ponticlaro\Bebop\Api\Route $route Route instance
      * @return void
      */
-    protected static function __prependRoute(\Ponticlaro\Bebop\API\Route $route)
+    protected static function __prependRoute(\Ponticlaro\Bebop\Api\Route $route)
     {
         self::$routes->unshift($route);
     }
@@ -133,10 +133,10 @@ class Routes extends SingletonAbstract {
     /**
      * Internal function to add route instance to the bottom of the list
      * 
-     * @param  \Ponticlaro\Bebop\API\Route $route Route instance
+     * @param  \Ponticlaro\Bebop\Api\Route $route Route instance
      * @return void
      */
-    protected static function __appendRoute(\Ponticlaro\Bebop\API\Route $route)
+    protected static function __appendRoute(\Ponticlaro\Bebop\Api\Route $route)
     {
         self::$routes->push($route);
     }
@@ -145,7 +145,7 @@ class Routes extends SingletonAbstract {
      * Returns single route using its 
      * 
      * @param  string                      $key   ID + method of the target route
-     * @return \Ponticlaro\Bebop\API\Route $route Route instance
+     * @return \Ponticlaro\Bebop\Api\Route $route Route instance
      */
     public static function get($key)
     {   

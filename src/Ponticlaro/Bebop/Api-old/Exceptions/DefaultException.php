@@ -1,6 +1,6 @@
 <?php
 
-namespace Ponticlaro\Bebop\API\Exceptions;
+namespace Ponticlaro\Bebop\Api\Exceptions;
 
 use Ponticlaro\Bebop;
 
