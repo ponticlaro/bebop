@@ -566,7 +566,7 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->data);
+        return new \ArrayIterator($this->data);
     }
 
     /**
