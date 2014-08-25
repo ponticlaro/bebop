@@ -112,6 +112,16 @@ class WpApi {
 	}
 
 	/**
+	 * Returns Slim Framework instance
+	 *
+	 * @return Slim\Slim
+	 */
+	public function slim()
+	{
+		return $this->router->slim();
+	}
+
+	/**
 	 * Returns Routes Manager instance
 	 *
 	 * @return Ponticlaro\Bebop\Api\Routes Api Routes Manager

@@ -2,6 +2,7 @@
 
 namespace Ponticlaro;
 
+use Ponticlaro\Bebop\Api\StaticAssetsApi;
 use Ponticlaro\Bebop\Db;
 use Ponticlaro\Bebop\Db\ObjectMeta;
 use Ponticlaro\Bebop\Common\Collection;
@@ -47,6 +48,9 @@ class Bebop extends SingletonAbstract
         // Instantiate Paths Manager
         self::Paths();
 
+        // Set Bebop root directory
+        self::setPath('bebop', __DIR__);
+
         // Set default Media Mvc Model modifications
         Media::onInit(function($media) {
 
@@ -82,6 +86,9 @@ class Bebop extends SingletonAbstract
         
         // Instantiate Api
         self::Api();
+
+        // Setup static assets Api
+        new StaticAssetsApi(__DIR__);
 
         // Shortcode support for in editor use 
         add_shortcode('Bebop', array($this, 'shortcode'));

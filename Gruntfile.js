@@ -6,10 +6,10 @@ module.exports = function(grunt) {
 
     meta: {
 
-      ui_main_js_path: 'src/Ponticlaro/Bebop/UI/assets/js',
-      ui_list_js_path: 'src/Ponticlaro/Bebop/UI/Plugins/ContentList/assets/js',
-      ui_multilist_js_path: 'src/Ponticlaro/Bebop/UI/Plugins/MultiContentList/assets/js',
-      ui_media_js_path: 'src/Ponticlaro/Bebop/UI/Plugins/Media/assets/js',
+      ui_main_js_path: 'src/Ponticlaro/Bebop/Resources/static/ui/core/js',
+      ui_list_js_path: 'src/Ponticlaro/Bebop/Resources/static/ui/list/js',
+      ui_multilist_js_path: 'src/Ponticlaro/Bebop/Resources/static/ui/multilist/assets/js',
+      ui_media_js_path: 'src/Ponticlaro/Bebop/Resources/static/ui/media/js',
     },
 
     jshint: {

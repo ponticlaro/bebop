@@ -25,7 +25,6 @@ class PathManager extends SingletonAbstract {
 
         // Instantiate paths collection object
         self::$__paths = Bebop::Collection(array(
-            'bebop'   => __DIR__,
             'root'    => ABSPATH,
             'admin'   => '',
             'plugins' => '',

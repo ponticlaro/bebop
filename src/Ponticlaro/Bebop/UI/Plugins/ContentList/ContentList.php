@@ -40,20 +40,19 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	public function registerScripts()
 	{
 		// Register CSS
-		$css_path         = '/assets/css/bebop-ui--list.css';
-		$css_url          = self::$__base_url . $css_path;
-		$css_version      = Bebop::util('getFileVersion', __DIR__ . $css_path);
+		$css_path         = 'ui/list/css/bebop-ui--list.css';
+		$css_version      = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $css_path));
 		$css_dependencies = array('bebop-ui');
 
-		wp_register_style('bebop-ui--list', $css_url, $css_dependencies, $css_version);
+		wp_register_style('bebop-ui--list', Bebop::getUrl('_bebop/static', $css_path), $css_dependencies, $css_version);
 
 		// Register development JS
 		if (Bebop::isDevEnvEnabled()) {
 			
-			wp_register_script('bebop-ui--listView', self::$__base_url .'/assets/js/views/List.js', array(), false, true);
-			wp_register_script('bebop-ui--listItemView', self::$__base_url .'/assets/js/views/ListItemView.js', array(), false, true);
-			wp_register_script('bebop-ui--listItemModel', self::$__base_url .'/assets/js/models/ListItemModel.js', array(), false, true);
-			wp_register_script('bebop-ui--listCollection', self::$__base_url .'/assets/js/collections/ListCollection.js', array(), false, true);
+			wp_register_script('bebop-ui--listView', Bebop::getUrl('_bebop/static', 'ui/list/js/views/List.js'), array(), false, true);
+			wp_register_script('bebop-ui--listItemView', Bebop::getUrl('_bebop/static', 'ui/list/js/views/ListItemView.js'), array(), false, true);
+			wp_register_script('bebop-ui--listItemModel', Bebop::getUrl('_bebop/static', 'ui/list/js/models/ListItemModel.js'), array(), false, true);
+			wp_register_script('bebop-ui--listCollection', Bebop::getUrl('_bebop/static', 'ui/list/js/collections/ListCollection.js'), array(), false, true);
 
 			$js_dependencies = array(
 				'jquery',
@@ -67,7 +66,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				'bebop-ui--listCollection'
 			);
 			
-			wp_register_script('bebop-ui--list', self::$__base_url .'/assets/js/bebop-ui--list.js', $js_dependencies, false, true);
+			wp_register_script('bebop-ui--list', Bebop::getUrl('_bebop/static', 'ui/list/js/bebop-ui--list.js'), $js_dependencies, false, true);
 		}
 
 		// Register optimized JS
@@ -84,11 +83,10 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				'mustache'
 			);
 
-			$js_path    = '/assets/js/bebop-ui--list.min.js';
-			$js_url     = self::$__base_url . $js_path;
-			$js_version = Bebop::util('getFileVersion', __DIR__ . $js_path);
+			$js_path    = 'ui/list/js/bebop-ui--list.min.js';
+			$js_version = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $js_path));
 
-			wp_register_script('bebop-ui--list', $js_url, $js_dependencies, $js_version, true);
+			wp_register_script('bebop-ui--list', Bebop::getUrl('_bebop/static', $js_path), $js_dependencies, $js_version, true);
 		}
 	}
 

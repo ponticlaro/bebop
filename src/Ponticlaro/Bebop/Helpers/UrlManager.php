@@ -25,7 +25,6 @@ class UrlManager extends SingletonAbstract {
 
         // Instantiate paths collection object
         self::$__urls = Bebop::Collection(array(
-            'bebop'   => Bebop::util('getPathUrl', __DIR__),
             'home'    => home_url(),
             'admin'   => admin_url(),
             'plugins' => plugins_url(),
