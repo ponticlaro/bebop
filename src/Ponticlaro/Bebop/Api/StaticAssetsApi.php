@@ -10,7 +10,7 @@ class StaticAssetsApi {
 	public function __construct($directory)
 	{
 		// Set Bebop static assets URL
-		Bebop::setPath('_bebop/static', $directory .'/Resources/static');
+		Bebop::setPath('_bebop/static', $directory);
 
 		// Set Bebop static assets directory
         Bebop::setUrl('_bebop/static', Bebop::getUrl('home', '_bebop/static'));
@@ -19,7 +19,7 @@ class StaticAssetsApi {
         $api->setBaseUrl('_bebop/static');
 
         // Set unique resource to capture all requests
-        $api->get('/.*', function() use($api) {
+        $api->get('/.*?', function() use($api) {
 
             // Get slim instance
             $slim = $api->slim();
@@ -28,14 +28,19 @@ class StaticAssetsApi {
             $relative_path = str_replace('/_bebop/static', '', $slim->request()->getResourceUri());
             $path          = Bebop::getPath('_bebop/static', $relative_path);
 
+            // Search for target files
+            $list = glob($path .'.*');
+
             // Return 404 if asset do not exist
-            if (!is_readable($path)) {
+            if (!$list) {
                 
                 $slim->halt(404, json_encode(array(
                     'message' => "You're looking for a Bebop asset that do not exist"
                 )));
             }
             
+            $path = $list[0];
+
             // Check file extension
             $file_parts = pathinfo($path);
 

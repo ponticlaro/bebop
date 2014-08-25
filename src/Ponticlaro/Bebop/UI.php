@@ -59,16 +59,16 @@ class UI extends SingletonAbstract {
 	public function registerScripts()
 	{
 		// Register CSS
-		$css_path    = '/ui/core/css/bebop-ui.css';
-		$css_version = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $css_path));
+		$css_path    = '/ui/core/css/bebop-ui';
+		$css_version = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $css_path .'.css'));
 
 		wp_register_style('bebop-ui', Bebop::getUrl('_bebop/static', $css_path), array(), $css_version);
 
 		// Register development JS
 		if (Bebop::isDevEnvEnabled()) {
 			
-			wp_register_script('mustache', Bebop::getUrl('_bebop/static', '/ui/core/js/vendor/mustache.js'), array(), '0.8.1', true);
-			wp_register_script('jquery.debounce', Bebop::getUrl('_bebop/static', '/ui/core/js/vendor/jquery.ba-throttle-debounce.min.js'), array('jquery'), '0.8.1', true);
+			wp_register_script('mustache', Bebop::getUrl('_bebop/static', 'ui/core/js/vendor/mustache'), array(), '0.8.1', true);
+			wp_register_script('jquery.debounce', Bebop::getUrl('_bebop/static', 'ui/core/js/vendor/jquery.ba-throttle-debounce.min'), array('jquery'), '0.8.1', true);
 			
 			$dependencies = array(
 				'jquery',
@@ -76,7 +76,7 @@ class UI extends SingletonAbstract {
 				'jquery.debounce'
 			);
 			
-			wp_register_script('bebop-ui', Bebop::getUrl('_bebop/static', '/ui/core/js/bebop-ui.js'), $dependencies, false, true);
+			wp_register_script('bebop-ui', Bebop::getUrl('_bebop/static', 'ui/core/js/bebop-ui'), $dependencies, false, true);
 		}
 
 		// Register optimized JS
@@ -84,8 +84,8 @@ class UI extends SingletonAbstract {
 
 			// Mustache is optimized separately 
 			// so that other components can load it only if needed
-			$mustache_path    = '/ui/core/js/vendor/mustache.min.js';
-			$mustache_version = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $mustache_path)); 
+			$mustache_path    = 'ui/core/js/vendor/mustache.min';
+			$mustache_version = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $mustache_path .'.js')); 
 			
 			wp_register_script('mustache', Bebop::getUrl('_bebop/static', $mustache_path), array(), $mustache_version, true);
 
@@ -96,8 +96,8 @@ class UI extends SingletonAbstract {
 				'jquery-ui-datepicker'
 			);
 
-			$bebop_ui_path    = '/ui/core/js/bebop-ui.min.js';
-			$bebop_ui_version = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $bebop_ui_path)); 
+			$bebop_ui_path    = 'ui/core/js/bebop-ui.min';
+			$bebop_ui_version = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $bebop_ui_path .'.js')); 
 
 			wp_register_script('bebop-ui', Bebop::getUrl('_bebop/static', $bebop_ui_path), $dependencies, $bebop_ui_version, true);
 		}
