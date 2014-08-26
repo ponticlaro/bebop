@@ -225,7 +225,7 @@ class AdminPage extends TrackableObjectAbstract
         $slug = Bebop::util('slugify', $slug, array('separator' => '-'));
 
         $this->config->set('menu_slug', $slug);
-        $this->config->set('url', '/wp-admin/admin.php?page='. $slug);
+        $this->config->set('url', admin_url() .'admin.php?page='. $slug);
 
         return $this;
     }
