@@ -415,8 +415,15 @@ class AdminPage extends TrackableObjectAbstract
             
             $names = Bebop::util('getControlNamesFromCallable', $function, array($this->data));
 
-            if ($names)
+            if ($names) {
+
                 $this->options->pushList($names);
+
+                foreach ($names as $name) {
+                    
+                    register_setting($this->getId(), $name);
+                }
+            }
         }
     }
 
