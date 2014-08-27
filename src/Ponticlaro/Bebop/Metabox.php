@@ -447,6 +447,9 @@ class Metabox extends TrackableObjectAbstract
      */
     public function __saveMeta($post_id) 
     {
+        // Return if this is a quick edition
+        if (wp_verify_nonce($_POST['_inline_edit'], 'inlineeditnonce')) return;
+
         $id         = $this->getId();
         $nonce_name = 'metabox_'. $id .'_nonce';
         $nonce      = isset($_POST[$nonce_name]) ? $_POST[$nonce_name] : '';
@@ -469,34 +472,31 @@ class Metabox extends TrackableObjectAbstract
 
                 foreach($this->meta_fields->getAll() as $field) {
 
-                    if (isset($_POST[$field])) {
+                    $value = isset($_POST[$field]) ? $_POST[$field] : '';
 
-                        $value = $_POST[$field] ?: '';
+                    // Empty values
+                    if (!$value) {
+                        
+                        delete_post_meta($post_id, $field);
+                    }
 
-                        // Empty values
-                        if (!$value) {
-                            
-                            delete_post_meta($post_id, $field);
+                    // Arrays
+                    elseif (is_array($value)) {
+                        
+                        // Delete all entries
+                        delete_post_meta($post_id, $field);
+
+                        foreach ($value as $v) {
+
+                            // Add single entry with same meta_key
+                            add_post_meta($post_id, $field, $v);
                         }
+                    }
 
-                        // Arrays
-                        elseif (is_array($value)) {
-                            
-                            // Delete all entries
-                            delete_post_meta($post_id, $field);
+                    // Strings, booleans, etc
+                    else {
 
-                            foreach ($value as $v) {
-
-                                // Add single entry with same meta_key
-                                add_post_meta($post_id, $field, $v);
-                            }
-                        }
-
-                        // Strings, booleans, etc
-                        else {
-
-                            update_post_meta($post_id, $field, $value);
-                        }
+                        update_post_meta($post_id, $field, $value);
                     }
                 }
             }
