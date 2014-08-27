@@ -67,7 +67,9 @@ class Post {
 
             $this->raw       = new \stdClass;
             $this->ID        = $post->ID;
-            $this->permalink = get_permalink($this->ID);
+
+            if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu')))
+                $this->permalink = get_permalink($this->ID);
 
             foreach ((array) $post as $key => $value) {
 
@@ -325,8 +327,15 @@ class Post {
             // Get model configuration instance
             $instance = static::__getInstance();
 
+            // Set post type argument
+            $instance->query->postType(static::$__type);
+
+            // Change status to inherit on attachments
+            if (static::$__type == 'attachment')
+               $instance->query->status('inherit');
+
             // Get results
-            $data = $instance->query->postType(static::$__type)->find($ids, $keep_order);
+            $data = $instance->query->find($ids, $keep_order);
 
             if ($data) {
                 
@@ -363,6 +372,10 @@ class Post {
 
         // Add post type as final argument
         $instance->query->postType(static::$__type);
+
+        // Change status to inherit on attachments
+        if (static::$__type == 'attachment')
+           $instance->query->status('inherit');
 
         // Get query results
         $items = $instance->query->findAll($args);
