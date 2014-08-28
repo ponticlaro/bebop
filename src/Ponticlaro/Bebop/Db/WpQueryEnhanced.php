@@ -545,6 +545,10 @@ class WpQueryEnhanced {
 	protected function __buildQuery(array $params = array())
 	{
 		array_walk($params, function(&$value, $key) {
+
+			if (is_array($value))
+				$value = implode(',', $value);
+			
 			$value = urldecode($value);
 		});
 
