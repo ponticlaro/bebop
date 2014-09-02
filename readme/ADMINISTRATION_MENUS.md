@@ -32,9 +32,10 @@ For all the available methods please check the `src/Ponticlaro/Bebop/AdminPage.p
 
 ### Set parent page
 ```php
-Bebop::AdminPage('Page Title', function($data) 
-{    
+$page = Bebop::AdminPage('Page Title', function($data) {    
+    
     // Your admin page code here
+});
 
-})->setParent('settings');
+$page->setParent('settings');
 ```
