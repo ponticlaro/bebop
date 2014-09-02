@@ -1,37 +1,40 @@
 Administration Menus
 ---
-This is the documentation for the [Administration Menus API](http://codex.wordpress.org/Administration_Menus) wrapper
+This is the documentation for the [Administration Menus API](http://codex.wordpress.org/Administration_Menus) wrapper.
 
-## Simple instantiation based on defaults 
+All admin page callable containers will be searched for control elements with the name attribute so that it can auto-save and fetch data. That data is passed as a `Ponticlaro\Bebop\Common\Collection` instance as the first and only argument of the callable. Each callable must contain at least these two features on its content:
+- Valid markup
+- Submit button
+
+## Available UI settings
+### Admin Page with a single page
 ```php
-Bebop::AdminPage('Admin Page title', function() 
+Bebop::AdminPage('Page Title', function($data) 
 {    
     // Your admin page code here
 });
 ```
 
-## Simple instantiation, but as a child of the 'Settings' page
+### Admin Page with multiple tabs
 ```php
-Bebop::AdminPage('Admin Page title', function() 
-{    
-    // Your admin page code here
-}, 
-array(
-    'parent' => 'settings'
-));
+Bebop::AdminPage('Page Title')->addTab('Tab 1 Title', function($data) {    
+
+    // Tab 1 code here
+})
+->addTab('Tab 2 Title',function($data) {    
+
+    // Tab 2 code here
+});
 ```
 
-## Full configuration
+## Available methods
+For all the available methods please check the `src/Ponticlaro/Bebop/AdminPage.php` file.
+
+### Set parent page
 ```php
-Bebop::AdminPage('Admin Page title', function() {
-    
+Bebop::AdminPage('Page Title', function($data) 
+{    
     // Your admin page code here
-}, 
-array(
-    'capability' => 'read',
-    'menu_slug'  => 'custom-admin-page',
-    'icon_url'   => '',
-    'position'   => '',
-    'parent'     => ''
-));
+
+})->setParent('settings');
 ```
