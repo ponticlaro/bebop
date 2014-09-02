@@ -17,11 +17,7 @@
     ],
     "require": {
         "php": ">=5.3.0",
-        "slim/slim": "~2",
-        "respect/validation": "~0.5"
-    },
-    "require-dev": {
-        "sami/sami": "2.0.0"
+        "slim/slim": "~2"
     },
     "autoload": {
         "psr-0": {
