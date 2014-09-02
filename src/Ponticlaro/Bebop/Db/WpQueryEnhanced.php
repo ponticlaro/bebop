@@ -39,7 +39,7 @@ class WpQueryEnhanced {
 	 * 
 	 * @var array
 	 */
-	protected $args_map = array(
+	protected static $args_map = array(
 		'type'           => 'post_type',
 		'status'         => 'post_status',
 		'parent'         => 'post_parent',
@@ -50,6 +50,46 @@ class WpQueryEnhanced {
 		'page'           => 'paged',
 		'include'        => 'post__in',
 		'exclude'        => 'post__not_in'
+	);
+
+	/**
+	 * Comparator map for composite query parameters
+	 * 
+	 * @var array
+	 */
+	protected static $comparator_map = array(
+		'eq'         => '=', 
+		'noteq'      => '!=', 
+		'is'         => '=', 
+		'isnot'      => '!=', 
+		'gt'         => '>', 
+		'gte'        => '>=', 
+		'lt'         => '<', 
+		'lte'        => '<=', 
+		'like'       => 'LIKE', 
+		'notlike'    => 'NOT LIKE', 
+		'in'         => 'IN', 
+		'notin'      => 'NOT IN', 
+		'between'    => 'BETWEEN', 
+		'notbetween' => 'NOT BETWEEN',
+		'and'        => 'AND'
+	);
+
+	/**
+	 * Value types map
+	 * 
+	 * @var array
+	 */
+	protected static $value_type_map = array(
+		'numeric'  => 'NUMERIC', 
+		'decimal'  => 'DECIMAL', 
+		'binary'   => 'BINARY', 
+		'char'     => 'CHAR', 
+		'date'     => 'DATE', 
+		'datetime' => 'DATETIME',
+		'time'     => 'TIME',
+		'signed'   => 'SIGNED', 
+		'unsigned' => 'UNSIGNED'
 	);
 
 	/**
@@ -229,8 +269,8 @@ class WpQueryEnhanced {
 		foreach ($args as $key => $value) {
 
 			// Check if we should map a custom query parameter to a built-in query parameter
-			if (array_key_exists($key, $this->args_map)) 
-				$key = $this->args_map[$key];
+			if (array_key_exists($key, static::$args_map)) 
+				$key = static::$args_map[$key];
 
 			// Make sure comma delimited values are converted to arrays
 			// on parameters that require arrays as the value
@@ -276,10 +316,16 @@ class WpQueryEnhanced {
 						
 					} else {
 
-						$data = array('taxonomy' => $data_string);
+						// check for comparator
+						$params = explode(':', $data_string);
+
+						$data = array(
+							'taxonomy' => isset($params[0]) ? $params[0] : '',
+							'operator' => isset($params[1]) && array_key_exists(strtolower($params[1]), static::$comparator_map) ? static::$comparator_map[$params[1]] : 'IN'
+						);
 					}
 
-					if ($data) {
+					if (isset($data['taxonomy']) && $data['taxonomy']) {
 
 						if (!$this->clean_args->hasKey('tax_query')) {
 							
@@ -339,10 +385,16 @@ class WpQueryEnhanced {
 						
 					} else {
 
-						$data = array('key' => $data_string);
+						// check for comparator
+						$params = explode(':', $data_string);
+
+						$data = array(
+							'key'     => isset($params[0]) ? $params[0] : '',
+							'compare' => isset($params[1]) && array_key_exists(strtolower($params[1]), static::$comparator_map) ? static::$comparator_map[$params[1]] : '='
+						);
 					}
 
-					if ($data) {
+					if (isset($data['key']) && $data['key']) {
 
 						if (!$this->clean_args->hasKey('meta_query')) {
 							
@@ -357,12 +409,21 @@ class WpQueryEnhanced {
 							$this->clean_args->set('meta_query.relation', $relation);
 						}
 
-						if (!isset($data['compare'])) 
+						if (!isset($data['compare']) || !$data['compare']) 
 							$data['compare'] = '=';
 
-						if (!isset($data['type'])) 
+						if (!isset($data['type']) || !$data['type']) 
 							$data['type'] = 'CHAR';
 		
+						// Search for a value type
+						$params = explode(':', $value);
+
+						if (count($params) == 2 && array_key_exists(strtolower($params[0]), static::$value_type_map)) {
+							
+							$data['type'] = $params[0];
+							$value        = $params[1];
+						}
+
 						$data['value'] = $value;
 
 						$this->clean_args->push($data, 'meta_query');
@@ -398,21 +459,9 @@ class WpQueryEnhanced {
 
 				unset($args[$key]);
 
-				$compare_map = array(
-					'='          => '=',
-					'gt'         => '>',
-					'gte'        => '>=',
-					'lt'         => '<',
-					'lte'        => '<=',
-					'in'         => 'IN',
-					'notIn'      => 'NOT IN',
-					'between'    => 'BETWEEN',
-					'notBetween' => 'NOT BETWEEN'
-				);
-
-				if (array_key_exists($compare, $compare_map)) {
+				if (array_key_exists(strtolower($compare), static::$comparator_map)) {
 					
-					$compare = $compare_map[$compare];
+					$compare = static::$comparator_map[$compare];
 					$values  = explode(',', $value);
 					$value   = count($values) == 1 && !in_array($compare, array('IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN')) ? $values[0] : $values;
 

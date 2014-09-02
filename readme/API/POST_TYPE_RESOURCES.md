@@ -29,12 +29,23 @@ Here is a list of the most relevant parameters:
 
 ### Tax queries
 If you need to use the [`tax_query`](http://codex.wordpress.org/Class_Reference/WP_Query#Taxonomy_Parameters) argument for `WP_Query` you need to use one of the following structures to build a query parameter:
-- tax:{{taxonomy_slug}}={{term(s)}}
+- tax:{{taxonomy_slug}}:{{operator}}={{term(s)}}
 - tax:{{tax_query_json}}={{term(s)}}
 
 **Notes:**  
+- The `:{{operator}}` section is optional. `IN` is the default operator value.
 - You can specify the relation of tax queries with `tax_relation` query parameter.   
 - You can specify comma separated values.
+
+#### Operators Map
+
+```php
+array( 
+    'in'    => 'IN', 
+    'notin' => 'NOT IN',
+    'and'   => 'AND'
+);
+```
 
 **Simple query with `IN` as compare operator:**  
 
@@ -57,12 +68,35 @@ After the `tax:` segment, you need to add a JSON object like:
 ### Meta Queries
 #### Structure
 If you need to use the [`meta_query`](http://codex.wordpress.org/Class_Reference/WP_Query#Custom_Field_Parameters) argument for `WP_Query` you need to use one of the following structures to build a query parameter:
-- meta:{{meta_key}}={{meta_value(s)}}
+- meta:{{meta_key}}:{{compare}}={{value_type}}:{{meta_value(s)}}
 - meta:{{meta_query_json}}={{meta_value(s)}}
 
 **Notes:**  
+- The `:{{compare}}` section is optional. `=` is the default compare value.
+- The `{{value_type}}:` section is optional. `CHAR` is the default value type.
 - You can specify the relation of meta queries with `meta_relation` query parameter.  
 - You can specify comma separated values.
+
+#### Compare Map
+
+```php
+array(
+    'eq'         => '=', 
+    'noteq'      => '!=', 
+    'is'         => '=', 
+    'isnot'      => '!=', 
+    'gt'         => '>', 
+    'gte'        => '>=', 
+    'lt'         => '<', 
+    'lte'        => '<=', 
+    'like'       => 'LIKE', 
+    'notlike'    => 'NOT LIKE', 
+    'in'         => 'IN', 
+    'notin'      => 'NOT IN', 
+    'between'    => 'BETWEEN', 
+    'notbetween' => 'NOT BETWEEN'
+);
+```
 
 **Examples:**  
 Simple query with `=` as compare operator:  
