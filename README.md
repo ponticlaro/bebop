@@ -20,7 +20,7 @@ Next, update your project's composer.json file to include Bebop:
 ```javascript
 {
     "require": {
-        "ponticlaro/bebop": "~1"
+        "ponticlaro/bebop": "~2"
     }
 }
 ```
