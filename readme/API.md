@@ -11,43 +11,67 @@ The URL for all resources will be prefixed with `/_bebop/api/`.
 The API object is a singleton with several components that allow API customization.  
 
 ```php
-$api = \Ponticlaro\Bebop::API();
+$api = \Ponticlaro\Bebop::Api();
+```
+
+### Getting the Slim Framework Object
+
+```php
+$slim = \Ponticlaro\Bebop::Api()->slim();
 ```
 
 ### Getting the Router Object
 The Router object is a singleton that handles all API requests, responses, authentication, error handling, etc...
 
 ```php
-$router = \Ponticlaro\Bebop::API()->Router();
+$router = \Ponticlaro\Bebop::Api()->router();
 ```
 
 ### Getting the Routes Object
 The Routes object is a singleton that is used to manage routes.
 
 ```php
-$routes = \Ponticlaro\Bebop::API()->Routes();
+$routes = \Ponticlaro\Bebop::Api()->routes();
 ```
 
-### Adding/Replacing resources
-You can either add or replace an existing route by using the `Routes` object.  
-You just need to define these for the route:  
-- **$method**: GET, POST, PUT, PATCH, HEAD, OPTIONS, etc...
-- **$path**: URL path. Will be automatically prefixed with `/_bebop/api/`
-- **$function**: The function that will handle the route. All route parameters will be correctly passed to this function.  
+### Adding resources/routes
 ```php
-$routes = \Ponticlaro\Bebop::API()->Routes();
+$api = \Ponticlaro\Bebop::Api();
 
-// Add a resource to the top of the list
-// You can use 'prepend' instead of 'add'
-$routes->add('get', 'pages/:id/child-pages', function($id) {
+// GET resource
+$api->get('custom/:id/child-pages(/)', function($id) {
         
     // Your code goes here.
     
     return $response;
 });
 
-// Add a resource to the bottom of the list
-$routes->append('get', 'pages/:id/child-pages', function($id) {
+// POST resource
+$api->post('custom(/)', function() {
+        
+    // Your code goes here.
+    
+    return $response;
+});
+
+// PUT resource
+$api->put('custom/:id(/)', function($id) {
+        
+    // Your code goes here.
+    
+    return $response;
+});
+
+// PATCH resource
+$api->patch('custom/:id(/)', function($id) {
+        
+    // Your code goes here.
+    
+    return $response;
+});
+
+// DELETE resource
+$api->delete('custom/:id(/)', function($id) {
         
     // Your code goes here.
     
@@ -55,7 +79,19 @@ $routes->append('get', 'pages/:id/child-pages', function($id) {
 });
 ```
 
-## Available Resources
+**NOTE:** Inside the resource/route function you need to return the desired response. That response should be either an object or an array and will be converted to JSON when a request is made.
+
+### Managing response headers
+If you need to add/remove/modify headers, you need to first get the Slim Framework instance and use it to make any necessary changes:
+
+```php
+$slim = \Ponticlaro\Bebop::Api()->slim();
+
+// Modify content-type header
+$slim->response()->header('Content-Type', 'text/html');
+```
+
+## Default Resources
 ### Status Resources
 Read [this](API/STATUS_RESOURCES.md) documentation file
 
