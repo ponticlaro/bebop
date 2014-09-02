@@ -1,13 +1,13 @@
-MVC - Model
+MVC - Models
 ---
 
 ## Usage
 ### Extending
 ```php
-class Product extends \Ponticlaro\Bebop\Mvc\Model {
+class Product extends \Ponticlaro\Bebop\Mvc\Models\Post {
     
     // Post type name 
-    protected $__type = 'product';
+    protected static $__type = 'product';
 }
 ```
 
