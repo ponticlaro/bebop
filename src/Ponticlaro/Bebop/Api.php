@@ -32,7 +32,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
     protected function __construct()
     {
         // Instantiate new Api
-        static::$api = new WpApi('bebop_api');
+        static::$api = new WpApi('bebop:api');
         static::$api->setBaseUrl('_bebop/api/');
 
         // Set post meta projection
