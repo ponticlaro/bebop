@@ -13,7 +13,7 @@ Bebop::Taxonomy($name, $post_types = null);
   - **string**: Should be the singular form of the post type name, including white-spaces and capital letters. Plural form will be automatically assumed to be the singular form plus an "**s**" at the end.
   - **array**: Should only contain two elements and both must be strings. The first element is the singular form and the second element is the plural form.
 
-- `$post_types` (opitonal): can be either:
+- `$post_types` (optional): can be either:
   - **string**: matching the [$post_type](http://codex.wordpress.org/Function_Reference/register_post_type#Parameters) parameter on the `register_post_type` function, which is equal to the `Ponticlaro\Bebop\PostType` instance `ID`. 
   - **`Ponticlaro\Bebop\PostType` instance**
   - **array**: each element on this list can be either:
