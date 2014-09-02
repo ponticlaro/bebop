@@ -427,8 +427,31 @@
 
 			}, this);
 
+			// After render event
+			if (this.afterRenderFns.length > 0) {
+
+				_.each(this.afterRenderFns, function(fn) {
+
+					fn(this);
+
+				}, this);
+			}
+
 			return this;
+		},
+
+		afterRender: function(fn) {
+
+			
 		}
 	});
+
+	ItemView.prototype.afterRenderFns = [];
+
+	ItemView.onRendered = function(fn) {
+
+		if(_.isFunction(fn))
+				this.prototype.afterRenderFns.push(fn);
+	};
 
 })(window, document, undefined, jQuery || $);
