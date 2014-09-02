@@ -19,6 +19,7 @@ class BebopFactory extends FactoryAbstract {
 		'Metabox'    => '\Ponticlaro\Bebop\Metabox',
 		'Option'     => '\Ponticlaro\Bebop\Db\Option',
 		'PostType'   => '\Ponticlaro\Bebop\PostType',
+		'Shortcode'  => '\Ponticlaro\Bebop\Shortcode',
 		'Taxonomy'   => '\Ponticlaro\Bebop\Taxonomy'
 	);
 

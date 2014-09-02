@@ -91,7 +91,7 @@ class Bebop extends SingletonAbstract
         new StaticAssetsApi(__DIR__ . '/Resources/static');
 
         // Shortcode support for in editor use 
-        add_shortcode('Bebop', array($this, 'shortcode'));
+        add_shortcode('Bebop', array($this, '__bebopShortcodes'));
     }
 
     /**
@@ -326,7 +326,7 @@ class Bebop extends SingletonAbstract
      * @param  string  $content  Shortcode content
      * @return void
      */
-    public function shortcode($attrs, $content = null) 
+    public function __bebopShortcodes($attrs, $content = null) 
     {
         if ($attrs) {
 
