@@ -43,6 +43,13 @@ class Shortcode {
     protected $attributes;
 
     /**
+     * Shortcode default attributes
+     * 
+     * @var Ponticlaro\Bebop\Common\Collection
+     */
+    protected $default_attributes;
+
+    /**
      * Instantiates a new shortcode
      * 
      * @param string   $tag      Shortcode tag
@@ -56,10 +63,11 @@ class Shortcode {
         if (!is_callable($function))
             throw new \Exception("Shortcode function must be callable");
         
-        $this->__trackable_id = $tag;  
-        $this->tag            = $tag;
-        $this->function       = $function;
-        $this->attributes     = Bebop::Collection();
+        $this->__trackable_id     = $tag;  
+        $this->tag                = $tag;
+        $this->function           = $function;
+        $this->attributes         = Bebop::Collection();
+        $this->default_attributes = Bebop::Collection();
 
         add_shortcode($tag, array($this, '__registerShortcode'));
     }
@@ -74,6 +82,12 @@ class Shortcode {
      */
     public function __registerShortcode($attrs, $content = null, $tag)
     {
+        // Clear attributes
+        $this->attributes->clear();
+
+        // Set default attributes
+        $this->attributes->setList($this->default_attributes->getAll());
+
         // Remove quotes from attributes
         if ($attrs) {
 
@@ -129,7 +143,7 @@ class Shortcode {
     public function setDefaultAttr($key, $value)
     {
         if (is_string($key))
-            $this->attributes->set($key, $value);
+            $this->default_attributes->set($key, $value);
 
         return $this;
     }
