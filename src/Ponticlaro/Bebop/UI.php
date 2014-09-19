@@ -40,9 +40,9 @@ class UI extends SingletonAbstract {
 
 		// Add built-in plugins
 		$this->addPlugins(array(
-			'Ponticlaro\Bebop\UI\Plugins\Media',
-			'Ponticlaro\Bebop\UI\Plugins\ContentList',
-			'Ponticlaro\Bebop\UI\Plugins\MultiContentList'
+			'Ponticlaro\Bebop\UI\Plugins\Media\Media',
+			'Ponticlaro\Bebop\UI\Plugins\ContentList\ContentList',
+			'Ponticlaro\Bebop\UI\Plugins\MultiContentList\MultiContentList'
 		));
 
 		$this->__instances = Bebop::Collection();

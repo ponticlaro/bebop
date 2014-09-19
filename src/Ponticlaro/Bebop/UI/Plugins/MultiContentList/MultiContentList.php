@@ -1,6 +1,6 @@
 <?php
 
-namespace Ponticlaro\Bebop\UI\Plugins;
+namespace Ponticlaro\Bebop\UI\Plugins\MultiContentList;
 
 use Ponticlaro\Bebop;
 
@@ -153,7 +153,7 @@ class MultiContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	 * 
 	 * @param \Ponticlaro\Bebop\UI\Plugins\ContentList $list  ContentList instance
 	 */
-	public function addList(\Ponticlaro\Bebop\UI\Plugins\ContentList $list, array $data = array())
+	public function addList(\Ponticlaro\Bebop\UI\Plugins\ContentList\ContentList $list, array $data = array())
 	{
 		// Override list data
 		if ($data) $list->setData($data);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ponticlaro\Bebop\UI\Plugins;
+namespace Ponticlaro\Bebop\UI\Plugins\ContentList;
 
 use Ponticlaro\Bebop;
 

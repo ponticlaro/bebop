@@ -88,7 +88,7 @@ class Bebop extends SingletonAbstract
         self::Api();
 
         // Setup static assets Api
-        new StaticAssetsApi(__DIR__ . '/Resources/static');
+        new StaticAssetsApi(__DIR__ . '/Bebop/Resources/static');
 
         // Shortcode support for in editor use 
         add_shortcode('Bebop', array($this, '__bebopShortcodes'));
