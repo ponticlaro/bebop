@@ -50,7 +50,15 @@ class ContextManager extends SingletonAbstract {
 
 		    $key = null;
 
-		    if (is_category()) { $key = 'tax/category'; }
+			if (is_home()) { $key = 'home/posts'; }
+
+		    elseif (is_front_page()) { $key = 'home/page'; }
+
+		    elseif (is_search()) { $key = 'search'; }
+
+		    elseif (is_404()) { $key = 'error/404'; }
+
+		    elseif (is_category()) { $key = 'tax/category'; }
 
 		    elseif (is_tag()) { $key = 'tax/tag'; }
 
@@ -79,14 +87,6 @@ class ContextManager extends SingletonAbstract {
 
 		        $key = 'single/'. $post_type;
 		    }
-
-		    elseif (is_home()) { $key = 'home/posts'; }
-
-		    elseif (is_front_page()) { $key = 'home/page'; }
-
-		    elseif (is_search()) { $key = 'search'; }
-
-		    elseif (is_404()) { $key = 'error/404'; }
 
 		    return $key;
 		});
