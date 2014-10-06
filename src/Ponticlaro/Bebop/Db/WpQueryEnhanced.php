@@ -544,7 +544,7 @@ class WpQueryEnhanced {
 		$meta['items_total']    = (int) $this->query->found_posts;
 		$meta['items_returned'] = (int) $this->query->post_count;
 		$meta['total_pages']    = (int) $this->query->max_num_pages;
-		$meta['current_page']   = (int) max(1, $this->query->query_vars['paged']);
+		$meta['current_page']   = $this->query->max_num_pages === 0 ? 0 : (int) max(1, $this->query->query_vars['paged']);
 		$meta['has_more']       = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? false : true;
 
 		// Remove post_type parameter when not querying the /posts resource
@@ -553,7 +553,7 @@ class WpQueryEnhanced {
 			unset($args['post_type']);
 		} 
 
-		$meta['previous_page'] = $meta['current_page'] == 1 ? null : $this->__buildPreviousPageUrl($args);
+		$meta['previous_page'] = in_array($meta['current_page'], [0, 1]) ? null : $this->__buildPreviousPageUrl($args);
 		$meta['next_page']     = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? null : $this->__buildNextPageUrl($args);
 
 		return $meta;
