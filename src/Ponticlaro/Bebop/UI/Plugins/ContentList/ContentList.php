@@ -44,7 +44,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		// Register CSS
 		$css_path         = 'ui/list/css/bebop-ui--list';
 		$css_version      = Bebop::util('getFileVersion', Bebop::getPath('_bebop/static', $css_path .'.css'));
-		$css_dependencies = array('bebop-ui');
+		$css_dependencies = array('bebop-ui', 'bebop-ui--media');
 
 		wp_register_style('bebop-ui--list', Bebop::getUrl('_bebop/static', $css_path), $css_dependencies, $css_version);
 
@@ -62,10 +62,11 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				'underscore',
 				'backbone',
 				'mustache',
+				'bebop-ui--media',
 				'bebop-ui--listView',
 				'bebop-ui--listItemView',
 				'bebop-ui--listItemModel',
-				'bebop-ui--listCollection'
+				'bebop-ui--listCollection',
 			);
 			
 			wp_register_script('bebop-ui--list', Bebop::getUrl('_bebop/static', 'ui/list/js/bebop-ui--list'), $js_dependencies, false, true);
@@ -82,7 +83,8 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				'jquery-ui-sortable',
 				'underscore',
 				'backbone',
-				'mustache'
+				'mustache',
+				'bebop-ui--media'
 			);
 
 			$js_path    = 'ui/list/js/bebop-ui--list.min';
