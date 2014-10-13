@@ -417,6 +417,7 @@
 			// Show item if not already visible
 			if(!this.$el.is(':visible')) this.$el.slideDown(200);
 
+			// Render child UI Lists instances
 			_.each(this.views[view].$el.find('[bebop-list--el="container"]'), function(item, index) {
 
 				new Bebop.List({
@@ -424,6 +425,13 @@
 					parentList: this.list,
 					parentModel: this.model
 				});
+
+			}, this);
+
+			// Render UI Media instances
+			_.each(this.views[view].$el.find('[bebop-media--el="container"]'), function(item, index) {
+
+				new Bebop.Media({el: item});
 
 			}, this);
 

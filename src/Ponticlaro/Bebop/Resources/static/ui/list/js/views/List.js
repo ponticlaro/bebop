@@ -186,9 +186,6 @@
 
 				var context = this.status.get('dataContext');
 
-				console.log('CONTEXT TPL');
-				console.log(this.formTemplates[context]);
-
 				// Fallback to default form if the context one is empty
 				this.formTemplates.main = this.formTemplates[context] !== undefined ? this.formTemplates[context] : this.formTemplates['default'];
 
@@ -228,8 +225,6 @@
 				if (this.formTemplates.main === "")
 					this.formTemplates.main = this.formTemplates['default'];
 
-				console.log(this.formTemplates);
-
 				///////////////////////////
 				// Handle Item Templates //
 				///////////////////////////
@@ -265,8 +260,6 @@
 				}, this);
 
 				$tplContainer.remove();
-
-				console.log(this.itemTemplates);
 			}
 
 			// Add forms HTML to DOM

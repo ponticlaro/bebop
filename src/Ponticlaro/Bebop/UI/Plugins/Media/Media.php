@@ -121,6 +121,19 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	public function renderTemplates()
 	{
 		?>
+		<script bebop-media--template="main" type="text/template" style="display:none">
+			<div bebop-media--el="previewer"></div>
+			
+			<div bebop-media--el="actions">
+				<button bebop-media--action="select" class="button button-small">
+					<b>Select</b> <span class="bebop-ui-icon-file-upload"></span>
+				</button>
+				<button bebop-media--action="remove" class="button button-small">
+					<span class="bebop-ui-icon-remove"></span>
+				</button>
+			</div>
+		</script>
+		
 		<script bebop-media--template="image-view" type="text/template" style="display:none">
 			<div class="bebop-media--previewer-image">
 				<div class="bebop-media--previewer-image-inner">

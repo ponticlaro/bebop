@@ -10,22 +10,28 @@
 
 		initialize: function(options) {
 
-			// Collect DOM elements
-			this.$el            = $(options.el);
-			this.$previewer     = this.$el.find('[bebop-media--el="previewer"]');
-			this.$actions       = this.$el.find('[bebop-media--el="actions"]');
-			this.$dataContainer = this.$el.find('input');
+			// Collect main DOM element
+			this.$el = $(options.el);
 
 			// Collect templates
 			var $body = $(document.body);
 
 			this.templates = {
-				image: $body.find('[bebop-media--template="image-view"]').html(),
-				nonImage: $body.find('[bebop-media--template="non-image-view"]').html(),
-				empty: $body.find('[bebop-media--template="empty-view"]').html(),
-				error: $body.find('[bebop-media--template="error-view"]').html(),
-				loading: $body.find('[bebop-media--template="loading-view"]').html()
+				main: $body.find('[bebop-media--template="main"]').html().trim(),
+				image: $body.find('[bebop-media--template="image-view"]').html().trim(),
+				nonImage: $body.find('[bebop-media--template="non-image-view"]').html().trim(),
+				empty: $body.find('[bebop-media--template="empty-view"]').html().trim(),
+				error: $body.find('[bebop-media--template="error-view"]').html().trim(),
+				loading: $body.find('[bebop-media--template="loading-view"]').html().trim()
 			}
+
+			// Insert main template
+			this.$el.append(this.templates.main);
+
+			// Collect other DOM elements
+			this.$previewer     = this.$el.find('[bebop-media--el="previewer"]');
+			this.$actions       = this.$el.find('[bebop-media--el="actions"]');
+			this.$dataContainer = this.$el.find('input');
 
 			// Set default status model
 			this.status = new Backbone.Model({
