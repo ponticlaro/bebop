@@ -169,8 +169,17 @@
 					id          = data.id != undefined ? data.id : data.ID,
 					typeValue   = data.post_mime_type != undefined ? data.post_mime_type : data.mime,
 					view        = typeValue.indexOf('image') != -1 ? 'image' : 'nonImage',
-					data.url    = data.permalink != undefined ? data.permalink : data.url;
 					data.title  = data.post_title != undefined ? data.post_title : data.title;
+
+					if (data.type == 'image') {
+
+						data.url = data.sizes.thumbnail != undefined ? data.sizes.thumbnail.url : data.url;
+					} 
+
+					else {
+
+						data.url = data.permalink != undefined ? data.permalink : data.url;
+					}
 
 					this.status.set('id', id);
 					this.status.set('view', view);
