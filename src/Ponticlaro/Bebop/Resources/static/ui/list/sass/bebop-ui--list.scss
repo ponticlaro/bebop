@@ -3,9 +3,9 @@
 	border: 1px solid #ccc;
 
 	& [bebop-list--el="container"] {
-
 		background-color: #f9f9f9;
-		border-width: 3px;
+		margin: 0;
+		border: 6px solid #eee;
 
 		[bebop-list--el="list"] {
 			
@@ -30,7 +30,7 @@
 
 		[bebop-list--el="container"] {
 			margin: 0;
-			border: 1px solid #ccc;
+			border: 6px solid #eee;
 		}
 	}
 
