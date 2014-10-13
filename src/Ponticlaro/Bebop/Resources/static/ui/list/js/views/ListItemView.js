@@ -72,10 +72,10 @@
 			// Collect data container input
 			this.$dataContainer = this.$el.find('[bebop-list--el="data-container"]');
 			
-			if (!this.list.status.get('isChildList')) {
+			//if (!this.list.status.get('isChildList')) {
 
 				this.$dataContainer.attr('name', options.fieldName +'[]');
-			}
+			//}
 			
 			this.mode = options.mode ? options.mode : null;
 

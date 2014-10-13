@@ -1,6 +1,19 @@
 [bebop-list--el="container"] {
 	background-color: #fff;
 	border: 1px solid #ccc;
+
+	& [bebop-list--el="container"] {
+
+		background-color: #f9f9f9;
+		border-width: 3px;
+
+		[bebop-list--el="list"] {
+			
+			li {
+				background-color: #f9f9f9;
+			}
+		}
+	}
 }
 
 [bebop-list--el="title"] {

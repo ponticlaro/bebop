@@ -47,6 +47,9 @@
 			// Add mode to container as attribute
 			this.$el.attr('bebop-list--mode', this.config.get('mode'));
 
+			// Get field name
+			this.fieldName = this.config.get('field_name');
+
 			// Build status object
 			this.status = new Backbone.Model({
 				isChildList: config == 'inherit' ? true : false,
@@ -80,6 +83,10 @@
 				var contextData = this.parentModel.get(dataContext);
 
 				this.collection = new List.Collection(contextData);
+
+				this.fieldName = dataContext;
+
+				this.$el.find('[bebop-list--el="data-container"]').attr('name', dataContext);
 			} 
 
 			// This is a parent list
@@ -176,6 +183,17 @@
 
 				this.itemTemplates = this.parentList.itemTemplates;
 				this.formTemplates = this.parentList.formTemplates;
+
+				var context = this.status.get('dataContext');
+
+				console.log('CONTEXT TPL');
+				console.log(this.formTemplates[context]);
+
+				// Fallback to default form if the context one is empty
+				this.formTemplates.main = this.formTemplates[context] !== undefined ? this.formTemplates[context] : this.formTemplates['default'];
+
+				// Set child list field name
+				this.itemTemplates.main = $('<div>').html(this.itemTemplates.main).find('[bebop-list--el="data-container"]').attr('name', this.fieldName).end().html();
 			} 
 
 			// This is a parent list
@@ -187,7 +205,7 @@
 				this.formTemplates = {};
 
 				///////////////////////////
-				// Handle Item Templates //
+				// Handle Form Templates //
 				///////////////////////////
 				$formTemplates     = $tplContainer.find('[bebop-list--formTemplate]');
 				this.formTemplates = {};
@@ -198,12 +216,19 @@
 						templateId = $el.attr('bebop-list--formTemplate');
 
 					// If we have a template ID, store it in the templates object
-					if (templateId) this.formTemplates[templateId] = $el.html();
+					if (templateId) this.formTemplates[templateId] = $el.html().trim();
 
 					// Remove element from DOM
 					$el.remove();
 					
 				}, this);
+
+			
+				// Fallback to default form if the main one is empty
+				if (this.formTemplates.main === "")
+					this.formTemplates.main = this.formTemplates['default'];
+
+				console.log(this.formTemplates);
 
 				///////////////////////////
 				// Handle Item Templates //
@@ -231,7 +256,7 @@
 							html = $el.html();
 						}
 
-						this.itemTemplates[templateId] = html;
+						this.itemTemplates[templateId] = html.trim();
 					}
 
 					// Remove element from DOM
@@ -240,11 +265,13 @@
 				}, this);
 
 				$tplContainer.remove();
+
+				console.log(this.itemTemplates);
 			}
 
 			// Add forms HTML to DOM
-			if (this.formTemplates.top) this.$topForm.html(this.formTemplates.top);
-			if (this.formTemplates.bottom) this.$bottomForm.html(this.formTemplates.bottom);
+			this.$topForm.html(this.formTemplates.main);
+			this.$bottomForm.html(this.formTemplates.main);
 
 			// Collect form DOM element and action buttons
 			this.$form   = this.$el.find('[bebop-list--el="form"]');
@@ -272,9 +299,6 @@
 				}, this);
 
 			}, this);
-
-			// Get field name
-			this.fieldName = this.config.get('field_name');
 
 			this.handleEmptyIndicator = function() {
 
@@ -524,9 +548,10 @@
 
 				// Append new model
 				this.appendItem(model);
-
+ 
 				// Remove source data input from DOM
-				this.$dataInputs.get(index).remove();
+				if (this.$dataInputs !== undefined && this.$dataInputs.length >= 1)
+					this.$dataInputs.get(index).remove();
 
 			}, this);
 

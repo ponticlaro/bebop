@@ -15,6 +15,8 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 	protected static $__base_url;
 
+	protected static $__default_form;
+
 	protected $__current_instance_key;
 
 	public function __construct()
@@ -132,24 +134,30 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 				</div>
 			</script>
 
-			<script bebop-list--formTemplate="top" type="text/template" style="display:none">
-				<?php if ($this->config->get('show_top_form')) echo $this->getForm(); ?>
-			</script>
+			<?php 
 
-			<script bebop-list--formTemplate="bottom" type="text/template" style="display:none">
-				<?php if ($this->config->get('show_bottom_form')) echo $this->getForm(); ?>
-			</script>
+			// Form Templates
+			$forms = $this->getAllForms();
 
-			<?php $items_views = $this->getAllItemViews();
+			if ($forms) {
+				foreach ($forms as $form) { ?>
+					 
+					<script bebop-list--formTemplate="<?php echo $form->getId(); ?>" type="text/template" style="display:none">
+						<?php echo $this->getFormHtml($form->getId()); ?>
+					</script>
+
+				<?php }
+			}
+
+			// Item Templates
+			$items_views = $this->getAllItemViews();
 
 			if ($items_views) {
-
 				foreach ($items_views as $key => $template) { ?>
 					 
 					<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none"><?php echo $template; ?></script>
 
 				<?php }
-
 			} ?>
 		</div>
 
@@ -203,19 +211,25 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			'browse'  => '',
 			'reorder' => '',
 			'edit'    => ''
-		));
+		))->disableDottedNotation();
 
 		// Labels
 		$this->labels = Bebop::Collection(array(
 			'add_button'  => 'Add Item',
 			'sort_button' => 'Sort'
-		));
+		))->disableDottedNotation();
 
-		// Form elements
-		$this->form_elements = Bebop::Collection(array(
+		// Forms
+		$this->forms = Bebop::Collection()->disableDottedNotation();
+
+		// Add default form
+		$this->addForm('default', array(
 			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
 			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
 		));
+
+		// Add empty main form
+		$this->addForm('main');
 
 		// Register templates on admin footer
 		add_action('admin_footer', array($this, 'renderTemplates'));
@@ -314,11 +328,84 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		return is_string($mode) && $this->config->get('mode') == $mode ? true : false;
 	}
 
+	public function addForm($id, array $elements = array())
+	{
+		$this->forms->set($id, new ContentListForm($id, $elements ?: $this->forms->get('default')->getAllElements()));
+
+		return $this;
+	}
+
+	public function addFormElements($form_id, array $elements)
+	{
+		foreach ($elements as $element_id => $template) {
+			
+			$this->addFormElement($form_id, $element_id, $template);
+		}
+
+		return $this;
+	}
+
+	public function addFormElement($form_id, $element_id, $template)
+	{
+		if (!is_string($form_id) || !is_string($element_id))
+			throw new \Exception("Form ID and Element ID must both be strings");
+
+		// Add form if it does not exist
+		if (!$this->forms->hasKey($form_id))
+			$this->addForm($form_id);
+
+		// Add element to form
+		$this->forms->get($form_id)->addElement($element_id, $template);
+
+		return $this;
+	}
+
+	public function formHasElement($form_id, $element_id)
+	{
+		if (!is_string($form_id) || !is_string($element_id)) return false;
+
+		return $this->forms->get($form_id) ? $this->forms->get($form_id)->hasElement($id) : falss;
+	}
+
+	public function removeFormElement($form_id, $element_id)
+	{
+		if (!is_string($form_id) || !is_string($element_id))
+			throw new \Exception("Form ID and Element ID must both be strings");
+
+		// Remove element from form
+		if ($this->forms->hasKey($form_id))
+			$this->forms->get($form_id)->addElement($element_id, $template);
+
+		return $this;
+	}
+
+	public function clearFormElements($form_id)
+	{
+		// Remove element from form
+		if ($this->forms->hasKey($form_id))
+			$this->forms->get($form_id)->clearElements();
+
+		return $this;
+	}
+
+	public function getForm($id)
+	{
+		if (!is_string($form_id))
+			throw new \Exception("Form ID must both be a string");
+
+		return $this->forms->get($id);
+	}
+
+	public function getAllForms()
+	{
+		return $this->forms->getAll();
+	}
+
 	public function setItemView($view, $template)
 	{
 		if(!is_string($view)) return $this;
 
-		$this->views->set($view, $this->__getHtml($template));
+		$this->views->set($view, $this->getHtml($template));
 
 		return $this;
 	}
@@ -335,44 +422,48 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		return $this->views->getAll();
 	}
 
+	//////////////////////////////////////////////
+	// START OF OLD API                         //
+	// Will be deprecated on next major version //
+	//////////////////////////////////////////////
 	public function clearForm()
 	{
-		$this->form_elements->clear();
+		$this->forms->get('default')->clearElements();
 
 		return $this;
 	}
 
 	public function addFormEl($element_id, $template)
 	{
-		$this->appendFormEl($element_id, $template);
+		$this->forms->get('default')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function prependFormEl($element_id, $template)
 	{
-		$this->form_elements->unshift($element_id, $template);
+		$this->forms->get('default')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function appendFormEl($element_id, $template)
 	{
-		$this->form_elements->set($element_id, $template);
+		$this->forms->get('default')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function replaceFormEl($element_id, $template)
 	{
-		$this->form_elements->set($element_id, $template);
+		$this->forms->get('default')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function removeFormEl($element_id)
 	{
-		$this->form_elements->remove($element_id);
+		$this->forms->get('default')->removeElement($element_id);
 
 		return $this;
 	}
@@ -400,18 +491,22 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		return $this;
 	}
+	//////////////////////////////////////////////
+	// END OF OLD API                           //
+	// Will be deprecated on next major version //
+	//////////////////////////////////////////////
 
-	public function getForm()
+	public function getFormHtml($id)
 	{
 		$html     = '';
-		$elements = $this->form_elements->getAll();
+		$elements = $this->forms->get($id)->getAllElements();
 
 		if ($elements) {
 			
-			foreach ($elements as $element_id => $element_tpl) {
+			foreach ($elements as $id => $template) {
 				
-				$html .= "<div bebop-list--formElementId='$element_id' class='bebop-list--formField'>";
-				$html .= $this->__getHtml($element_tpl);
+				$html .= "<div bebop-list--formElementId='$id' class='bebop-list--formField'>";
+				$html .= $this->getHtml($template);
 				$html .= '</div>';
 			}
 		}
@@ -419,7 +514,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		return $html;
 	}
 
-	private function __getHtml($source) 
+	public function getHtml($source) 
 	{
 		if (is_callable($source)) {
 
