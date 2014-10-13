@@ -13,92 +13,98 @@
 			// Collect main DOM element
 			this.$el = $(options.el);
 
-			// Collect templates
-			var $body = $(document.body);
+			if (this.$el.prop('bebop-media--initialized') === undefined) {
 
-			this.templates = {
-				main: $body.find('[bebop-media--template="main"]').html().trim(),
-				image: $body.find('[bebop-media--template="image-view"]').html().trim(),
-				nonImage: $body.find('[bebop-media--template="non-image-view"]').html().trim(),
-				empty: $body.find('[bebop-media--template="empty-view"]').html().trim(),
-				error: $body.find('[bebop-media--template="error-view"]').html().trim(),
-				loading: $body.find('[bebop-media--template="loading-view"]').html().trim()
-			}
+				// Mark element as initialized
+				this.$el.prop('bebop-media--initialized', true);
 
-			// Insert main template
-			this.$el.append(this.templates.main);
+				// Collect templates
+				var $body = $(document.body);
 
-			// Collect other DOM elements
-			this.$previewer     = this.$el.find('[bebop-media--el="previewer"]');
-			this.$actions       = this.$el.find('[bebop-media--el="actions"]');
-			this.$dataContainer = this.$el.find('input');
+				this.templates = {
+					main: $body.find('[bebop-media--template="main"]').html().trim(),
+					image: $body.find('[bebop-media--template="image-view"]').html().trim(),
+					nonImage: $body.find('[bebop-media--template="non-image-view"]').html().trim(),
+					empty: $body.find('[bebop-media--template="empty-view"]').html().trim(),
+					error: $body.find('[bebop-media--template="error-view"]').html().trim(),
+					loading: $body.find('[bebop-media--template="loading-view"]').html().trim()
+				}
 
-			// Set default status model
-			this.status = new Backbone.Model({
-				view: 'loading',
-				id: options.id != undefined ? options.id : this.$dataContainer.val(),
-				data: null
-			});
+				// Insert main template
+				this.$el.append(this.templates.main);
 
-			// Get instance configuration
-			var config  = this.$el.attr('bebop-media--config');
-			this.config = new Backbone.Model(config ? JSON.parse(config) : {});
-			this.$el.attr('bebop-media--config', null);
+				// Collect other DOM elements
+				this.$previewer     = this.$el.find('[bebop-media--el="previewer"]');
+				this.$actions       = this.$el.find('[bebop-media--el="actions"]');
+				this.$dataContainer = this.$el.find('input');
 
-			// Get field name
-			this.fieldName = this.config.get('field_name');
+				// Set default status model
+				this.status = new Backbone.Model({
+					view: 'loading',
+					id: options.id != undefined ? options.id : this.$dataContainer.val(),
+					data: null
+				});
 
-			// Instantiate WordPress media picker
-			this.mediaPicker = wp.media({
-				frame: 'select',
-	            multiple: false,
-	            title: this.config.get('title'),
-	            library: {
-	                type: this.config.get('mime_types')
-	            },
-	            button: {
-	                text: this.config.get('button_text')
-	            }
-			});
+				// Get instance configuration
+				var config  = this.$el.attr('bebop-media--config');
+				this.config = new Backbone.Model(config ? JSON.parse(config) : {});
+				this.$el.attr('bebop-media--config', null);
 
-			this.mediaPicker.on("select", function() {
+				// Get field name
+				this.fieldName = this.config.get('field_name');
 
-				var selection = this.mediaPicker.state().get('selection').toJSON(),
-					file      = selection.length > 0 ? selection[0] : null;
+				// Instantiate WordPress media picker
+				this.mediaPicker = wp.media({
+					frame: 'select',
+		            multiple: false,
+		            title: this.config.get('title'),
+		            library: {
+		                type: this.config.get('mime_types')
+		            },
+		            button: {
+		                text: this.config.get('button_text')
+		            }
+				});
 
-				if (file) {
+				this.mediaPicker.on("select", function() {
 
-					this.status.set('data', file);
-					this.status.set('id', file.id);
+					var selection = this.mediaPicker.state().get('selection').toJSON(),
+						file      = selection.length > 0 ? selection[0] : null;
 
-					// Images
-					if (file.type == 'image') {
-						this.status.set('view', 'image');
-					} 
+					if (file) {
 
-					// Non-images
-					else {
-						this.status.set('view', 'nonImage');
-					
+						this.status.set('data', file);
+						this.status.set('id', file.id);
+
+						// Images
+						if (file.type == 'image') {
+							this.status.set('view', 'image');
+						} 
+
+						// Non-images
+						else {
+							this.status.set('view', 'nonImage');
+						
+						}
+
 					}
 
+					this.render();
+
+				}, this);
+
+				this.listenTo(this.status, 'change:view', this.render);
+				this.listenTo(this.status, 'change:data', this.handleNewData);
+
+				if (this.status.get('view') == 'loading' && this.status.get('id')) {
+					this.fetchMedia();
+
+				} else {
+					this.status.set('view', 'empty');
 				}
 
 				this.render();
-
-			}, this);
-
-			this.listenTo(this.status, 'change:view', this.render);
-			this.listenTo(this.status, 'change:data', this.handleNewData);
-
-			if (this.status.get('view') == 'loading' && this.status.get('id')) {
-				this.fetchMedia();
-
-			} else {
-				this.status.set('view', 'empty');
-			}
-
-			this.render();
+			};
 		},
 
 		doAction: function(event) {
