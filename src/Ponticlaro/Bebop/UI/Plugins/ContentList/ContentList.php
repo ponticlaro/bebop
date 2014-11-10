@@ -337,6 +337,31 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		return $this;
 	}
 
+	public function setFormElements($form_id, array $elements)
+	{
+		foreach ($elements as $element_id => $template) {
+			
+			$this->setFormElement($form_id, $element_id, $template);
+		}
+
+		return $this;
+	}
+
+	public function setFormElement($form_id, $element_id, $template)
+	{
+		if (!is_string($form_id) || !is_string($element_id))
+			throw new \Exception("Form ID and Element ID must both be strings");
+
+		// Add form if it does not exist
+		if (!$this->forms->hasKey($form_id))
+			$this->addForm($form_id);
+
+		// Add element to form
+		$this->forms->get($form_id)->addElement($element_id, $template);
+
+		return $this;
+	}
+
 	public function addFormElements($form_id, array $elements)
 	{
 		foreach ($elements as $element_id => $template) {
@@ -357,7 +382,12 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			$this->addForm($form_id);
 
 		// Add element to form
-		$this->forms->get($form_id)->addElement($element_id, $template);
+		$form = $this->forms->get($form_id);
+
+		if ($form->hasElement($element_id))
+			throw new \Exception("There is already a form element named '$element_id'. To replace it use setFormElement() instead.");
+			
+		$form->addElement($element_id, $template);
 
 		return $this;
 	}
