@@ -594,7 +594,7 @@ class AdminPage extends TrackableObjectAbstract
                     $this->renderSinglePage();
                 } ?>
 
-            <form>
+            </form>
             
         </div><!-- /.wrap -->
         
