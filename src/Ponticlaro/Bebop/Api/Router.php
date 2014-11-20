@@ -130,8 +130,8 @@ class Router {
                 if ($request_body) {
                     
                     // Throw error if content-type is not 'application/json'
-                    if (!$content_type || $content_type != 'application/json')
-                        throw new \UnexpectedValueException("You need to send the Content-type header with 'application/json as its value'", 1);
+                    if (!$content_type || !preg_match('/application\/json/', $content_type))
+                        throw new \UnexpectedValueException("You need to send the Content-type header with 'application/json' as its value", 1);
                     
                     // Validate request body as JSON string
                     if (!Bebop::util('isJson', $request_body))
