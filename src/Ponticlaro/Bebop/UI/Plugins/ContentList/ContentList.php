@@ -225,13 +225,17 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		$this->forms = Bebop::Collection()->disableDottedNotation();
 
 		// Add default form
+		// This is inherited by user added forms without form elements
 		$this->addForm('default', array(
 			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
 			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
 		));
 
-		// Add empty main form
-		$this->addForm('main');
+		// Add main form
+		$this->addForm('main', array(
+			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
+			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
+		));
 
 		// Register templates on admin footer
 		add_action('admin_footer', array($this, 'renderTemplates'));
@@ -460,42 +464,42 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	//////////////////////////////////////////////
 	public function clearForm()
 	{
-		$this->forms->get('default')->clearElements();
+		$this->forms->get('main')->clearElements();
 
 		return $this;
 	}
 
 	public function addFormEl($element_id, $template)
 	{
-		$this->forms->get('default')->addElement($element_id, $template);
+		$this->forms->get('main')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function prependFormEl($element_id, $template)
 	{
-		$this->forms->get('default')->addElement($element_id, $template);
+		$this->forms->get('main')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function appendFormEl($element_id, $template)
 	{
-		$this->forms->get('default')->addElement($element_id, $template);
+		$this->forms->get('main')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function replaceFormEl($element_id, $template)
 	{
-		$this->forms->get('default')->addElement($element_id, $template);
+		$this->forms->get('main')->addElement($element_id, $template);
 
 		return $this;
 	}
 
 	public function removeFormEl($element_id)
 	{
-		$this->forms->get('default')->removeElement($element_id);
+		$this->forms->get('main')->removeElement($element_id);
 
 		return $this;
 	}
