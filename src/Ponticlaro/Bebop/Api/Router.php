@@ -279,7 +279,7 @@ class Router {
     public function __call($name, $args)
     {
         if (method_exists($this->slim, $name))
-            return call_user_method_array($name, $this->slim, $args);
+            return call_user_func_array(array($this->slim, $name), $args);
 
         return $this;
     }

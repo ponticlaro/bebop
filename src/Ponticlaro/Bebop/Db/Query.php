@@ -70,7 +70,7 @@ class Query {
         // Check current arg for method
         if (!is_null($this->current_arg) && method_exists($this->current_arg, $name)) {
 
-            call_user_method_array($name, $this->current_arg, $args);
+            call_user_func_array(array($this->current_arg, $name), $args);
         }
 
         // Check if:
@@ -82,7 +82,7 @@ class Query {
                 method_exists($this->current_arg->getCurrentChild(), $name) && 
                 $this->current_arg->getCurrentChild()->actionIsAvailable($name)) {
 
-            call_user_method_array($name, $this->current_arg->getCurrentChild(), $args);
+            call_user_func_array(array($this->current_arg->getCurrentChild(), $name), $args);
         }
 
         // Check if:
@@ -308,6 +308,6 @@ class Query {
      */
     private function __addArgChild(Arg $arg, array $args = array())
     {
-        call_user_method_array('addChild', $arg, $args);
+        call_user_func_array(array($arg, 'addChild'), $args);
     }
 }

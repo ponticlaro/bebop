@@ -191,7 +191,7 @@ class Media extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			if (!$route instanceof \Ponticlaro\Bebop\API\Route)
 				 throw new \UnexpectedValueException("Route '$route_id' do not exist");
 
-			$api_endpoint = call_user_method_array('parsePath', $route, $args);
+			$api_endpoint = call_user_func_array(array($route, 'parsePath'), $args);
     	}
 
     	return $this;

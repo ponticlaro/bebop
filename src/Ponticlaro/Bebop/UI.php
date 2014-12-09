@@ -45,8 +45,6 @@ class UI extends SingletonAbstract {
 			'Ponticlaro\Bebop\UI\Plugins\MultiContentList\MultiContentList'
 		));
 
-		$this->__instances = Bebop::Collection();
-
 		// Register common UI scripts
 		add_action('admin_enqueue_scripts', array($this, 'registerScripts'));
 	}

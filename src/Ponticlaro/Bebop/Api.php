@@ -319,7 +319,7 @@ class Api extends \Ponticlaro\Bebop\Patterns\SingletonAbstract {
     public function __call($name, $args)
     {
         if (method_exists(static::$api, $name))
-            return call_user_method_array($name, static::$api, $args);
+            return call_user_func_array(array(static::$api, $name), $args);
 
         throw new \Exception("Bebop::Api method do not exist");
     }

@@ -276,7 +276,7 @@ class WpApi {
 		if (!is_callable($callable))
 			throw new \Exception("WpApi: route callable must be callable");
 		
-		call_user_method_array($method, $this->routes(), array($path, $callable));
+		call_user_func_array(array($this->routes(), $method), array($path, $callable));
 	}
 
 	/**
@@ -288,7 +288,7 @@ class WpApi {
 	 */
 	public function __call($name, $args)
 	{
-		call_user_method_array($name, $this->routes(), $args);
+		call_user_func_array(array($this->routes(), $method), $args);
 
 		return $this;
 	}

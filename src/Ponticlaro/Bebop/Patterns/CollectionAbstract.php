@@ -634,7 +634,7 @@ abstract class CollectionAbstract implements CollectionInterface, \IteratorAggre
      */
     public function __get($path)
     {
-        if (!is_string($path)) return null;
+        if (!is_string($path) || !$this->__hasPath($path)) return null;
 
         if ($this->isDottedNotationEnabled()) {
 

@@ -201,8 +201,6 @@ class Post {
     {
         if (is_callable($fn))
             static::__getInstance()->init_mods = $fn;
-
-        return $this;
     }
 
     /**
@@ -231,8 +229,6 @@ class Post {
                 }
             }
         }
-
-        return $this;
     }
 
     /**
@@ -452,7 +448,7 @@ class Post {
         // Get model configuration instance
         $instance = static::__getInstance();
 
-        call_user_method_array($name, $instance->query, $args);
+        call_user_func_array(array($instance->query, $name), $args);
 
         return $instance;
     }
@@ -470,7 +466,7 @@ class Post {
         $instance = static::__getInstance();
 
         if (!is_null($instance->query))
-            call_user_method_array($name, $instance->query, $args);
+            call_user_func_array(array($instance->query, $name), $args);
 
         return $instance;
     }

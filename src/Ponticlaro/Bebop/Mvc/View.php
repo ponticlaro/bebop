@@ -43,9 +43,8 @@ class View {
      */
     public static function setViewsDir($path)
     {
-        if (is_string($path) && is_readable($path)) self::$views_dir = rtrim($path, '/');
-
-        return $this;
+        if (is_string($path) && is_readable($path)) 
+            self::$views_dir = rtrim($path, '/');
     }
 
     /**

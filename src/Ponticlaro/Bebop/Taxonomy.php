@@ -97,7 +97,7 @@ class Taxonomy extends TrackableObjectAbstract
         $this->post_types = Bebop::Collection();
 
         // Set post type name
-        call_user_method_array('__setName', $this, is_array($name) ? $name : array($name));
+        call_user_func_array(array($this, '__setName'), is_array($name) ? $name : array($name));
 
         // Set post_type id
         $this->__trackable_id = Bebop::util('slugify', is_array($name) ? $name[0] : $name);
@@ -709,7 +709,7 @@ class Taxonomy extends TrackableObjectAbstract
     public function __call($name, $args)
     {
         if (in_array($name, $this->methods_alias))
-            return call_user_method_array($this->methods_alias[$name], $this, $args);
+            return call_user_func_array(array($this, $this->methods_alias[$name]), $args);
 
         return $this;
     }

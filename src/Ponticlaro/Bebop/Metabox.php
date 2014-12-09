@@ -448,7 +448,7 @@ class Metabox extends TrackableObjectAbstract
     public function __saveMeta($post_id) 
     {
         // Return if this is a quick edition
-        if (wp_verify_nonce($_POST['_inline_edit'], 'inlineeditnonce')) return;
+        if (isset($_POST['_inline_edit']) && wp_verify_nonce($_POST['_inline_edit'], 'inlineeditnonce')) return;
 
         $id         = $this->getId();
         $nonce_name = 'metabox_'. $id .'_nonce';

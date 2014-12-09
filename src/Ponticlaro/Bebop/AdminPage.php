@@ -579,7 +579,6 @@ class AdminPage extends TrackableObjectAbstract
 
         <div class="wrap">
             <h2><?php echo $this->getPageTitle(); ?></h2>
-            
             <form method="post" action="options.php">
                 
                 <?php settings_errors();
@@ -595,7 +594,6 @@ class AdminPage extends TrackableObjectAbstract
                 } ?>
 
             </form>
-            
         </div><!-- /.wrap -->
         
     <?php }

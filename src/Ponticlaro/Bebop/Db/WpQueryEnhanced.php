@@ -548,7 +548,7 @@ class WpQueryEnhanced {
 		$meta['has_more']       = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? false : true;
 
 		// Remove post_type parameter when not querying the /posts resource
-		if ($resource_name != 'posts' && isset($args['post_type'])) {
+		if ((isset($resource_name) && $resource_name != 'posts') && isset($args['post_type'])) {
 
 			unset($args['post_type']);
 		} 

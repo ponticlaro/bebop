@@ -97,7 +97,7 @@ class Utils
 	 * @param  array    $args     Callabler arguments
 	 * @return array              List of control elements names
 	 */
-    public function getControlNamesFromCallable($callable, array $args = array())
+    public static function getControlNamesFromCallable($callable, array $args = array())
     {   
     	$names = array();
 

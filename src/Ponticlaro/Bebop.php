@@ -119,7 +119,7 @@ class Bebop extends SingletonAbstract
      * 
      * @return boolean True for enabled, false otherwise
      */
-    public function isDevEnvEnabled()
+    public static function isDevEnvEnabled()
     {
         return self::$__dev_env_enabled;
     }
@@ -301,8 +301,6 @@ class Bebop extends SingletonAbstract
     {
         $tracker = Bebop\Helpers\ObjectTracker::getInstance();
         $tracker->track($object);
-
-        return $this;
     }
 
     /**
@@ -410,9 +408,7 @@ class Bebop extends SingletonAbstract
      */
     public static function setUrl($key, $value = null)
     {
-        self::Urls()->set($key, $value);
-
-        return $this;   
+        self::Urls()->set($key, $value);  
     }
 
     /**
@@ -423,8 +419,6 @@ class Bebop extends SingletonAbstract
     public static function setUrls(array $urls = array())
     {
         self::Urls()->set($key);
-
-        return $this;
     }
 
     /**
@@ -457,8 +451,6 @@ class Bebop extends SingletonAbstract
     public static function removeUrl($key)
     {
         self::Urls()->remove($key);
-
-        return $this;
     }
 
     /**
@@ -483,8 +475,6 @@ class Bebop extends SingletonAbstract
     public static function setPath($key, $value = null)
     {
         self::Paths()->set($key, $value);
-
-        return $this;   
     }
 
     /**
@@ -495,8 +485,6 @@ class Bebop extends SingletonAbstract
     public static function setPaths(array $paths = array())
     {
         self::Paths()->set($paths);
-
-        return $this;
     }
 
     /**
@@ -529,8 +517,6 @@ class Bebop extends SingletonAbstract
     public static function removePath($key)
     {
         self::Paths()->remove($key);
-
-        return $this;
     }
 
     /**

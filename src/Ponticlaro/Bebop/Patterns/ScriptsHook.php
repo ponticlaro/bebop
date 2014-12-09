@@ -142,8 +142,14 @@ class ScriptsHook {
      * 
      * @param string $id Script ID
      */
-    public function register(Script $script)
+    public function register($id, $path, array $dependencies = array(), $version = null)
     {
+        $script = new Script();
+        $script->setId($id)
+               ->setPath($path)
+               ->setDependencies($dependencies)
+               ->setVersion($version);
+
         $this->scripts->set($script->getid(), $script);
         $this->register_list->push($script->getid());
 
