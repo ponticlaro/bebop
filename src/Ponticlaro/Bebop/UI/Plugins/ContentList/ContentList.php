@@ -410,7 +410,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		// Remove element from form
 		if ($this->forms->hasKey($form_id))
-			$this->forms->get($form_id)->addElement($element_id, $template);
+			$this->forms->get($form_id)->removeElement($element_id);
 
 		return $this;
 	}
