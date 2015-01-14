@@ -171,8 +171,9 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		if (version_compare($wp_version, '3.5', '>=')) {
 			
-			// Enqueue media scripts
-			wp_enqueue_media();
+			// Enqueue media scripts ONLY if needed
+			if (!did_action('wp_enqueue_media'))
+				wp_enqueue_media();
 
 		} else {
 
