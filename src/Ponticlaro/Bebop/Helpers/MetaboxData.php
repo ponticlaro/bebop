@@ -52,12 +52,9 @@ class MetaboxData {
 
 		// If single, try to unserialize it
 		if ($is_single) {
-
-			// Try to unserialize if it is a string
-			if (is_string($data)) unserialize($data[0]);
-
+			
 			// Get first item
-			$data = $data[0];
+			$data = $data && isset($data[0]) ? maybe_unserialize($data[0]) : '';
 		}
 
 		// Handle arrays that only contain empty values
