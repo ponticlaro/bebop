@@ -35,6 +35,13 @@ class Post {
     protected static $__raw_properties = true;
 
     /**
+     * Current query instance
+     * 
+     * @var Ponticlaro\Bebop\Db\Query;
+     */
+    protected $query;
+
+    /**
      * Instantiates new model by inheriting all the $post properties
      * 
      * @param WP_Post $post
@@ -358,7 +365,7 @@ class Post {
      * 
      * @return array
      */
-    public function findAll(array $args = array())
+    public static function findAll(array $args = array())
     {   
         // Make sure we have a query object to be used
         static::__enableQueryMode();
