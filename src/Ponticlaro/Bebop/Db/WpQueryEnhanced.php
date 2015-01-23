@@ -49,7 +49,8 @@ class WpQueryEnhanced {
 		'sort_direction' => 'order',
 		'page'           => 'paged',
 		'include'        => 'post__in',
-		'exclude'        => 'post__not_in'
+		'exclude'        => 'post__not_in',
+		'search'         => 's'
 	);
 
 	/**
