@@ -475,7 +475,7 @@ class Metabox extends TrackableObjectAbstract
                     $value = isset($_POST[$field]) ? $_POST[$field] : '';
 
                     // Empty values
-                    if (!$value) {
+                    if ($value === '') {
                         
                         delete_post_meta($post_id, $field);
                     }
