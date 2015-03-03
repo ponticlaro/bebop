@@ -157,7 +157,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			if ($items_views) {
 				foreach ($items_views as $key => $template) { ?>
 					 
-					<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none"><?php echo $template; ?></script>
+					<script bebop-list--itemTemplate="<?php echo $key; ?>" type="text/template" style="display:none"><?php echo $this->getHtml($template); ?></script>
 
 				<?php }
 			} ?>
@@ -445,7 +445,7 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 	{
 		if(!is_string($view)) return $this;
 
-		$this->views->set($view, $this->getHtml($template));
+		$this->views->set($view, $template);
 
 		return $this;
 	}
