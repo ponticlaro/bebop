@@ -50,11 +50,11 @@ class MetaboxData {
 		// Get data from container
 		$data = $this->__data->get($key);
 
-		// If single, try to unserialize it
-		if ($is_single) {
+		// If array and single item is requested, try to unserialize it
+		if ($data && is_array($data) && $is_single) {
 			
 			// Get first item
-			$data = $data && isset($data[0]) ? maybe_unserialize($data[0]) : '';
+			$data = isset($data[0]) ? maybe_unserialize($data[0]) : '';
 		}
 
 		// Handle arrays that only contain empty values
