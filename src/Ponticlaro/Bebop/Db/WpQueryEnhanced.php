@@ -95,6 +95,17 @@ class WpQueryEnhanced {
 	);
 
 	/**
+	 * Available taxonomy query fields
+	 * 
+	 * @var array
+	 */
+	protected static $taxonomy_query_fields = array(
+		'term_id',
+		'name',
+		'slug'
+	);
+
+	/**
 	 * List of arguments that require arrays as the value
 	 * 
 	 * @var array
@@ -342,6 +353,15 @@ class WpQueryEnhanced {
 
 						if (!isset($data['field'])) 
 							$data['field'] = 'slug';
+
+						// Search for a value type
+						$params = explode(':', $value);
+
+						if (count($params) == 2 && in_array(strtolower($params[0]), static::$taxonomy_query_fields)) {
+							
+							$data['field'] = $params[0];
+							$value         = $params[1];
+						}
 
 						$data['terms'] = array();
 

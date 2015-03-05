@@ -29,11 +29,12 @@ Here is a list of the most relevant parameters:
 
 ### Tax queries
 If you need to use the [`tax_query`](http://codex.wordpress.org/Class_Reference/WP_Query#Taxonomy_Parameters) argument for `WP_Query` you need to use one of the following structures to build a query parameter:
-- tax:{{taxonomy_slug}}:{{operator}}={{term(s)}}
+- tax:{{taxonomy_slug}}:{{operator}}={{field}}:{{term(s)}}
 - tax:{{tax_query_json}}={{term(s)}}
 
 **Notes:**  
 - The `:{{operator}}` section is optional. `IN` is the default operator value.
+- The `{{field}}:` section is optional. `slug` is the default field.
 - You can specify the relation of tax queries with `tax_relation` query parameter.   
 - You can specify comma separated values.
 
