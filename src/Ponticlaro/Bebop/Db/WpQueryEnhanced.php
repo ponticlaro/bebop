@@ -45,6 +45,7 @@ class WpQueryEnhanced {
 		'parent'         => 'post_parent',
 		'mime_type'      => 'post_mime_type',
 		'max_results'    => 'posts_per_page',
+		'ppp'            => 'posts_per_page',
 		'sort_by'        => 'orderby',
 		'sort_direction' => 'order',
 		'page'           => 'paged',
@@ -328,15 +329,10 @@ class WpQueryEnhanced {
 
 					if (isset($data['taxonomy']) && $data['taxonomy']) {
 
-						if (!$this->clean_args->hasKey('tax_query')) {
-							
-							$relation = 'AND';
-
-							if (isset($args['tax_relation'])) {
+						if (!$this->clean_args->hasKey('tax_query') && isset($args['tax_relation'])) {
 								
-								$relation = $args['tax_relation'];
-								unset($args['tax_relation']);
-							}
+							$relation = $args['tax_relation'];
+							unset($args['tax_relation']);
 
 							$this->clean_args->set('tax_query.relation', $relation);
 						}
@@ -397,15 +393,10 @@ class WpQueryEnhanced {
 
 					if (isset($data['key']) && $data['key']) {
 
-						if (!$this->clean_args->hasKey('meta_query')) {
-							
-							$relation = 'AND';
-
-							if (isset($args['meta_relation'])) {
+						if (!$this->clean_args->hasKey('meta_query') && isset($args['meta_relation'])) {
 								
-								$relation = $args['meta_relation'];
-								unset($args['meta_relation']);
-							}
+							$relation = $args['meta_relation'];
+							unset($args['meta_relation']);
 
 							$this->clean_args->set('meta_query.relation', $relation);
 						}
@@ -554,8 +545,8 @@ class WpQueryEnhanced {
 			unset($args['post_type']);
 		} 
 
-		$meta['previous_page'] = in_array($meta['current_page'], [0, 1]) ? null : $this->__buildPreviousPageUrl($args);
-		$meta['next_page']     = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? null : $this->__buildNextPageUrl($args);
+		$meta['previous_page'] = in_array($meta['current_page'], [0, 1]) ? null : $this->__buildPreviousPageUrl($this->raw_args->getAll());
+		$meta['next_page']     = $meta['current_page'] == $meta['total_pages'] || $meta['total_pages'] == 0 ? null : $this->__buildNextPageUrl($this->raw_args->getAll());
 
 		return $meta;
 	}
