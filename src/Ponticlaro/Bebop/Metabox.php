@@ -369,7 +369,7 @@ class Metabox extends TrackableObjectAbstract
     private function __setMetaFields()
     {   
         // Only execute if there are no manually defined meta fields
-        if (empty($this->meta_fields->getAll())) {
+        if (!$this->meta_fields->getAll()) {
 
             $function = $this->getCallback();
             $args     = array($this->data, new \WP_Post(new \stdClass), $this);

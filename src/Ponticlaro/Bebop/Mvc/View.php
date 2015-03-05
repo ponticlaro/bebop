@@ -109,7 +109,7 @@ class View {
      */
     public function varHasValue($key)
     {
-        return $this->vars->hasKey($key) && !empty($this->vars->get($key)) ? true : false;
+        return $this->vars->hasKey($key) && $this->vars->get($key) != '' ? true : false;
     }
 
     /**
