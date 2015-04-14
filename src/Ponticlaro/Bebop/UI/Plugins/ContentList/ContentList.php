@@ -102,12 +102,14 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 			<script bebop-list--itemTemplate="main" class="bebop-list--item" type="text/template" style="display:none">
 
 				<input bebop-list--el="data-container" type="hidden">
-				
+
 				<div class="bebop-list--drag-handle">
 					<span class="bebop-ui-icon-move"></span>
 				</div>
-				
+
 				<div bebop-list--el="content" class="bebop-ui-clrfix">
+
+					<span title="Select this item" bebop-list--el="item-selector" class="bebop-ui-checkbox bebop-ui-icon-checkbox-unchecked"></span>
 
 					<?php if ($this->isMode('gallery')) {
 
@@ -221,8 +223,9 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		// Labels
 		$this->labels = Bebop::Collection(array(
-			'add_button'  => 'Add Item',
-			'sort_button' => 'Sort'
+			'bulk_action_button' => 'Apply',
+			'add_button'         => 'Add Item',
+			'sort_button'        => 'Sort'
 		))->disableDottedNotation();
 
 		// Forms
@@ -231,14 +234,16 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		// Add default form
 		// This is inherited by user added forms without form elements
 		$this->addForm('default', array(
-			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
-			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
+			'bulk_action' => __DIR__ .'/views/partials/form/default/elements/bulk_action.php',
+			'add'         => __DIR__ .'/views/partials/form/default/elements/add.php',
+			'sort'        => __DIR__ .'/views/partials/form/default/elements/sort.php'
 		));
 
 		// Add main form
 		$this->addForm('main', array(
-			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
-			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
+			'bulk_action' => __DIR__ .'/views/partials/form/default/elements/bulk_action.php',
+			'add'         => __DIR__ .'/views/partials/form/default/elements/add.php',
+			'sort'        => __DIR__ .'/views/partials/form/default/elements/sort.php'
 		));
 
 		// Register templates on admin footer

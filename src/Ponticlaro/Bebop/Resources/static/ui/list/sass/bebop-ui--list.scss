@@ -14,6 +14,15 @@
 			}
 		}
 	}
+
+	.bebop-ui-checkbox {
+		color: #aaa;
+		cursor: pointer;
+
+		&:hover {
+			color: #444;
+		}
+	}
 }
 
 [bebop-list--el="title"] {
@@ -99,6 +108,10 @@
 			}
 		}
 
+		[bebop-list--el="bulk-actions-container"] {
+			display:none;
+		}	
+
 		.bebop-list--drag-handle {
 			display: none;
 			cursor: move;
@@ -133,6 +146,16 @@
 			}
 		}
 
+		[bebop-list--el="item-selector"] {
+			position:absolute;
+			top: 10px;
+			left: 10px;
+
+			&.is-active:before {
+				content: "\e601";
+			}
+		}
+
 		.bebop-list--item-image {
 			background: #d0d0d0;
 			border: 1px solid #ccc; 
@@ -148,8 +171,8 @@
 			}
 		}
 
-		.bebop-list--item-content {
-			
+		[bebop-list--el="content"] {
+			padding-left: 20px;
 		}
 
 		[bebop-list--el="item-actions"] {
