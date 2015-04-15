@@ -442,6 +442,12 @@
 
 				this.status.set('view', 'reorder');
 
+				_.each(this.buttons.editAll, function(item) {
+					item.$el.removeClass('is-enabled')
+						.find('b').text('Edit All').end()
+					    .find('span').removeClass('bebop-ui-icon-save').addClass('bebop-ui-icon-edit');
+				});
+
 				_.each(this.buttons.sort, function(item) {
 					item.$el.addClass('is-enabled');
 				});
@@ -452,6 +458,34 @@
 
 				_.each(this.buttons.sort, function(item) {
 					item.$el.removeClass('is-enabled');
+				});
+			}
+		},
+
+		formAction_toggleEditAll: function(event) {
+
+			if (this.status.get('view') != 'edit') {
+
+				this.status.set('view', 'edit');
+
+				_.each(this.buttons.sort, function(item) {
+					item.$el.removeClass('is-enabled');
+				});
+
+				_.each(this.buttons.editAll, function(item) {
+					item.$el.addClass('is-enabled')
+						.find('b').text('Save All').end()
+					    .find('span').removeClass('bebop-ui-icon-edit').addClass('bebop-ui-icon-save');
+				});
+
+			} else {
+
+				this.status.set('view', 'browse');
+
+				_.each(this.buttons.editAll, function(item) {
+					item.$el.removeClass('is-enabled')
+						.find('b').text('Edit All').end()
+					    .find('span').removeClass('bebop-ui-icon-save').addClass('bebop-ui-icon-edit');
 				});
 			}
 		},

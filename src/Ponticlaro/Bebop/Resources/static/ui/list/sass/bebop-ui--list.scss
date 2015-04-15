@@ -195,7 +195,8 @@
 		padding-right: 8px; 
 	}
 
-	[bebop-list--formAction="toggleReorder"].is-enabled {
+	[bebop-list--formAction="toggleReorder"].is-enabled,
+	[bebop-list--formAction="toggleEditAll"].is-enabled {
 		background-color: #bbb;
 		border-color: #888;
 		color: #fff;

@@ -221,8 +221,9 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 
 		// Labels
 		$this->labels = Bebop::Collection(array(
-			'add_button'  => 'Add Item',
-			'sort_button' => 'Sort'
+			'add_button'      => 'Add Item',
+			'sort_button'     => 'Sort',
+			'edit_all_button' => 'Edit All'
 		))->disableDottedNotation();
 
 		// Forms
@@ -231,14 +232,16 @@ class ContentList extends \Ponticlaro\Bebop\UI\PluginAbstract {
 		// Add default form
 		// This is inherited by user added forms without form elements
 		$this->addForm('default', array(
-			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
-			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
+			'add'      => __DIR__ .'/views/partials/form/default/elements/add.php',
+			'sort'     => __DIR__ .'/views/partials/form/default/elements/sort.php',
+			'edit_all' => __DIR__ .'/views/partials/form/default/elements/edit_all.php',
 		));
 
 		// Add main form
 		$this->addForm('main', array(
-			'add'  => __DIR__ .'/views/partials/form/default/elements/add.php',
-			'sort' => __DIR__ .'/views/partials/form/default/elements/sort.php'
+			'add'      => __DIR__ .'/views/partials/form/default/elements/add.php',
+			'sort'     => __DIR__ .'/views/partials/form/default/elements/sort.php',
+			'edit_all' => __DIR__ .'/views/partials/form/default/elements/edit_all.php',
 		));
 
 		// Register templates on admin footer
