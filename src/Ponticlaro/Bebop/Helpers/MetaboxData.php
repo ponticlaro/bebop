@@ -47,24 +47,24 @@ class MetaboxData {
 	 */
 	public function get($key, $is_single = false) 
 	{
-		// Get data from container
-		$data = $this->__data->get($key);
+        // Get data from container
+        $data = $this->__data->get($key);
 
-		// If array and single item is requested, try to unserialize it
-		if ($data && is_array($data) && $is_single) {
-			
-			// Get first item
-			$data = isset($data[0]) ? maybe_unserialize($data[0]) : '';
-		}
+        // If array and single item is requested, try to unserialize it
+        if ($data && is_array($data) && $is_single) {
+            
+            // Get first item
+            $data = isset($data[0]) ? maybe_unserialize($data[0]) : '';
+        }
 
-		// Handle arrays that only contain empty values
-		elseif (is_array($data) && !array_filter($data)) {
+        // Handle arrays that only contain empty values
+        elseif (is_array($data) && !array_filter($data) && $is_single) {
 
-			$data = array();
-		}
+            $data = $is_single ? '' : array();
+        }
 
-		// Return data
-		return $data;
+        // Return data
+        return $data;
 	}
 
 	/**
