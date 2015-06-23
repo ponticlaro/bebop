@@ -6,170 +6,172 @@ use Ponticlaro\Bebop;
 
 class Tab {
 
-	/**
-	 * Tab ID
-	 * 
-	 * @var string
-	 */
-	protected $id;
+    /**
+     * Tab ID
+     * 
+     * @var string
+     */
+    protected $id;
 
-	/**
-	 * Tab title
-	 * 
-	 * @var string
-	 */
-	protected $title;
+    /**
+     * Tab title
+     * 
+     * @var string
+     */
+    protected $title;
 
-	/**
-	 * Tab function
-	 * 
-	 * @var string
-	 */
-	protected $function;
+    /**
+     * Tab function
+     * 
+     * @var string
+     */
+    protected $function;
 
-	/**
+    /**
      * Options names
      * 
      * @var Ponticlaro\Bebop\Common\Collection
      */
-	protected $options;
+    protected $options;
 
-	/**
+    /**
      * Options names
      * 
      * @var Ponticlaro\Bebop\Common\Collection
      */
-	protected $data;
+    protected $data;
 
-	/**
-	 * Instantiates a new tab
-	 * 
-	 * @param string   $title    
-	 * @param callable $function
-	 */
-	public function __construct($title, $function)
-	{
-		$this->options = Bebop::Collection();
-		$this->data    = Bebop::Collection();
+    /**
+     * Instantiates a new tab
+     *
+     * @param string   $id
+     * @param string   $title    
+     * @param callable $function
+     */
+    public function __construct($id, $title, $function)
+    {
+        $this->options = Bebop::Collection();
+        $this->data    = Bebop::Collection();
+        
+        $this->setId($id);
+        $this->setTitle($title);
+        $this->setFunction($function);
 
-		$this->setTitle($title);
-		$this->setFunction($function);
+        // Fet control elements name attribute from function
+        $names = Bebop::util('getControlNamesFromCallable', $function, array($this->data));
+        
+        // Define options if there are control names
+        if ($names)
+            $this->setOptions($names);
 
-		// Fet control elements name attribute from function
-		$names = Bebop::util('getControlNamesFromCallable', $function, array($this->data));
-		
-		// Define options if there are control names
-		if ($names)
-			$this->setOptions($names);
-
-		// Register Settings
+        // Register Settings
         add_action('admin_init', array($this, '__handleSettingsRegistration'));
-	}
+    }
 
-	/**
-	 * Sets tab ID
-	 * 
-	 * @param string $id
-	 */
-	public function setId($id)
-	{
-		if (is_string($id))
-			$this->id = Bebop::util('slugify', $id, array('separator' => '-'));
+    /**
+     * Sets tab ID
+     * 
+     * @param string $id
+     */
+    public function setId($id)
+    {
+        if (is_string($id))
+            $this->id = Bebop::util('slugify', $id, array('separator' => '-'));
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Returns tab ID
-	 * 
-	 * @return string
-	 */
-	public function getId()
-	{
-		return $this->id;
-	}
+    /**
+     * Returns tab ID
+     * 
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
-	/**
-	 * Sets tab title
-	 * 
-	 * @param string $title
-	 */
-	public function setTitle($title)
-	{
-		if (is_string($title))
-			$this->title = $title;
+    /**
+     * Sets tab title
+     * 
+     * @param string $title
+     */
+    public function setTitle($title)
+    {
+        if (is_string($title))
+            $this->title = $title;
 
-		if (!$this->id)
-			$this->setId($title);
+        if (!$this->id)
+            $this->setId($title);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Returns tab title
-	 * 
-	 * @return string
-	 */
-	public function getTitle()
-	{
-		return $this->title;
-	}
+    /**
+     * Returns tab title
+     * 
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
 
-	/**
-	 * Sets tab function
-	 * 
-	 * @param callable $function
-	 */
-	public function setFunction($function)
-	{
-		if (is_callable($function))
-			$this->function = $function;
+    /**
+     * Sets tab function
+     * 
+     * @param callable $function
+     */
+    public function setFunction($function)
+    {
+        if (is_callable($function))
+            $this->function = $function;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function getFunction()
-	{
-		return $this->function;
-	}
+    public function getFunction()
+    {
+        return $this->function;
+    }
 
-	/**
-	 * Sets options name
-	 * 
-	 * @param array $options
-	 */
-	public function setOptions(array $options)
-	{
-		foreach ($options as $option) {
-			
-			$this->addOption($option);
-		}
+    /**
+     * Sets options name
+     * 
+     * @param array $options
+     */
+    public function setOptions(array $options)
+    {
+        foreach ($options as $option) {
+            
+            $this->addOption($option);
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Adds a single option name
-	 * 
-	 * @param string $id
-	 */
-	public function addOption($option)
-	{
-		if (is_string($option))
-			$this->options->push($option);
+    /**
+     * Adds a single option name
+     * 
+     * @param string $id
+     */
+    public function addOption($option)
+    {
+        if (is_string($option))
+            $this->options->push($option);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Returns all options
-	 * 
-	 * @return array
-	 */
-	public function getOptions()
-	{
-		return $this->options->getAll();
-	}
+    /**
+     * Returns all options
+     * 
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options->getAll();
+    }
 
     /**
      * Registers grouped settings
@@ -178,14 +180,14 @@ class Tab {
      */
     public function __handleSettingsRegistration()
     {
-    	$options = $this->options->getAll();
+        $options = $this->options->getAll();
 
-    	if ($options) {
+        if ($options) {
 
-	        foreach ($options as $option) {
-	            
-	            register_setting($this->getId(), $option);
-	        }
+            foreach ($options as $option) {
+                
+                register_setting($this->getId(), $option);
+            }
         }
     }
 
@@ -196,7 +198,7 @@ class Tab {
      */
     private function __setData()
     {
-    	$options = $this->options->getAll();
+        $options = $this->options->getAll();
 
         if ($options) {
             
@@ -212,9 +214,9 @@ class Tab {
      * 
      * @return void
      */
-	public function render()
-	{
-		$this->__setData();
-		call_user_func_array($this->getFunction(), array($this->data));
-	}
+    public function render()
+    {
+        $this->__setData();
+        call_user_func_array($this->getFunction(), array($this->data));
+    }
 }

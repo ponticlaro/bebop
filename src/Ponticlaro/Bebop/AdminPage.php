@@ -385,7 +385,9 @@ class AdminPage extends TrackableObjectAbstract
     {
         if (is_string($title) && is_callable($function)) {
 
-            $this->tabs->push(new Tab($title, $function));
+            $id = $this->__trackable_id .'-'. Bebop::util('slugify', $title, array('separator' => '-'));
+
+            $this->tabs->push(new Tab($id, $title, $function));
         }
 
         return $this;
