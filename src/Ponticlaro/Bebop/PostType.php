@@ -119,7 +119,9 @@ class PostType extends TrackableObjectAbstract
         $this->taxonomies = Bebop::Collection();
 
         // Instantiate rewrite configuration object
-        $this->rewrite_config = Bebop::Collection();
+        $this->rewrite_config = Bebop::Collection([
+            'with_front' => false, // Defaults to 'false' so that we can use the Permalinks menu to change permalinks for the built-in post post-type
+        ]);
 
         // Set post type name
         call_user_func_array(array($this, '__setName'), is_array($name) ? $name : array($name));
