@@ -120,7 +120,7 @@ abstract class Script implements ScriptInterface {
             return '';
         }
 
-        return $this->config->get('base_url') ? $this->config->get('base_url') .'/' : Bebop::getUrl('theme') .'/';
+        return $this->config->get('base_url') ? $this->config->get('base_url') .'/' : null;
     }
 
     /**
