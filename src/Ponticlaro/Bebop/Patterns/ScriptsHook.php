@@ -297,7 +297,13 @@ class ScriptsHook {
 
             if ($this->scripts->hasKey($script_id)) {
 
-                $base_url   = $this->getBaseUrl();
+                $base_url = $this->getBaseUrl();
+
+                if (!$base_url) {
+                    $this->setBaseUrl(Bebop::getUrl('theme'));
+                    $base_url = $this->getBaseUrl();
+                }
+
                 $script_obj = $this->scripts->get($script_id);
 
                 if ($base_url && !$script_obj->getBaseUrl()) $script_obj->setBaseUrl($base_url);
