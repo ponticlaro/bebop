@@ -1,4 +1,4 @@
-Bebop
+Ponticlaro&trade; Bebop
 ==================
 [![Code Climate](https://codeclimate.com/github/ponticlaro/bebop/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop)
 [![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop)
