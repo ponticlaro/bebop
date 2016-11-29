@@ -36,9 +36,6 @@ nbproject
 /xmlrpc.php
 *.log
 
-# Node
-/node_modules
-
 # Composer
 /vendor
 composer.lock

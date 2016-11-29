@@ -1,30 +1,25 @@
 {
-    "name": "ponticlaro/bebop",
-    "description": "Develop WordPress sites faster and more elegantly.",
-    "keywords": ["wordpress", "tool", "api", "ui"],
-    "type": "library",
-    "license": [
-       "MIT",
-       "GPL-3.0+"
-    ],
-    "authors": [
-        {
-            "name": "Ponticlaro",
-            "email": "hello@ponticlaro.com",
-            "homepage": "http://www.ponticlaro.com",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php": ">=5.3.0",
-        "slim/slim": "~2"
-    },
-    "autoload": {
-        "psr-0": {
-            "Ponticlaro": "src/"
-        }
-    },
-    "support": {
-        "email": "hello@ponticlaro.com"
+  "name": "ponticlaro/bebop",
+  "description": "Develop WordPress sites faster and more elegantly.",
+  "keywords": ["wordpress", "tool", "api", "ui"],
+  "type": "metapackage",
+  "license": [
+   "MIT",
+   "GPL-3.0+"
+  ],
+  "authors": [
+    {
+      "name": "Ponticlaro",
+      "email": "hello@ponticlaro.com",
+      "homepage": "http://www.ponticlaro.com",
+      "role": "Developer"
     }
+  ],
+  "require": {
+    "php": ">=5.3.0",
+    "ponticlaro/bebop-core": "^1"
+  },
+  "support": {
+    "email": "hello@ponticlaro.com"
+  }
 }

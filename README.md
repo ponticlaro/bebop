@@ -1,9 +1,11 @@
 Ponticlaro&trade; Bebop
 ==================
+
 [![Code Climate](https://codeclimate.com/github/ponticlaro/bebop/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop)
 [![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop)
 [![License](https://poser.pugx.org/ponticlaro/bebop/license.png)](https://packagist.org/packages/ponticlaro/bebop)
 [![Total Downloads](https://poser.pugx.org/ponticlaro/bebop/downloads.png)](https://packagist.org/packages/ponticlaro/bebop)
+[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop/composerlock)](https://packagist.org/packages/ponticlaro/bebop)
 
 ## Installing via Composer
 
@@ -20,7 +22,7 @@ Next, update your project's composer.json file to include Bebop:
 ```javascript
 {
     "require": {
-        "ponticlaro/bebop": "~2"
+        "ponticlaro/bebop": "^3"
     }
 }
 ```

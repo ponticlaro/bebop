@@ -1,9 +1,0 @@
-{
-  "name": "bebop",
-  "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-jshint": "*",
-    "grunt-contrib-concat": "*",
-    "grunt-contrib-uglify": "*"
-  }
-}
