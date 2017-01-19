@@ -1,6 +1,7 @@
 Ponticlaro&trade; Bebop
 ==================
 
+[![Join the chat at https://gitter.im/ponticlaro/bebop](https://badges.gitter.im/ponticlaro/bebop.svg)](https://gitter.im/ponticlaro/bebop?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop)
 [![License](https://poser.pugx.org/ponticlaro/bebop/license.png)](https://packagist.org/packages/ponticlaro/bebop)
 [![Total Downloads](https://poser.pugx.org/ponticlaro/bebop/downloads.png)](https://packagist.org/packages/ponticlaro/bebop)
