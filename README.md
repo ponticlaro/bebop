@@ -1,79 +1,28 @@
 Ponticlaro&trade; Bebop
 ==================
 
-[![Join the chat at https://gitter.im/ponticlaro/bebop](https://badges.gitter.im/ponticlaro/bebop.svg)](https://gitter.im/ponticlaro/bebop?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop)
-[![License](https://poser.pugx.org/ponticlaro/bebop/license.png)](https://packagist.org/packages/ponticlaro/bebop)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop/downloads.png)](https://packagist.org/packages/ponticlaro/bebop)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop/composerlock)](https://packagist.org/packages/ponticlaro/bebop)
 
 ## Modules
 ### [Bebop Core](https://github.com/ponticlaro/bebop-core)
-[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop-core/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-core) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-core/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-core)
-[![License](https://poser.pugx.org/ponticlaro/bebop-core/license.png)](https://packagist.org/packages/ponticlaro/bebop-core)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-core/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-core)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-core/composerlock)](https://packagist.org/packages/ponticlaro/bebop-core)
 
 ### [Bebop Common](https://github.com/ponticlaro/bebop-common)
-[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop-common/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-common) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-common/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-common)
-[![License](https://poser.pugx.org/ponticlaro/bebop-common/license.png)](https://packagist.org/packages/ponticlaro/bebop-common)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-common/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-common)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-common/composerlock)](https://packagist.org/packages/ponticlaro/bebop-common)
 
 ### [Bebop CMS](https://github.com/ponticlaro/bebop-cms)
-[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop-cms/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-cms) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-cms/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-cms)
-[![License](https://poser.pugx.org/ponticlaro/bebop-cms/license.png)](https://packagist.org/packages/ponticlaro/bebop-cms)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-cms/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-cms)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-cms/composerlock)](https://packagist.org/packages/ponticlaro/bebop-cms)
 
 ### [Bebop UI](https://github.com/ponticlaro/bebop-ui)
-[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop-ui/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-ui) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-ui/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-ui)
-[![License](https://poser.pugx.org/ponticlaro/bebop-ui/license.png)](https://packagist.org/packages/ponticlaro/bebop-ui)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-ui/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-ui)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-ui/composerlock)](https://packagist.org/packages/ponticlaro/bebop-ui)
 
 ### [Bebop MVC](https://github.com/ponticlaro/bebop-mvc)
-[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop-mvc/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-mvc) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-mvc/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-mvc)
-[![License](https://poser.pugx.org/ponticlaro/bebop-mvc/license.png)](https://packagist.org/packages/ponticlaro/bebop-mvc)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-mvc/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-mvc)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-mvc/composerlock)](https://packagist.org/packages/ponticlaro/bebop-mvc)
 
 ### [Bebop DB](https://github.com/ponticlaro/bebop-db)
-[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop-db/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-db) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-db/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-db)
-[![License](https://poser.pugx.org/ponticlaro/bebop-db/license.png)](https://packagist.org/packages/ponticlaro/bebop-db)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-db/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-db)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-db/composerlock)](https://packagist.org/packages/ponticlaro/bebop-db)
 
 ### [Bebop Scripts Loader](https://github.com/ponticlaro/bebop-scripts-loader)
-[![Code Climate](https://codeclimate.com/github/ponticlaro/bebop-scripts-loader/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-scripts-loader) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-scripts-loader/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-scripts-loader)
-[![License](https://poser.pugx.org/ponticlaro/bebop-scripts-loader/license.png)](https://packagist.org/packages/ponticlaro/bebop-scripts-loader)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-scripts-loader/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-scripts-loader)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-scripts-loader/composerlock)](https://packagist.org/packages/ponticlaro/bebop-scripts-loader)
 
 ### [Bebop HTTP API](https://github.com/ponticlaro/bebop-http-api)
-[![bebop-http-api](https://codeclimate.com/github/ponticlaro/bebop-http-api/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-http-api) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-http-api/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-http-api)
-[![License](https://poser.pugx.org/ponticlaro/bebop-http-api/license.png)](https://packagist.org/packages/ponticlaro/bebop-http-api)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-http-api/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-http-api)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-http-api/composerlock)](https://packagist.org/packages/ponticlaro/bebop-http-api)
 
 ### [Bebop HTTP Client](https://github.com/ponticlaro/bebop-http-client)
-[![bebop-http-client](https://codeclimate.com/github/ponticlaro/bebop-http-client/badges/gpa.svg)](https://codeclimate.com/github/ponticlaro/bebop-http-client) 
-[![Latest Stable Version](https://poser.pugx.org/ponticlaro/bebop-http-client/v/stable.png)](https://packagist.org/packages/ponticlaro/bebop-http-client)
-[![License](https://poser.pugx.org/ponticlaro/bebop-http-client/license.png)](https://packagist.org/packages/ponticlaro/bebop-http-client)
-[![Total Downloads](https://poser.pugx.org/ponticlaro/bebop-http-client/downloads.png)](https://packagist.org/packages/ponticlaro/bebop-http-client)
-[![composer.lock available](https://poser.pugx.org/ponticlaro/bebop-http-client/composerlock)](https://packagist.org/packages/ponticlaro/bebop-http-client)
 
 
 ## Installing via Composer
-
 The recommended way to install Bebop is through
 [Composer](http://getcomposer.org).
 
